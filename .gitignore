@@ -28,4 +28,4 @@ dist/
 
 # Database
 *.db
-*.sqlite
+*.sqlite.tasks/
