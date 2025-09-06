@@ -1,0 +1,24 @@
+{
+  "name": "fitchallenge-admin",
+  "version": "1.0.0",
+  "description": "FitChallenge 健康挑战平台管理后台",
+  "main": "public/src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview --port 8081"
+  },
+  "keywords": [
+    "fitchallenge",
+    "admin",
+    "management",
+    "dashboard"
+  ],
+  "author": "FitChallenge Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^7.1.2"
+  }
+}

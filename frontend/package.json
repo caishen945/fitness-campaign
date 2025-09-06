@@ -1,0 +1,29 @@
+{
+  "name": "fitchallenge-frontend",
+  "version": "1.0.0",
+  "description": "FitChallenge Frontend",
+  "main": "public/src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "http-server public -p 8080 --cors -c-1",
+    "dev": "http-server public -p 8080 --cors -c-1 -o",
+    "serve": "http-server public -p 8080 --cors",
+    "lint": "eslint public/src --ext .js",
+    "lint:fix": "eslint public/src --ext .js --fix",
+    "lint:check": "eslint public/src --ext .js --format=compact"
+  },
+  "keywords": [
+    "fitchallenge",
+    "frontend",
+    "health",
+    "fitness"
+  ],
+  "author": "FitChallenge Team",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}

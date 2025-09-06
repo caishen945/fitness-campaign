@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置诊断工具</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .diagnostic-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #28a745; }
+        .status-warning { background-color: #ffc107; }
+        .status-error { background-color: #dc3545; }
+        .log-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h3><i class="fas fa-stethoscope"></i> 系统设置诊断工具</h3>
+                        <p class="mb-0">诊断为什么系统设置菜单会消失</p>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="diagnostic-section">
+                            <h5><i class="fas fa-info-circle"></i> 问题说明</h5>
+                            <div class="alert alert-info">
+                                <strong>发现:</strong> 系统设置功能本身是完整的，包括SystemSettings类、导航逻辑、菜单配置等。
+                                问题在于菜单项在某些情况下会消失或点击无效。
+                            </div>
+                        </div>
+
+                        <div class="diagnostic-section">
+                            <h5><i class="fas fa-play"></i> 快速操作</h5>
+                            <div class="btn-group" role="group">
+                                <button id="run-diagnosis" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> 运行完整诊断
+                                </button>
+                                <button id="force-show-menu" class="btn btn-warning">
+                                    <i class="fas fa-eye"></i> 强制显示菜单
+                                </button>
+                                <button id="test-navigation" class="btn btn-success">
+                                    <i class="fas fa-compass"></i> 测试导航功能
+                                </button>
+                                <button id="clear-logs" class="btn btn-secondary">
+                                    <i class="fas fa-trash"></i> 清除日志
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="diagnostic-section">
+                            <h5><i class="fas fa-list-check"></i> 诊断结果</h5>
+                            <div id="diagnosis-results">
+                                <p class="text-muted">点击"运行完整诊断"开始检查...</p>
+                            </div>
+                        </div>
+
+                        <div class="diagnostic-section">
+                            <h5><i class="fas fa-terminal"></i> 实时日志</h5>
+                            <div id="log-output" class="log-output"></div>
+                        </div>
+
+                        <div class="diagnostic-section">
+                            <h5><i class="fas fa-tools"></i> 修复建议</h5>
+                            <div id="fix-suggestions" class="alert alert-secondary">
+                                等待诊断完成后显示修复建议...
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#17a2b8',
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545'
+            };
+            
+            const logOutput = document.getElementById('log-output');
+            logOutput.innerHTML += `<div style="color: ${colors[type] || '#6c757d'};">[${timestamp}] ${message}</div>`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function updateDiagnosisResult(item, status, message) {
+            const resultsDiv = document.getElementById('diagnosis-results');
+            const existingItem = document.getElementById(`result-${item}`);
+            
+            const statusClass = status === 'success' ? 'status-success' : 
+                               status === 'warning' ? 'status-warning' : 'status-error';
+            
+            const resultHtml = `
+                <div id="result-${item}" class="d-flex align-items-center mb-2">
+                    <span class="status-indicator ${statusClass}"></span>
+                    <strong>${item}:</strong> ${message}
+                </div>
+            `;
+            
+            if (existingItem) {
+                existingItem.outerHTML = resultHtml;
+            } else {
+                resultsDiv.innerHTML += resultHtml;
+            }
+        }
+
+        // 运行完整诊断
+        document.getElementById('run-diagnosis').addEventListener('click', async function() {
+            log('🔍 开始运行完整系统设置诊断...', 'info');
+            
+            const resultsDiv = document.getElementById('diagnosis-results');
+            resultsDiv.innerHTML = '<p class="text-info">正在诊断中...</p>';
+            
+            // 1. 检查AdminApp是否存在
+            log('📋 步骤1: 检查AdminApp实例...', 'info');
+            if (window.parent && window.parent.adminApp) {
+                const adminApp = window.parent.adminApp;
+                updateDiagnosisResult('AdminApp实例', 'success', '已找到');
+                log('✅ AdminApp实例存在', 'success');
+                
+                // 2. 检查认证状态
+                log('📋 步骤2: 检查认证状态...', 'info');
+                if (adminApp.isAuthenticated) {
+                    updateDiagnosisResult('认证状态', 'success', '已认证');
+                    log('✅ 用户已认证', 'success');
+                } else {
+                    updateDiagnosisResult('认证状态', 'error', '未认证 - 这可能是菜单消失的原因');
+                    log('❌ 用户未认证，侧边栏不会显示', 'error');
+                }
+                
+                // 3. 检查pages配置
+                log('📋 步骤3: 检查settings页面配置...', 'info');
+                if (adminApp.pages && adminApp.pages.settings) {
+                    const settingsConfig = adminApp.pages.settings;
+                    updateDiagnosisResult('settings页面配置', 'success', '配置存在');
+                    log('✅ settings页面配置存在', 'success');
+                    
+                    // 检查具体配置项
+                    const hasClass = settingsConfig.Class;
+                    const hasRender = typeof settingsConfig.render === 'function';
+                    const hasAfterRender = typeof settingsConfig.afterRender === 'function';
+                    
+                    updateDiagnosisResult('SystemSettings类', hasClass ? 'success' : 'error', 
+                        hasClass ? '已配置' : '缺失');
+                    updateDiagnosisResult('render方法', hasRender ? 'success' : 'error', 
+                        hasRender ? '已配置' : '缺失');
+                    updateDiagnosisResult('afterRender方法', hasAfterRender ? 'success' : 'error', 
+                        hasAfterRender ? '已配置' : '缺失');
+                        
+                    log(`   - SystemSettings类: ${hasClass ? '✅' : '❌'}`, hasClass ? 'success' : 'error');
+                    log(`   - render方法: ${hasRender ? '✅' : '❌'}`, hasRender ? 'success' : 'error');
+                    log(`   - afterRender方法: ${hasAfterRender ? '✅' : '❌'}`, hasAfterRender ? 'success' : 'error');
+                } else {
+                    updateDiagnosisResult('settings页面配置', 'error', '配置缺失');
+                    log('❌ settings页面配置缺失', 'error');
+                }
+                
+                // 4. 检查菜单DOM元素
+                log('📋 步骤4: 检查DOM中的菜单元素...', 'info');
+                const parentDoc = window.parent.document;
+                const settingsLink = parentDoc.querySelector('[data-page="settings"]');
+                
+                if (settingsLink) {
+                    updateDiagnosisResult('菜单DOM元素', 'success', '元素存在');
+                    log('✅ 系统设置菜单DOM元素存在', 'success');
+                    
+                    // 检查样式
+                    const isVisible = settingsLink.offsetParent !== null;
+                    const computedStyle = window.parent.getComputedStyle(settingsLink);
+                    
+                    updateDiagnosisResult('菜单可见性', isVisible ? 'success' : 'warning', 
+                        isVisible ? '可见' : '隐藏');
+                    log(`   - 可见性: ${isVisible ? '✅' : '⚠️'}`, isVisible ? 'success' : 'warning');
+                    log(`   - display: ${computedStyle.display}`, 'info');
+                    log(`   - visibility: ${computedStyle.visibility}`, 'info');
+                } else {
+                    updateDiagnosisResult('菜单DOM元素', 'error', '元素不存在');
+                    log('❌ 系统设置菜单DOM元素不存在', 'error');
+                }
+                
+                // 5. 检查事件监听器
+                log('📋 步骤5: 检查事件监听器...', 'info');
+                if (typeof adminApp.navigate === 'function') {
+                    updateDiagnosisResult('导航功能', 'success', 'navigate方法存在');
+                    log('✅ navigate方法存在', 'success');
+                } else {
+                    updateDiagnosisResult('导航功能', 'error', 'navigate方法缺失');
+                    log('❌ navigate方法缺失', 'error');
+                }
+                
+            } else {
+                updateDiagnosisResult('AdminApp实例', 'error', '未找到');
+                log('❌ 未找到AdminApp实例', 'error');
+                log('💡 这可能是因为此页面不在管理员后台框架中打开', 'warning');
+            }
+            
+            // 生成修复建议
+            generateFixSuggestions();
+            log('🎯 诊断完成', 'success');
+        });
+
+        // 强制显示菜单
+        document.getElementById('force-show-menu').addEventListener('click', function() {
+            log('🔧 尝试强制显示系统设置菜单...', 'info');
+            
+            if (window.parent && window.parent.document) {
+                const parentDoc = window.parent.document;
+                let settingsLink = parentDoc.querySelector('[data-page="settings"]');
+                
+                if (settingsLink) {
+                    // 强制显示现有菜单
+                    settingsLink.style.display = 'block';
+                    settingsLink.style.visibility = 'visible';
+                    settingsLink.style.opacity = '1';
+                    const parent = settingsLink.closest('li');
+                    if (parent) {
+                        parent.style.display = 'block';
+                        parent.style.visibility = 'visible';
+                    }
+                    log('✅ 已强制显示现有的系统设置菜单', 'success');
+                } else {
+                    // 创建新的菜单项
+                    const sidebar = parentDoc.querySelector('.sidebar');
+                    if (sidebar) {
+                        const navLinks = sidebar.querySelector('ul, .nav-links');
+                        if (navLinks) {
+                            const settingsLi = parentDoc.createElement('li');
+                            settingsLi.style.marginBottom = '0.5rem';
+                            settingsLi.innerHTML = `
+                                <a href="#" data-page="settings" style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid transparent; background: transparent; transition: all 0.3s ease;">
+                                    <i class="fas fa-cogs" style="margin-right: 10px;"></i> 系统设置
+                                    <small style="float: right; opacity: 0.7;">Ctrl+9</small>
+                                </a>
+                            `;
+                            navLinks.appendChild(settingsLi);
+                            log('✅ 已创建新的系统设置菜单项', 'success');
+                        } else {
+                            log('❌ 未找到导航链接容器', 'error');
+                        }
+                    } else {
+                        log('❌ 未找到侧边栏', 'error');
+                    }
+                }
+            } else {
+                log('❌ 无法访问父页面文档', 'error');
+            }
+        });
+
+        // 测试导航功能
+        document.getElementById('test-navigation').addEventListener('click', function() {
+            log('🧪 测试系统设置导航功能...', 'info');
+            
+            if (window.parent && window.parent.adminApp) {
+                const adminApp = window.parent.adminApp;
+                
+                try {
+                    log('🚀 调用 adminApp.navigate("settings")', 'info');
+                    log(`当前页面: ${adminApp.currentPage}`, 'info');
+                    log(`认证状态: ${adminApp.isAuthenticated}`, 'info');
+                    
+                    // 检查pages配置
+                    if (adminApp.pages && adminApp.pages.settings) {
+                        log('✅ settings页面配置存在', 'success');
+                        log(`settings配置:`, 'info');
+                        log(`- Class: ${adminApp.pages.settings.Class ? adminApp.pages.settings.Class.name : 'undefined'}`, 'info');
+                        log(`- render: ${typeof adminApp.pages.settings.render}`, 'info');
+                        log(`- afterRender: ${typeof adminApp.pages.settings.afterRender}`, 'info');
+                        log(`- instance: ${adminApp.pages.settings.instance ? 'exists' : 'null'}`, 'info');
+                    } else {
+                        log('❌ settings页面配置不存在', 'error');
+                    }
+                    
+                    // 尝试导航
+                    adminApp.navigate('settings');
+                    log('✅ 导航调用成功', 'success');
+                    
+                    // 检查导航后的状态
+                    setTimeout(() => {
+                        log(`导航后当前页面: ${adminApp.currentPage}`, 'info');
+                        const settingsLink = window.parent.document.querySelector('[data-page="settings"]');
+                        if (settingsLink) {
+                            log(`菜单项类名: ${settingsLink.className}`, 'info');
+                            log(`菜单项样式: ${settingsLink.style.cssText}`, 'info');
+                        }
+                    }, 1000);
+                    
+                } catch (error) {
+                    log(`❌ 导航调用失败: ${error.message}`, 'error');
+                    log(`错误堆栈: ${error.stack}`, 'error');
+                }
+            } else {
+                log('❌ AdminApp不可用', 'error');
+            }
+        });
+
+        // 清除日志
+        document.getElementById('clear-logs').addEventListener('click', function() {
+            document.getElementById('log-output').innerHTML = '';
+            log('🧹 日志已清除', 'info');
+        });
+
+        function generateFixSuggestions() {
+            const suggestionsDiv = document.getElementById('fix-suggestions');
+            const results = document.getElementById('diagnosis-results');
+            
+            let suggestions = [];
+            
+            // 检查具体问题并生成建议
+            if (results.innerHTML.includes('未认证')) {
+                suggestions.push('🔑 <strong>认证问题:</strong> 请确保用户已登录管理员后台');
+            }
+            
+            if (results.innerHTML.includes('元素不存在')) {
+                suggestions.push('🎨 <strong>DOM问题:</strong> 系统设置菜单项在DOM中缺失，可能是渲染问题');
+            }
+            
+            if (results.innerHTML.includes('配置缺失')) {
+                suggestions.push('⚙️ <strong>配置问题:</strong> SystemSettings页面配置有问题，需要检查App-fixed.js');
+            }
+            
+            if (suggestions.length === 0) {
+                suggestions.push('✅ <strong>系统正常:</strong> 如果仍有问题，尝试刷新页面或清除浏览器缓存');
+            }
+            
+            // 添加通用建议
+            suggestions.push('💡 <strong>通用解决方案:</strong>');
+            suggestions.push('   • 刷新管理员后台页面 (Ctrl+F5)');
+            suggestions.push('   • 使用键盘快捷键 Ctrl+9');
+            suggestions.push('   • 检查浏览器控制台是否有错误信息');
+            suggestions.push('   • 清除浏览器缓存和本地存储');
+            
+            suggestionsDiv.innerHTML = suggestions.map(s => `<div>${s}</div>`).join('');
+            suggestionsDiv.className = 'alert alert-info';
+        }
+
+        // 页面加载时的欢迎信息
+        window.addEventListener('load', function() {
+            log('🎯 系统设置诊断工具已加载', 'success');
+            log('💡 这个工具会帮助你找出系统设置菜单消失的原因', 'info');
+            log('🚀 点击"运行完整诊断"开始检查', 'info');
+        });
+    </script>
+</body>
+</html>

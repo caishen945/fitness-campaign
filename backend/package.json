@@ -1,0 +1,55 @@
+{
+  "name": "fitchallenge-backend",
+  "version": "1.0.0",
+  "description": "FitChallenge 健康挑战平台后端",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:check": "eslint . --ext .js --format=compact",
+    "perf:basic": "node scripts/performance-test.js basic",
+    "perf:load": "node scripts/performance-test.js load",
+    "perf:stress": "node scripts/performance-test.js stress",
+    "perf:all": "node scripts/performance-test.js all"
+  },
+  "keywords": [
+    "fitness",
+    "challenge",
+    "health",
+    "api"
+  ],
+  "author": "FitChallenge Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-rate-limit": "^6.11.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.3",
+    "node-fetch": "^3.3.2",
+    "redis": "^5.8.2",
+    "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "autocannon": "^8.0.0",
+    "eslint": "^9.33.0",
+    "jest": "^30.0.5",
+    "nodemon": "^3.0.1",
+    "supertest": "^7.1.4"
+  }
+}

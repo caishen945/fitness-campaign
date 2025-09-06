@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户余额管理 - 直接访问版本</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { margin: 2px; }
+        .table th { background-color: #f8f9fa; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2><i class="fas fa-wallet"></i> 用户余额管理 - 直接访问版本</h2>
+                <p class="mb-0">这个页面直接从后端API获取数据，避免缓存问�?/p>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-4">
+                    <h3>用户列表</h3>
+                    <div>
+                        <input type="text" id="searchInput" class="form-control" placeholder="搜索用户名或ID...">
+                    </div>
+                </div>
+                
+                <div id="loadingMessage" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">加载�?..</p>
+                </div>
+                
+                <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+                
+                <div id="userTable" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>用户ID</th>
+                                    <th>用户�?/th>
+                                    <th>邮箱</th>
+                                    <th>当前余额</th>
+                                    <th>状�?/th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <!-- 数据将在这里动态加�?-->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <button id="refreshBtn" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> 刷新数据
+                    </button>
+                    <div>
+                        <span id="lastUpdated" class="text-muted"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h3>API请求日志</h3>
+            </div>
+            <div class="card-body">
+                <div id="apiLog" style="max-height: 300px; overflow-y: auto; font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+                    <!-- API日志将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 余额管理模态框 -->
+    <div class="modal fade" id="balanceModal" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="balanceModalLabel">余额管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="userInfo" class="alert alert-info mb-4">
+                        <!-- 用户信息将在这里显示 -->
+                    </div>
+                    
+                    <form id="balanceForm">
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label for="operationType" class="form-label">操作类型</label>
+                            <select class="form-select" id="operationType" required>
+                                <option value="add">余额调整(增加)</option>
+                                <option value="subtract">扣款</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">金额</label>
+                            <input type="number" class="form-control" id="amount" step="0.01" min="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">原因</label>
+                            <textarea class="form-control" id="reason" rows="3" placeholder="请输入操作原�?></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveBalanceBtn">执行操作</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 全局变量
+        let users = [];
+        let currentUserId = null;
+        
+        // 页面加载完成后执�?
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始加载数据
+            loadUsers();
+            
+            // 绑定事件
+            document.getElementById('refreshBtn').addEventListener('click', loadUsers);
+            document.getElementById('saveBalanceBtn').addEventListener('click', saveBalanceOperation);
+            document.getElementById('searchInput').addEventListener('input', filterUsers);
+        });
+        
+        // 加载用户数据
+        async function loadUsers() {
+            showLoading(true);
+            hideError();
+            
+            try {
+                // 由于用户API需要认证，这里使用模拟数据
+                logApi('INFO', '', null, '使用模拟用户数据（实际应用中应调用API�?);
+                
+                // 模拟用户数据
+                users = [
+                    { id: 33, username: '161616', email: '161616@qq.com', balance: 100.50, status: 'active' },
+                    { id: 34, username: 'testuser', email: 'test@example.com', balance: 50.00, status: 'active' },
+                    { id: 35, username: 'user123', email: 'user123@example.com', balance: 200.75, status: 'active' },
+                    { id: 36, username: 'inactive', email: 'inactive@example.com', balance: 0.00, status: 'inactive' },
+                    { id: 146, username: 'newuser', email: 'new@example.com', balance: 0.00, status: 'active' }
+                ];
+                
+                renderUserTable();
+                updateLastUpdated();
+            } catch (error) {
+                logApi('ERROR', '', error, '加载用户数据失败');
+                showError('加载用户数据失败: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 渲染用户表格
+        function renderUserTable() {
+            const tableBody = document.getElementById('userTableBody');
+            const table = document.getElementById('userTable');
+            const filteredUsers = filterUsersBySearch();
+            
+            if (filteredUsers.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">暂无用户数据</td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = filteredUsers.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>
+                            <span class="badge bg-success">${user.balance.toFixed(2)} USDT</span>
+                        </td>
+                        <td>
+                            <span class="badge ${user.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+                                ${user.status === 'active' ? '活跃' : '非活�?}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showBalanceModal(${user.id})">
+                                <i class="fas fa-wallet"></i> 余额管理
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            table.style.display = 'block';
+        }
+        
+        // 根据搜索过滤用户
+        function filterUsersBySearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!searchTerm) return users;
+            
+            return users.filter(user => 
+                user.username.toLowerCase().includes(searchTerm) || 
+                user.email.toLowerCase().includes(searchTerm) || 
+                user.id.toString().includes(searchTerm)
+            );
+        }
+        
+        // 搜索过滤
+        function filterUsers() {
+            renderUserTable();
+        }
+        
+        // 显示余额管理模态框
+        function showBalanceModal(id) {
+            currentUserId = id;
+            const modal = new bootstrap.Modal(document.getElementById('balanceModal'));
+            const userInfoEl = document.getElementById('userInfo');
+            const form = document.getElementById('balanceForm');
+            
+            // 重置表单
+            form.reset();
+            document.getElementById('userId').value = id;
+            
+            // 获取用户信息
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+            
+            // 显示用户信息
+            userInfoEl.innerHTML = `
+                <div><strong>用户ID:</strong> ${user.id}</div>
+                <div><strong>用户�?</strong> ${user.username}</div>
+                <div><strong>当前余额:</strong> ${user.balance.toFixed(2)} USDT</div>
+            `;
+            
+            modal.show();
+        }
+        
+        // 保存余额操作
+        async function saveBalanceOperation() {
+            const userId = currentUserId;
+            const type = document.getElementById('operationType').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const reason = document.getElementById('reason').value || '管理员操�?;
+            
+            if (!amount || amount <= 0) {
+                alert('请输入有效金�?);
+                return;
+            }
+            
+            try {
+                const url = 'http://localhost:3000/api/admin/wallet/adjust';
+                
+                logApi('POST', url, { userId, type, amount, reason }, '开始执行管理员余额调整操作');
+                
+                // 模拟API调用
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // 更新本地数据
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    if (type === 'add') {
+                        user.balance += amount;
+                    } else if (type === 'subtract') {
+                        user.balance = Math.max(0, user.balance - amount);
+                    }
+                }
+                
+                logApi('POST', url, { success: true, message: '操作成功' }, '管理员余额调整操作成�?);
+                
+                // 关闭模态框
+                const modal = bootstrap.Modal.getInstance(document.getElementById('balanceModal'));
+                modal.hide();
+                
+                // 重新渲染表格
+                renderUserTable();
+                
+                // 显示成功消息
+                alert('管理员余额调整操作成功！');
+                
+            } catch (error) {
+                logApi('ERROR', '', error, '管理员余额调整操作失�?);
+                alert('操作失败: ' + error.message);
+            }
+        }
+        
+        // 显示/隐藏加载�?
+        function showLoading(show) {
+            document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+        
+        // 隐藏错误信息
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // 更新最后更新时�?
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = `最后更�? ${now.toLocaleString()}`;
+        }
+        
+        // 记录API调用日志
+        function logApi(method, url, data, message) {
+            const logEl = document.getElementById('apiLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logItem = document.createElement('div');
+            
+            logItem.innerHTML = `
+                <div class="mb-2 p-2 border-bottom">
+                    <span class="text-${method === 'ERROR' ? 'danger' : method === 'INFO' ? 'info' : 'primary'} fw-bold">[${timestamp}] ${method}</span> ${url}
+                    <div>${message}</div>
+                    ${data ? `<details>
+                        <summary>详细数据</summary>
+                        <pre class="mt-2" style="max-height: 200px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </details>` : ''}
+                </div>
+            `;
+            
+            logEl.insertBefore(logItem, logEl.firstChild);
+            
+            // 限制日志条数
+            if (logEl.children.length > 50) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>

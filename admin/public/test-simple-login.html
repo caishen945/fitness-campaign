@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简登录测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-content { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔐 极简登录测试页面</h1>
+    
+    <div class="test-section">
+        <div class="test-title">测试单个无效凭据�?秒超时）</div>
+        <div class="test-content">
+            <button id="test-single">测试单个无效凭据</button>
+            <div id="result">点击按钮开始测�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">调试日志</div>
+        <pre id="debug-log" style="max-height: 200px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 测试单个无效凭据
+        async function testSingleInvalid() {
+            const resultEl = document.getElementById('result');
+            resultEl.innerHTML = '<div>�?正在测试单个无效凭据...</div>';
+            
+            try {
+                log('开始测试单个无效凭�?..', 'info');
+                const startTime = Date.now();
+                
+                // 设置5秒超�?
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 5000); // 5秒超�?
+                
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'test123', password: 'test123' }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`测试完成，耗时: ${responseTime}ms`, 'success');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                resultEl.innerHTML = `<div style="color: green;">�?测试完成 (耗时: ${responseTime}ms)</div>`;
+                resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                if (error.name === 'AbortError') {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    log(`测试超时，总耗时: ${responseTime}ms`, 'warning');
+                    resultEl.innerHTML = `<div style="color: red;">�?测试超时 (${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>请求�?秒内没有响应</div>';
+                } else {
+                    log(`测试失败: ${error.message}`, 'error');
+                    resultEl.innerHTML = `<div style="color: red;">�?测试失败</div>`;
+                    resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // 事件绑定
+        document.getElementById('test-single').addEventListener('click', testSingleInvalid);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('极简登录测试页面已加�?, 'info');
+        });
+    </script>
+</body>
+</html>

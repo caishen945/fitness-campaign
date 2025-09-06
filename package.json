@@ -1,0 +1,45 @@
+{
+  "name": "fitchallenge",
+  "private": true,
+  "version": "1.0.0",
+  "description": "FitChallenge 健康挑战平台 - 项目整体管理",
+  "type": "module",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install && cd ../admin && npm install",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "start:admin": "cd admin && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:admin": "cd admin && npm run dev",
+    "build": "cd admin && npm run build",
+    "test": "cd backend && npm test",
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint",
+    "health-check": "node scripts/system-health-check.js",
+    "pre-deploy": "npm run health-check && npm run lint && npm run test",
+    "impact-analysis": "echo '📋 请参考 IMPACT_ASSESSMENT_QUICK_GUIDE.md 进行影响分析'"
+  },
+  "keywords": [
+    "fitchallenge",
+    "health",
+    "fitness",
+    "challenge",
+    "vip",
+    "blockchain"
+  ],
+  "author": "FitChallenge Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "backend",
+    "frontend",
+    "admin"
+  ],
+  "devDependencies": {
+    "@fortawesome/fontawesome-free": "^6.4.0",
+    "vite": "^4.4.9"
+  }
+}

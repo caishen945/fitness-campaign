@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>强制菜单修复 - FitChallenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .main-card { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .fix-btn {
+            padding: 12px 25px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+        .fix-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-danger-custom { background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; }
+        .btn-success-custom { background: linear-gradient(45deg, #00b894, #00cec9); color: white; }
+        .btn-primary-custom { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color: white; }
+        .btn-warning-custom { background: linear-gradient(45deg, #fdcb6e, #e17055); color: white; }
+        
+        #console { 
+            background: #2c3e50; 
+            color: #ecf0f1; 
+            padding: 15px; 
+            border-radius: 5px; 
+            height: 300px; 
+            overflow-y: auto; 
+            font-family: 'Courier New', monospace; 
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .menu-preview {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid #4cc9f0;
+        }
+        
+        .menu-item.missing {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background: #27ae60; }
+        .status-error { background: #e74c3c; }
+        .status-warning { background: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <div class="text-center mb-4">
+            <h1 class="display-6 fw-bold" style="background: linear-gradient(45deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="fas fa-wrench"></i> 强制菜单修复工具
+            </h1>
+            <p class="lead text-muted">解决管理员系统导航菜单中系统设置不显示的问题</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> 紧急修复</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>强制修复导航菜单渲染问题：</p>
+                        <div class="d-grid gap-2">
+                            <button id="force-clear-cache" class="fix-btn btn-danger-custom">
+                                <i class="fas fa-trash"></i> 强制清除所有缓存
+                            </button>
+                            <button id="inject-menu-fix" class="fix-btn btn-warning-custom">
+                                <i class="fas fa-syringe"></i> 注入菜单修复代码
+                            </button>
+                            <button id="force-reload-app" class="fix-btn btn-primary-custom">
+                                <i class="fas fa-sync-alt"></i> 强制重载应用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-search"></i> 诊断检查</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>检查导航菜单状态：</p>
+                        <div class="d-grid gap-2">
+                            <button id="check-menu-html" class="fix-btn btn-success-custom">
+                                <i class="fas fa-code"></i> 检查菜单HTML
+                            </button>
+                            <button id="check-css-styles" class="fix-btn btn-success-custom">
+                                <i class="fas fa-palette"></i> 检查CSS样式
+                            </button>
+                            <button id="check-js-errors" class="fix-btn btn-success-custom">
+                                <i class="fas fa-bug"></i> 检查JS错误
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-list"></i> 菜单项检查结果</h5>
+            </div>
+            <div class="card-body">
+                <div id="menu-check-result">
+                    <p class="text-muted">点击"检查菜单HTML"开始诊断...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-terminal"></i> 修复日志</h5>
+            </div>
+            <div class="card-body p-0">
+                <div id="console">[系统] 强制菜单修复工具已加载</div>
+                <div class="p-3">
+                    <button id="clear-console" class="btn btn-sm btn-secondary">清除日志</button>
+                    <button id="export-log" class="btn btn-sm btn-info">导出日志</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-4">
+            <h6><i class="fas fa-info-circle"></i> 使用说明：</h6>
+            <ol>
+                <li><strong>先点击"检查菜单HTML"</strong> - 诊断当前菜单状态</li>
+                <li><strong>如果发现问题，点击"强制清除所有缓存"</strong> - 清除浏览器和应用缓存</li>
+                <li><strong>然后点击"注入菜单修复代码"</strong> - 强制修复菜单渲染</li>
+                <li><strong>最后点击"强制重载应用"</strong> - 重新加载管理员系统</li>
+            </ol>
+        </div>
+    </div>
+
+    <script type="module">
+        // 日志功能
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const console = document.getElementById('console');
+            const colorMap = {
+                'success': '#27ae60',
+                'error': '#e74c3c',
+                'warning': '#f39c12',
+                'info': '#3498db'
+            };
+            
+            console.innerHTML += `<div style="color: ${colorMap[type] || '#ecf0f1'};">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // 1. 强制清除所有缓存
+        document.getElementById('force-clear-cache').addEventListener('click', () => {
+            log('🧹 开始强制清除所有缓存...', 'warning');
+            
+            try {
+                // 清除localStorage
+                const localStorageKeys = Object.keys(localStorage);
+                log(`📋 清除localStorage (${localStorageKeys.length}项)`, 'info');
+                localStorage.clear();
+                
+                // 清除sessionStorage
+                const sessionStorageKeys = Object.keys(sessionStorage);
+                log(`📋 清除sessionStorage (${sessionStorageKeys.length}项)`, 'info');
+                sessionStorage.clear();
+                
+                // 清除cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                log('🍪 清除所有Cookies', 'info');
+                
+                // 尝试清除缓存API（如果支持）
+                if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                        names.forEach(function(name) {
+                            caches.delete(name);
+                        });
+                        log('💾 清除Cache API缓存', 'info');
+                    });
+                }
+                
+                log('✅ 所有缓存清除完成！', 'success');
+                log('💡 建议：刷新页面或重启浏览器', 'warning');
+                
+            } catch (error) {
+                log(`❌ 缓存清除失败: ${error.message}`, 'error');
+            }
+        });
+
+        // 2. 注入菜单修复代码
+        document.getElementById('inject-menu-fix').addEventListener('click', async () => {
+            log('💉 开始注入菜单修复代码...', 'warning');
+            
+            try {
+                // 创建修复脚本
+                const fixScript = `
+                (function() {
+                    console.log('🔧 菜单修复脚本已注入');
+                    
+                    // 强制显示系统设置菜单项
+                    function forceShowSettingsMenu() {
+                        const sidebar = document.querySelector('.sidebar');
+                        if (!sidebar) {
+                            console.log('❌ 未找到侧边栏');
+                            return false;
+                        }
+                        
+                        const navLinks = sidebar.querySelector('.nav-links');
+                        if (!navLinks) {
+                            console.log('❌ 未找到导航链接容器');
+                            return false;
+                        }
+                        
+                        // 检查是否已存在系统设置链接
+                        let settingsLink = navLinks.querySelector('[data-page="settings"]');
+                        
+                        if (!settingsLink) {
+                            console.log('🔧 系统设置菜单项不存在，创建新的');
+                            
+                            // 创建系统设置菜单项
+                            const settingsLi = document.createElement('li');
+                            settingsLi.style.marginBottom = '0.5rem';
+                            settingsLi.innerHTML = \`
+                                <a href="#" data-page="settings" style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid transparent; background: transparent;">
+                                    <i class="fas fa-cogs" style="margin-right: 10px;"></i> 系统设置
+                                    <small style="float: right; opacity: 0.7;">Ctrl+9</small>
+                                </a>
+                            \`;
+                            
+                            navLinks.appendChild(settingsLi);
+                            settingsLink = settingsLi.querySelector('[data-page="settings"]');
+                        } else {
+                            console.log('✅ 系统设置菜单项已存在');
+                        }
+                        
+                        // 强制显示
+                        if (settingsLink) {
+                            settingsLink.style.display = 'block';
+                            settingsLink.style.visibility = 'visible';
+                            settingsLink.style.opacity = '1';
+                            console.log('✅ 系统设置菜单项已强制显示');
+                        }
+                        
+                        return true;
+                    }
+                    
+                    // 修复键盘快捷键
+                    function fixKeyboardShortcuts() {
+                        document.addEventListener('keydown', function(e) {
+                            if ((e.ctrlKey || e.metaKey) && e.key === '9') {
+                                e.preventDefault();
+                                console.log('⌨️ Ctrl+9快捷键触发');
+                                
+                                // 尝试获取AdminApp实例
+                                if (window.adminApp && typeof window.adminApp.navigate === 'function') {
+                                    window.adminApp.navigate('settings');
+                                    console.log('✅ 通过AdminApp导航到settings');
+                                } else {
+                                    // 手动触发导航
+                                    const settingsLink = document.querySelector('[data-page="settings"]');
+                                    if (settingsLink) {
+                                        settingsLink.click();
+                                        console.log('✅ 通过点击事件导航到settings');
+                                    } else {
+                                        console.log('❌ 无法找到settings链接');
+                                    }
+                                }
+                            }
+                        });
+                        console.log('⌨️ 键盘快捷键修复完成');
+                    }
+                    
+                    // 立即执行修复
+                    setTimeout(() => {
+                        forceShowSettingsMenu();
+                        fixKeyboardShortcuts();
+                    }, 100);
+                    
+                    // 定期检查和修复
+                    setInterval(() => {
+                        forceShowSettingsMenu();
+                    }, 5000);
+                    
+                })();
+                `;
+                
+                // 注入到当前页面
+                const script = document.createElement('script');
+                script.textContent = fixScript;
+                document.head.appendChild(script);
+                
+                log('✅ 菜单修复代码注入成功', 'success');
+                
+                // 尝试在管理员系统页面中也注入
+                try {
+                    const adminWindow = window.open('http://127.0.0.1:8081', '_blank');
+                    if (adminWindow) {
+                        adminWindow.addEventListener('load', () => {
+                            const adminScript = adminWindow.document.createElement('script');
+                            adminScript.textContent = fixScript;
+                            adminWindow.document.head.appendChild(adminScript);
+                            log('✅ 修复代码已注入到管理员系统', 'success');
+                        });
+                    }
+                } catch (error) {
+                    log(`⚠️ 无法直接注入到管理员系统: ${error.message}`, 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ 注入修复代码失败: ${error.message}`, 'error');
+            }
+        });
+
+        // 3. 强制重载应用
+        document.getElementById('force-reload-app').addEventListener('click', () => {
+            log('🔄 准备强制重载应用...', 'warning');
+            
+            // 倒计时
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                log(`⏱️ ${countdown}秒后重载管理员系统...`, 'warning');
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    log('🚀 正在重载...', 'info');
+                    window.location.href = 'http://127.0.0.1:8081';
+                }
+            }, 1000);
+        });
+
+        // 4. 检查菜单HTML
+        document.getElementById('check-menu-html').addEventListener('click', async () => {
+            log('🔍 开始检查菜单HTML结构...', 'info');
+            
+            try {
+                // 尝试获取管理员系统的HTML
+                const response = await fetch('http://127.0.0.1:8081');
+                const html = await response.text();
+                
+                log('✅ 成功获取管理员系统HTML', 'success');
+                
+                // 分析菜单项
+                const expectedMenuItems = [
+                    { page: 'dashboard', name: '仪表盘', shortcut: 'Ctrl+1' },
+                    { page: 'users', name: '用户管理', shortcut: 'Ctrl+2' },
+                    { page: 'vip', name: 'VIP管理', shortcut: 'Ctrl+3' },
+                    { page: 'wallet', name: '钱包管理', shortcut: 'Ctrl+4' },
+                    { page: 'checkin', name: '签到管理', shortcut: '' },
+                    { page: 'pk', name: 'PK挑战管理', shortcut: 'Ctrl+5' },
+                    { page: 'achievements', name: '成就管理', shortcut: 'Ctrl+6' },
+                    { page: 'team', name: '团队管理', shortcut: 'Ctrl+7' },
+                    { page: 'telegram', name: 'Telegram管理', shortcut: 'Ctrl+8' },
+                    { page: 'settings', name: '系统设置', shortcut: 'Ctrl+9' }
+                ];
+                
+                let resultHTML = '<div class="menu-preview">';
+                let hasIssues = false;
+                
+                expectedMenuItems.forEach(item => {
+                    const found = html.includes(`data-page="${item.page}"`);
+                    const status = found ? 'status-ok' : 'status-error';
+                    const menuClass = found ? '' : 'missing';
+                    
+                    if (!found) hasIssues = true;
+                    
+                    resultHTML += `
+                        <div class="menu-item ${menuClass}">
+                            <span class="status-dot ${status}"></span>
+                            <i class="fas ${getMenuIcon(item.page)}" style="margin-right: 10px;"></i>
+                            ${item.name}
+                            ${item.shortcut ? `<small style="float: right; opacity: 0.7;">${item.shortcut}</small>` : ''}
+                        </div>
+                    `;
+                    
+                    log(`${found ? '✅' : '❌'} ${item.name} (${item.page})`, found ? 'success' : 'error');
+                });
+                
+                resultHTML += '</div>';
+                
+                if (hasIssues) {
+                    resultHTML += '<div class="alert alert-danger mt-3"><strong>发现问题！</strong> 部分菜单项在HTML中缺失。</div>';
+                    log('❌ 发现菜单项缺失问题', 'error');
+                } else {
+                    resultHTML += '<div class="alert alert-success mt-3"><strong>检查通过！</strong> 所有菜单项都存在于HTML中。</div>';
+                    log('✅ 所有菜单项检查通过', 'success');
+                }
+                
+                document.getElementById('menu-check-result').innerHTML = resultHTML;
+                
+            } catch (error) {
+                log(`❌ 检查菜单HTML失败: ${error.message}`, 'error');
+                document.getElementById('menu-check-result').innerHTML = 
+                    '<div class="alert alert-danger">无法获取管理员系统HTML，请确保系统正在运行。</div>';
+            }
+        });
+
+        // 获取菜单图标
+        function getMenuIcon(page) {
+            const icons = {
+                dashboard: 'fa-tachometer-alt',
+                users: 'fa-users',
+                vip: 'fa-crown',
+                wallet: 'fa-wallet',
+                checkin: 'fa-calendar-check',
+                pk: 'fa-trophy',
+                achievements: 'fa-medal',
+                team: 'fa-users',
+                telegram: 'fab fa-telegram-plane',
+                settings: 'fa-cogs'
+            };
+            return icons[page] || 'fa-circle';
+        }
+
+        // 5. 检查CSS样式
+        document.getElementById('check-css-styles').addEventListener('click', () => {
+            log('🎨 检查CSS样式问题...', 'info');
+            
+            // 这里可以添加CSS检查逻辑
+            log('💡 建议检查以下CSS问题:', 'warning');
+            log('  - display: none 或 visibility: hidden', 'info');
+            log('  - opacity: 0', 'info');
+            log('  - height: 0 或 overflow: hidden', 'info');
+            log('  - z-index 层级问题', 'info');
+            log('  - position 定位问题', 'info');
+        });
+
+        // 6. 检查JS错误
+        document.getElementById('check-js-errors').addEventListener('click', () => {
+            log('🐛 检查JavaScript错误...', 'info');
+            
+            // 监听错误
+            window.addEventListener('error', (e) => {
+                log(`JS错误: ${e.message} at ${e.filename}:${e.lineno}`, 'error');
+            });
+            
+            window.addEventListener('unhandledrejection', (e) => {
+                log(`Promise拒绝: ${e.reason}`, 'error');
+            });
+            
+            log('✅ JavaScript错误监听已启动', 'success');
+        });
+
+        // 清除控制台
+        document.getElementById('clear-console').addEventListener('click', () => {
+            document.getElementById('console').innerHTML = '[系统] 日志已清除';
+        });
+
+        // 导出日志
+        document.getElementById('export-log').addEventListener('click', () => {
+            const logContent = document.getElementById('console').innerText;
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `menu-fix-log-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('📄 日志已导出', 'success');
+        });
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 强制菜单修复工具已准备就绪', 'success');
+            log('💡 建议操作顺序: 检查菜单HTML → 清除缓存 → 注入修复代码 → 重载应用', 'info');
+        });
+    </script>
+</body>
+</html>

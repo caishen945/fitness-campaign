@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 VIP问题调试工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-info { background: #17a2b8; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        
+        .log-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        
+        .network-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .network-log.request { border-left: 4px solid #007bff; }
+        .network-log.response { border-left: 4px solid #28a745; }
+        .network-log.error { border-left: 4px solid #dc3545; }
+        
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 VIP问题调试工具</h1>
+    
+    <div class="debug-section">
+        <h2>1. 系统状态检�?/h2>
+        <button onclick="checkSystemStatus()">检查系统状�?/button>
+        <div id="systemStatus"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>2. 模拟VIP编辑操作</h2>
+        <div class="form-group">
+            <label>VIP等级ID:</label>
+            <input type="number" id="vipLevelId" value="1" min="1">
+        </div>
+        <div class="form-group">
+            <label>等级名称:</label>
+            <input type="text" id="vipLevelName" value="测试等级">
+        </div>
+        <div class="form-group">
+            <label>步数目标:</label>
+            <input type="number" id="vipStepGoal" value="1000" min="1">
+        </div>
+        <div class="form-group">
+            <label>存款要求:</label>
+            <input type="number" id="vipDeposit" value="100" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>奖励金额:</label>
+            <input type="number" id="vipReward" value="50" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>挑战次数:</label>
+            <input type="number" id="vipChallengeTimes" value="3" min="1">
+        </div>
+        
+        <button onclick="simulateVipEdit()">模拟VIP编辑</button>
+        <button onclick="simulateVipCreate()">模拟VIP创建</button>
+        <button onclick="clearNetworkLogs()" class="danger">清除网络日志</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>3. 网络请求监控</h2>
+        <div id="networkLogs"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>4. 实时日志监控</h2>
+        <button onclick="startLogMonitoring()">开始监�?/button>
+        <button onclick="stopLogMonitoring()">停止监控</button>
+        <div id="realTimeLogs" class="log-output"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>5. 问题诊断</h2>
+        <button onclick="diagnoseVipIssue()">诊断VIP问题</button>
+        <div id="diagnosisResult"></div>
+    </div>
+
+    <script>
+        let logMonitoring = false;
+        let networkLogs = [];
+
+        // 检查系统状�?
+        async function checkSystemStatus() {
+            const output = document.getElementById('systemStatus');
+            let status = '<h3>系统状态检查结�?</h3>';
+            
+            try {
+                // 检查后端服�?
+                const backendResponse = await fetch('http://localhost:3000/api', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (backendResponse.ok) {
+                    status += '<div><span class="status-indicator status-success"></span>后端服务正常</div>';
+                } else {
+                    status += '<div><span class="status-indicator status-error"></span>后端服务异常</div>';
+                }
+                
+                // 检查管理员认证
+                const adminToken = localStorage.getItem('adminToken');
+                if (adminToken) {
+                    status += '<div><span class="status-indicator status-success"></span>管理员Token存在</div>';
+                    
+                    // 验证Token有效�?
+                    const authResponse = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${adminToken}`
+                        }
+                    });
+                    
+                    if (authResponse.ok) {
+                        status += '<div><span class="status-indicator status-success"></span>管理员Token有效</div>';
+                    } else {
+                        status += '<div><span class="status-indicator status-error"></span>管理员Token无效</div>';
+                    }
+                } else {
+                    status += '<div><span class="status-indicator status-warning"></span>管理员Token不存�?/div>';
+                }
+                
+                // 检查日志系�?
+                const adminLogs = localStorage.getItem('adminLogs');
+                if (adminLogs) {
+                    const logsCount = JSON.parse(adminLogs).length;
+                    status += `<div><span class="status-indicator status-info"></span>本地日志: ${logsCount} �?/div>`;
+                } else {
+                    status += '<div><span class="status-indicator status-warning"></span>本地日志为空</div>';
+                }
+                
+            } catch (error) {
+                status += `<div><span class="status-indicator status-error"></span>检查失�? ${error.message}</div>`;
+            }
+            
+            output.innerHTML = status;
+        }
+
+        // 模拟VIP编辑
+        async function simulateVipEdit() {
+            const levelId = document.getElementById('vipLevelId').value;
+            const levelName = document.getElementById('vipLevelName').value;
+            const stepGoal = document.getElementById('vipStepGoal').value;
+            const deposit = document.getElementById('vipDeposit').value;
+            const reward = document.getElementById('vipReward').value;
+            const challengeTimes = document.getElementById('vipChallengeTimes').value;
+            
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                alert('�?请先登录管理员后�?);
+                return;
+            }
+            
+            const requestData = {
+                name: levelName,
+                stepGoal: parseInt(stepGoal),
+                deposit: parseFloat(deposit),
+                reward: parseFloat(reward),
+                challengeTimes: parseInt(challengeTimes)
+            };
+            
+            logNetworkRequest('PUT', `/api/admin/vip-levels/${levelId}`, requestData);
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/vip-levels/${levelId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const responseData = await response.text();
+                logNetworkResponse('PUT', `/api/admin/vip-levels/${levelId}`, response.status, responseData);
+                
+                if (response.ok) {
+                    alert('�?VIP编辑成功�?);
+                } else {
+                    alert(`�?VIP编辑失败: ${response.status} - ${responseData}`);
+                }
+                
+            } catch (error) {
+                logNetworkError('PUT', `/api/admin/vip-levels/${levelId}`, error);
+                alert(`�?网络错误: ${error.message}`);
+            }
+        }
+
+        // 模拟VIP创建
+        async function simulateVipCreate() {
+            const levelName = document.getElementById('vipLevelName').value;
+            const stepGoal = document.getElementById('vipStepGoal').value;
+            const deposit = document.getElementById('vipDeposit').value;
+            const reward = document.getElementById('vipReward').value;
+            const challengeTimes = document.getElementById('vipChallengeTimes').value;
+            
+            const adminToken = localStorage.getItem('adminToken');
+            if (!adminToken) {
+                alert('�?请先登录管理员后�?);
+                return;
+            }
+            
+            const requestData = {
+                name: levelName,
+                stepGoal: parseInt(stepGoal),
+                deposit: parseFloat(deposit),
+                reward: parseFloat(reward),
+                challengeTimes: parseInt(challengeTimes)
+            };
+            
+            logNetworkRequest('POST', '/api/admin/vip-levels', requestData);
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const responseData = await response.text();
+                logNetworkResponse('POST', '/api/admin/vip-levels', response.status, responseData);
+                
+                if (response.ok) {
+                    alert('�?VIP创建成功�?);
+                } else {
+                    alert(`�?VIP创建失败: ${response.status} - ${responseData}`);
+                }
+                
+            } catch (error) {
+                logNetworkError('POST', '/api/admin/vip-levels', error);
+                alert(`�?网络错误: ${error.message}`);
+            }
+        }
+
+        // 记录网络请求
+        function logNetworkRequest(method, url, data) {
+            const log = {
+                timestamp: new Date().toISOString(),
+                type: 'request',
+                method: method,
+                url: url,
+                data: data
+            };
+            networkLogs.push(log);
+            updateNetworkLogs();
+        }
+
+        // 记录网络响应
+        function logNetworkResponse(method, url, status, data) {
+            const log = {
+                timestamp: new Date().toISOString(),
+                type: 'response',
+                method: method,
+                url: url,
+                status: status,
+                data: data
+            };
+            networkLogs.push(log);
+            updateNetworkLogs();
+        }
+
+        // 记录网络错误
+        function logNetworkError(method, url, error) {
+            const log = {
+                timestamp: new Date().toISOString(),
+                type: 'error',
+                method: method,
+                url: url,
+                error: error.message
+            };
+            networkLogs.push(log);
+            updateNetworkLogs();
+        }
+
+        // 更新网络日志显示
+        function updateNetworkLogs() {
+            const container = document.getElementById('networkLogs');
+            const recentLogs = networkLogs.slice(-20); // 只显示最�?0�?
+            
+            let html = '';
+            recentLogs.forEach(log => {
+                const logClass = log.type === 'request' ? 'request' : 
+                               log.type === 'response' ? 'response' : 'error';
+                
+                html += `<div class="network-log ${logClass}">`;
+                html += `[${log.timestamp}] ${log.method} ${log.url}`;
+                
+                if (log.type === 'request') {
+                    html += `<br>请求数据: ${JSON.stringify(log.data, null, 2)}`;
+                } else if (log.type === 'response') {
+                    html += `<br>状�? ${log.status}`;
+                    html += `<br>响应数据: ${log.data}`;
+                } else if (log.type === 'error') {
+                    html += `<br>错误: ${log.error}`;
+                }
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 清除网络日志
+        function clearNetworkLogs() {
+            networkLogs = [];
+            updateNetworkLogs();
+        }
+
+        // 开始日志监�?
+        function startLogMonitoring() {
+            logMonitoring = true;
+            const output = document.getElementById('realTimeLogs');
+            output.textContent = '开始监控日�?..\n';
+            
+            // 监控localStorage变化
+            const originalSetItem = localStorage.setItem;
+            localStorage.setItem = function(key, value) {
+                if (logMonitoring && (key === 'adminLogs' || key === 'frontendLogs')) {
+                    try {
+                        const logs = JSON.parse(value);
+                        const latestLog = logs[logs.length - 1];
+                        if (latestLog) {
+                            output.textContent += `[${latestLog.timestamp}] [${latestLog.level}] [${latestLog.category}] ${latestLog.message}\n`;
+                            output.scrollTop = output.scrollHeight;
+                        }
+                    } catch (e) {
+                        // 忽略解析错误
+                    }
+                }
+                originalSetItem.apply(this, arguments);
+            };
+            
+            alert('�?日志监控已开�?);
+        }
+
+        // 停止日志监控
+        function stopLogMonitoring() {
+            logMonitoring = false;
+            alert('⏹️ 日志监控已停�?);
+        }
+
+        // 诊断VIP问题
+        async function diagnoseVipIssue() {
+            const output = document.getElementById('diagnosisResult');
+            let diagnosis = '<h3>VIP问题诊断结果:</h3>';
+            
+            try {
+                // 检查最近的网络日志
+                const recentErrors = networkLogs.filter(log => log.type === 'error');
+                const recentResponses = networkLogs.filter(log => log.type === 'response' && log.status >= 400);
+                
+                if (recentErrors.length > 0) {
+                    diagnosis += '<div><span class="status-indicator status-error"></span>发现网络错误</div>';
+                    recentErrors.forEach(error => {
+                        diagnosis += `<div style="margin-left: 20px;">- ${error.method} ${error.url}: ${error.error}</div>`;
+                    });
+                }
+                
+                if (recentResponses.length > 0) {
+                    diagnosis += '<div><span class="status-indicator status-warning"></span>发现HTTP错误响应</div>';
+                    recentResponses.forEach(response => {
+                        diagnosis += `<div style="margin-left: 20px;">- ${response.method} ${response.url}: ${response.status}</div>`;
+                        diagnosis += `<div style="margin-left: 40px; font-size: 12px;">响应: ${response.data}</div>`;
+                    });
+                }
+                
+                // 检查Token状�?
+                const adminToken = localStorage.getItem('adminToken');
+                if (!adminToken) {
+                    diagnosis += '<div><span class="status-indicator status-error"></span>管理员Token不存�?/div>';
+                } else {
+                    // 验证Token
+                    const authResponse = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${adminToken}`
+                        }
+                    });
+                    
+                    if (authResponse.status === 401) {
+                        diagnosis += '<div><span class="status-indicator status-error"></span>管理员Token已过�?/div>';
+                    } else if (authResponse.ok) {
+                        diagnosis += '<div><span class="status-indicator status-success"></span>管理员Token有效</div>';
+                    }
+                }
+                
+                // 检查日志数�?
+                const adminLogs = localStorage.getItem('adminLogs');
+                if (adminLogs) {
+                    const logs = JSON.parse(adminLogs);
+                    const vipLogs = logs.filter(log => log.category === 'VIP-MANAGEMENT');
+                    const errorLogs = logs.filter(log => log.level === 'ERROR');
+                    
+                    diagnosis += `<div><span class="status-indicator status-info"></span>VIP操作日志: ${vipLogs.length} �?/div>`;
+                    diagnosis += `<div><span class="status-indicator status-info"></span>错误日志: ${errorLogs.length} �?/div>`;
+                    
+                    if (errorLogs.length > 0) {
+                        diagnosis += '<div><span class="status-indicator status-warning"></span>最近的错误:</div>';
+                        errorLogs.slice(-3).forEach(log => {
+                            diagnosis += `<div style="margin-left: 20px;">- ${log.message}</div>`;
+                        });
+                    }
+                }
+                
+                if (recentErrors.length === 0 && recentResponses.length === 0) {
+                    diagnosis += '<div><span class="status-indicator status-success"></span>未发现明显的网络问题</div>';
+                }
+                
+            } catch (error) {
+                diagnosis += `<div><span class="status-indicator status-error"></span>诊断失败: ${error.message}</div>`;
+            }
+            
+            output.innerHTML = diagnosis;
+        }
+
+        // 页面加载时自动检查状�?
+        window.addEventListener('load', () => {
+            setTimeout(checkSystemStatus, 1000);
+        });
+    </script>
+</body>
+</html>

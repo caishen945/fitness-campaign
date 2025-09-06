@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Auth Modal Test</title>
+    <link rel="stylesheet" href="src/components/TelegramAuthModal.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-title {
+            font-size: 28px;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .test-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .test-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .test-btn.secondary {
+            background: #6b7280;
+        }
+        
+        .test-btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .test-info {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h3 {
+            margin: 0 0 16px 0;
+            color: #374151;
+        }
+        
+        .test-info p {
+            margin: 0 0 12px 0;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .language-switcher {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            margin: 0 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .lang-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .lang-btn:hover {
+            border-color: #3b82f6;
+        }
+        
+        .device-info {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .device-info h4 {
+            margin: 0 0 12px 0;
+            color: #92400e;
+        }
+        
+        .device-details {
+            color: #92400e;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 640px) {
+            .test-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .test-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .test-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1 class="test-title">Telegram Auth Modal Test</h1>
+            <p class="test-subtitle">Test the new Telegram authorization modal with multi-language support</p>
+        </div>
+        
+        <div class="language-switcher">
+            <h3>Language / 语言</h3>
+            <button class="lang-btn active" data-lang="en-US">🇺🇸 English</button>
+            <button class="lang-btn" data-lang="zh-CN">🇨🇳 中文</button>
+        </div>
+        
+        <div class="device-info">
+            <h4>Device Information</h4>
+            <div class="device-details" id="deviceInfo">
+                Detecting device type...
+            </div>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" id="showModalBtn">Show Telegram Auth Modal</button>
+            <button class="test-btn secondary" id="testLanguageBtn">Test Language Switch</button>
+            <button class="test-btn secondary" id="testDeviceBtn">Test Device Detection</button>
+        </div>
+        
+        <div class="test-info">
+            <h3>Test Instructions</h3>
+            <p><strong>1. Show Modal:</strong> Click the first button to display the Telegram authorization modal</p>
+            <p><strong>2. Language Switch:</strong> Use the language buttons above to test multi-language support</p>
+            <p><strong>3. Device Detection:</strong> The modal automatically detects your device type and optimizes the display</p>
+            <p><strong>4. Responsive Design:</strong> Try resizing your browser window to test responsive behavior</p>
+        </div>
+        
+        <div class="test-info">
+            <h3>Features to Test</h3>
+            <p>✅ <strong>Multi-language Support:</strong> English (default) and Chinese Simplified</p>
+            <p>✅ <strong>Device Optimization:</strong> Mobile vs Desktop display optimization</p>
+            <p>✅ <strong>Responsive Design:</strong> Works on all screen sizes</p>
+            <p>✅ <strong>Accessibility:</strong> Keyboard navigation and screen reader support</p>
+            <p>✅ <strong>Dark Mode:</strong> Automatic dark mode detection (if supported)</p>
+        </div>
+    </div>
+
+    <!-- Mock App for testing -->
+    <script>
+        // Mock App class for testing
+        class MockApp {
+            constructor() {
+                this.token = null;
+                this.user = null;
+                this.listeners = {};
+            }
+            
+            showLoading(message) {
+                console.log('Loading:', message);
+                // Create a simple loading overlay
+                this.createLoadingOverlay(message);
+            }
+            
+            hideLoading() {
+                const loading = document.querySelector('.loading-overlay');
+                if (loading) {
+                    loading.remove();
+                }
+            }
+            
+            showToast(message, type = 'info') {
+                console.log('Toast:', type, message);
+                this.createToast(message, type);
+            }
+            
+            navigate(page) {
+                console.log('Navigate to:', page);
+                this.showToast(`Would navigate to: ${page}`, 'info');
+            }
+            
+            setToken(token) {
+                this.token = token;
+                console.log('Token set:', token);
+            }
+            
+            setUser(user) {
+                this.user = user;
+                console.log('User set:', user);
+            }
+            
+            emit(event, data) {
+                console.log('Event emitted:', event, data);
+                if (this.listeners[event]) {
+                    this.listeners[event].forEach(callback => callback(data));
+                }
+            }
+            
+            on(event, callback) {
+                if (!this.listeners[event]) {
+                    this.listeners[event] = [];
+                }
+                this.listeners[event].push(callback);
+            }
+            
+            createLoadingOverlay(message) {
+                const loading = document.createElement('div');
+                loading.className = 'loading-overlay';
+                loading.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    color: white;
+                    font-size: 18px;
+                `;
+                loading.textContent = message;
+                document.body.appendChild(loading);
+            }
+            
+            createToast(message, type) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    z-index: 10000;
+                    max-width: 300px;
+                    word-wrap: break-word;
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+        
+        // Mock API for testing
+        const mockApi = {
+            async telegramLogin(userData) {
+                console.log('Mock API: telegramLogin called with:', userData);
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Return mock success response
+                return {
+                    success: true,
+                    token: 'mock_token_' + Date.now(),
+                    user: {
+                        id: Date.now(),
+                        username: userData.username || 'testuser',
+                        telegramId: userData.id,
+                        firstName: userData.first_name,
+                        lastName: userData.last_name
+                    },
+                    isNewUser: true
+                };
+            }
+        };
+        
+        // Initialize mock app
+        const mockApp = new MockApp();
+        mockApp.api = mockApi;
+        
+        // Device detection
+        function updateDeviceInfo() {
+            const deviceInfo = document.getElementById('deviceInfo');
+            const userAgent = navigator.userAgent;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+            const isAndroid = /Android/.test(userAgent);
+            
+            let deviceType = 'Desktop';
+            if (isMobile) {
+                if (isIOS) deviceType = 'iOS Mobile';
+                else if (isAndroid) deviceType = 'Android Mobile';
+                else deviceType = 'Mobile';
+            }
+            
+            deviceInfo.innerHTML = `
+                <strong>Type:</strong> ${deviceType}<br>
+                <strong>User Agent:</strong> ${userAgent.substring(0, 50)}...<br>
+                <strong>Screen:</strong> ${window.screen.width} × ${window.screen.height}<br>
+                <strong>Viewport:</strong> ${window.innerWidth} × ${window.innerHeight}
+            `;
+        }
+        
+        // Language switching
+        function switchLanguage(lang) {
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update page language
+            document.documentElement.lang = lang;
+            
+            // Show feedback
+            mockApp.showToast(`Language switched to: ${lang}`, 'info');
+            
+            // Update device info language
+            if (lang === 'zh-CN') {
+                document.querySelector('.test-title').textContent = 'Telegram 授权弹窗测试';
+                document.querySelector('.test-subtitle').textContent = '测试新的Telegram授权弹窗，支持多语言';
+                document.querySelector('.device-info h4').textContent = '设备信息';
+                document.getElementById('showModalBtn').textContent = '显示Telegram授权弹窗';
+                document.getElementById('testLanguageBtn').textContent = '测试语言切换';
+                document.getElementById('testDeviceBtn').textContent = '测试设备检测';
+            } else {
+                document.querySelector('.test-title').textContent = 'Telegram Auth Modal Test';
+                document.querySelector('.test-subtitle').textContent = 'Test the new Telegram authorization modal with multi-language support';
+                document.querySelector('.device-info h4').textContent = 'Device Information';
+                document.getElementById('showModalBtn').textContent = 'Show Telegram Auth Modal';
+                document.getElementById('testLanguageBtn').textContent = 'Test Language Switch';
+                document.getElementById('testDeviceBtn').textContent = 'Test Device Detection';
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDeviceInfo();
+            
+            // Language switching
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', switchLanguage);
+            });
+            
+            // Show modal button
+            document.getElementById('showModalBtn').addEventListener('click', function() {
+                // Import and show the modal
+                import('./src/components/TelegramAuthModal.js')
+                    .then(module => {
+                        const TelegramAuthModal = module.default;
+                        const modal = new TelegramAuthModal(mockApp);
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Failed to load modal:', error);
+                        mockApp.showToast('Failed to load modal: ' + error.message, 'error');
+                    });
+            });
+            
+            // Test language switch
+            document.getElementById('testLanguageBtn').addEventListener('click', function() {
+                const currentLang = document.documentElement.lang;
+                const newLang = currentLang === 'en-US' ? 'zh-CN' : 'en-US';
+                switchLanguage(newLang);
+            });
+            
+            // Test device detection
+            document.getElementById('testDeviceBtn').addEventListener('click', function() {
+                updateDeviceInfo();
+                mockApp.showToast('Device information updated', 'info');
+            });
+            
+            // Window resize handler
+            window.addEventListener('resize', updateDeviceInfo);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深度数据库诊断页�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-content { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🗄�?深度数据库诊断页�?/h1>
+    
+    <div class="test-section">
+        <div class="test-title">1. 测试数据库基本连�?/div>
+        <div class="test-content">
+            <button id="test-basic-connection">测试基本连接</button>
+            <div id="basic-connection-result">点击按钮测试基本连接...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">2. 测试admin_users表查询（3秒超时）</div>
+        <div class="test-content">
+            <button id="test-admin-users-table">测试admin_users�?/button>
+            <div id="admin-users-result">点击按钮测试admin_users�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">3. 测试简单SELECT查询�?秒超时）</div>
+        <div class="test-content">
+            <button id="test-simple-select">测试简单SELECT</button>
+            <div id="simple-select-result">点击按钮测试简单SELECT...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">4. 测试数据库连接池状�?/div>
+        <div class="test-content">
+            <button id="test-connection-pool">测试连接池状�?/button>
+            <div id="connection-pool-result">点击按钮测试连接池状�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">5. 调试日志</div>
+        <pre id="debug-log" style="max-height: 300px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 测试基本连接
+        async function testBasicConnection() {
+            const resultEl = document.getElementById('basic-connection-result');
+            resultEl.innerHTML = '<div>�?正在测试基本连接...</div>';
+            
+            try {
+                log('开始测试基本连�?..', 'info');
+                const startTime = Date.now();
+                
+                const response = await fetch('http://localhost:3000/');
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`基本连接测试完成，耗时: ${responseTime}ms`, 'success');
+                
+                if (response.ok) {
+                    resultEl.innerHTML = `<div style="color: green;">�?基本连接正常 (耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应长度: ${data.length} 字符</div>`;
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 基本连接异常 (状�? ${response.status})</div>`;
+                }
+                
+            } catch (error) {
+                log(`基本连接测试失败: ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?基本连接测试失败</div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试admin_users表查�?
+        async function testAdminUsersTable() {
+            const resultEl = document.getElementById('admin-users-result');
+            resultEl.innerHTML = '<div>�?正在测试admin_users表查�?..</div>';
+            
+            try {
+                log('开始测试admin_users表查�?..', 'info');
+                const startTime = Date.now();
+                
+                // 设置3秒超�?
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 3000); // 3秒超�?
+                
+                const response = await fetch('http://localhost:3000/api/admin/users', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer test-token'
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`admin_users表查询测试完成，耗时: ${responseTime}ms`, 'success');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (response.status === 401) {
+                    resultEl.innerHTML = `<div style="color: green;">�?admin_users表查询正�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>返回401表示路由正常，只是需要有效token</div>';
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                } else if (response.status === 500) {
+                    resultEl.innerHTML = `<div style="color: red;">�?admin_users表查询失�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>服务器内部错误，可能是数据库问题</div>';
+                    resultEl.innerHTML += `<div>错误: ${data}</div>`;
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ admin_users表查询状态未�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                }
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                if (error.name === 'AbortError') {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    log(`admin_users表查询测试超时，总耗时: ${responseTime}ms`, 'warning');
+                    resultEl.innerHTML = `<div style="color: red;">�?查询超时 (${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>admin_users表查询在3秒内没有响应</div>';
+                } else {
+                    log(`admin_users表查询测试失�? ${error.message}`, 'error');
+                    resultEl.innerHTML = `<div style="color: red;">�?admin_users表查询测试失�?/div>`;
+                    resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // 测试简单SELECT查询
+        async function testSimpleSelect() {
+            const resultEl = document.getElementById('simple-select-result');
+            resultEl.innerHTML = '<div>�?正在测试简单SELECT查询...</div>';
+            
+            try {
+                log('开始测试简单SELECT查询...', 'info');
+                const startTime = Date.now();
+                
+                // 设置3秒超�?
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 3000); // 3秒超�?
+                
+                // 测试一个简单的API端点，看是否涉及数据库查�?
+                const response = await fetch('http://localhost:3000/api-docs', {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`简单SELECT查询测试完成，耗时: ${responseTime}ms`, 'success');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应长度: ${data.length} 字符`, 'info');
+                
+                if (response.ok) {
+                    resultEl.innerHTML = `<div style="color: green;">�?简单SELECT查询测试成功 (耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>Swagger文档加载正常</div>';
+                    resultEl.innerHTML += `<div>响应长度: ${data.length} 字符</div>`;
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 简单SELECT查询测试异常 (耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                }
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                if (error.name === 'AbortError') {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    log(`简单SELECT查询测试超时，总耗时: ${responseTime}ms`, 'warning');
+                    resultEl.innerHTML = `<div style="color: red;">�?查询超时 (${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>简单SELECT查询�?秒内没有响应</div>';
+                } else {
+                    log(`简单SELECT查询测试失败: ${error.message}`, 'error');
+                    resultEl.innerHTML = `<div style="color: red;">�?简单SELECT查询测试失败</div>`;
+                    resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // 测试连接池状�?
+        async function testConnectionPool() {
+            const resultEl = document.getElementById('connection-pool-result');
+            resultEl.innerHTML = '<div>�?正在测试连接池状�?..</div>';
+            
+            try {
+                log('开始测试连接池状�?..', 'info');
+                const startTime = Date.now();
+                
+                // 测试多个并发请求，看连接池是否正常工�?
+                const promises = [];
+                for (let i = 0; i < 3; i++) {
+                    promises.push(
+                        fetch('http://localhost:3000/').then(res => res.text())
+                    );
+                }
+                
+                const results = await Promise.all(promises);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                log(`连接池状态测试完成，耗时: ${responseTime}ms`, 'success');
+                log(`并发请求数量: ${promises.length}`, 'info');
+                log(`所有请求都成功完成`, 'info');
+                
+                resultEl.innerHTML = `<div style="color: green;">�?连接池状态正�?(耗时: ${responseTime}ms)</div>`;
+                resultEl.innerHTML += `<div>并发请求数量: ${promises.length}</div>`;
+                resultEl.innerHTML += '<div>所有请求都成功完成</div>';
+                
+            } catch (error) {
+                log(`连接池状态测试失�? ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?连接池状态测试失�?/div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 事件绑定
+        document.getElementById('test-basic-connection').addEventListener('click', testBasicConnection);
+        document.getElementById('test-admin-users-table').addEventListener('click', testAdminUsersTable);
+        document.getElementById('test-simple-select').addEventListener('click', testSimpleSelect);
+        document.getElementById('test-connection-pool').addEventListener('click', testConnectionPool);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('深度数据库诊断页面已加载', 'info');
+        });
+    </script>
+</body>
+</html>

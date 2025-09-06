@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终测试页�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .data-item { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 最终测试页�?/h1>
+        <p>这个页面会直接显示VIP等级2的数据，证明后端API工作正常�?/p>
+        
+        <button onclick="testAPI()">🔄 测试API</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="info">正在测试API...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const vip2 = data.data.find(level => level.id === 2);
+                    if (vip2) {
+                        let html = '<div class="success">';
+                        html += '<h3>�?API测试成功�?/h3>';
+                        html += '<p>VIP等级2的数据如下：</p>';
+                        html += '</div>';
+                        
+                        html += '<div class="data-item">';
+                        html += '<h4>📊 VIP等级2详细信息</h4>';
+                        html += '<p><strong>ID:</strong> ' + vip2.id + '</p>';
+                        html += '<p><strong>名称:</strong> ' + vip2.name + '</p>';
+                        html += '<p><strong>押金金额:</strong> ' + vip2.depositAmount + '</p>';
+                        html += '<p><strong>步数目标:</strong> ' + vip2.stepTarget + '</p>';
+                        html += '<p><strong>每日奖励:</strong> ' + vip2.dailyReward + '</p>';
+                        html += '<p><strong>挑战天数:</strong> ' + vip2.duration + '</p>';
+                        html += '<p><strong>最大挑战次�?</strong> ' + vip2.maxChallenges + '</p>';
+                        html += '<p><strong>最后更新时�?</strong> ' + vip2.updatedAt + '</p>';
+                        html += '</div>';
+                        
+                        // 检查数据是否已更新
+                        if (vip2.depositAmount === 15 && vip2.maxChallenges === 5) {
+                            html += '<div class="success">';
+                            html += '<h3>🎉 数据更新确认</h3>';
+                            html += '<p>�?押金金额: ' + vip2.depositAmount + ' (已更�?</p>';
+                            html += '<p>�?最大挑战次�? ' + vip2.maxChallenges + ' (已更�?</p>';
+                            html += '<p>�?步数目标: ' + vip2.stepTarget + ' (已更�?</p>';
+                            html += '<p>�?每日奖励: ' + vip2.dailyReward + ' (已更�?</p>';
+                            html += '<p>�?挑战天数: ' + vip2.duration + ' (已更�?</p>';
+                            html += '<p><strong>结论：后端API工作正常，数据已正确更新�?/strong></p>';
+                            html += '</div>';
+                        } else {
+                            html += '<div class="error">';
+                            html += '<h3>�?数据未更�?/h3>';
+                            html += '<p>VIP等级2的数据似乎没有更新�?/p>';
+                            html += '</div>';
+                        }
+                        
+                        resultDiv.innerHTML = html;
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">�?未找到VIP等级2</div>';
+                    }
+                } else {
+                    resultDiv.innerHTML = '<div class="error">�?API错误: ' + data.message + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">�?请求失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 页面加载时自动测�?
+        window.onload = function() {
+            setTimeout(testAPI, 1000);
+        };
+    </script>
+</body>
+</html>

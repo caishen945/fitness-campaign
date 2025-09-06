@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录控制台调试页�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .debug-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .debug-title { font-weight: bold; margin-bottom: 10px; }
+        .debug-content { margin-top: 10px; }
+        input, button { margin: 5px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🔐 登录控制台调试页�?/h1>
+    
+    <div class="debug-section">
+        <div class="debug-title">1. 检查浏览器环境</div>
+        <div class="debug-content">
+            <button id="check-browser">检查浏览器环境</button>
+            <div id="browser-result">点击按钮检查浏览器...</div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <div class="debug-title">2. 测试fetch API</div>
+        <div class="debug-content">
+            <button id="test-fetch">测试fetch API</button>
+            <div id="fetch-result">点击按钮测试fetch...</div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <div class="debug-title">3. 测试Promise</div>
+        <div class="debug-content">
+            <button id="test-promise">测试Promise</button>
+            <div id="promise-result">点击按钮测试Promise...</div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <div class="debug-title">4. 检查localStorage</div>
+        <div class="debug-content">
+            <button id="check-storage">检查localStorage</button>
+            <div id="storage-result">点击按钮检查存�?..</div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <div class="debug-title">5. 调试日志</div>
+        <pre id="debug-log" style="max-height: 300px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 检查浏览器环境
+        function checkBrowser() {
+            const resultEl = document.getElementById('browser-result');
+            let result = '<div style="margin-bottom: 10px;"><strong>浏览器环境检查结�?</strong></div>';
+            
+            // 检查fetch支持
+            if (typeof fetch !== 'undefined') {
+                result += '<div style="color: green;">�?fetch API 支持</div>';
+            } else {
+                result += '<div style="color: red;">�?fetch API 不支�?/div>';
+            }
+            
+            // 检查Promise支持
+            if (typeof Promise !== 'undefined') {
+                result += '<div style="color: green;">�?Promise 支持</div>';
+            } else {
+                result += '<div style="color: red;">�?Promise 不支�?/div>';
+            }
+            
+            // 检查async/await支持
+            try {
+                eval('(async () => {})()');
+                result += '<div style="color: green;">�?async/await 支持</div>';
+            } catch (e) {
+                result += '<div style="color: red;">�?async/await 不支�?/div>';
+            }
+            
+            // 检查localStorage支持
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                result += '<div style="color: green;">�?localStorage 支持</div>';
+            } catch (e) {
+                result += '<div style="color: red;">�?localStorage 不支�?/div>';
+            }
+            
+            // 浏览器信�?
+            result += '<div style="margin-top: 10px;"><strong>浏览器信�?</strong></div>';
+            result += `<div>User Agent: ${navigator.userAgent}</div>`;
+            result += `<div>语言: ${navigator.language}</div>`;
+            result += `<div>Cookie启用: ${navigator.cookieEnabled}</div>`;
+            
+            resultEl.innerHTML = result;
+            log('浏览器环境检查完�?, 'info');
+        }
+
+        // 测试fetch API
+        async function testFetch() {
+            const resultEl = document.getElementById('fetch-result');
+            resultEl.innerHTML = '<div>�?正在测试fetch API...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/');
+                const data = await response.text();
+                
+                if (response.ok) {
+                    resultEl.innerHTML = `<div style="color: green;">�?fetch API 测试成功</div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                    resultEl.innerHTML += `<div>响应长度: ${data.length} 字符</div>`;
+                    log('fetch API 测试成功', 'success');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ fetch API 测试异常</div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                    log('fetch API 测试异常', 'warning');
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<div style="color: red;">�?fetch API 测试失败</div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+                log(`fetch API 测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 测试Promise
+        function testPromise() {
+            const resultEl = document.getElementById('promise-result');
+            resultEl.innerHTML = '<div>�?正在测试Promise...</div>';
+            
+            const promise = new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve('Promise测试成功');
+                }, 1000);
+            });
+            
+            promise.then(result => {
+                resultEl.innerHTML = `<div style="color: green;">�?${result}</div>`;
+                log('Promise测试成功', 'success');
+            }).catch(error => {
+                resultEl.innerHTML = `<div style="color: red;">�?Promise测试失败: ${error}</div>`;
+                log('Promise测试失败', 'error');
+            });
+        }
+
+        // 检查localStorage
+        function checkStorage() {
+            const resultEl = document.getElementById('storage-result');
+            let result = '<div style="margin-bottom: 10px;"><strong>localStorage检查结�?</strong></div>';
+            
+            try {
+                // 检查现有数�?
+                const adminToken = localStorage.getItem('adminToken');
+                const adminUser = localStorage.getItem('adminUser');
+                
+                result += `<div>adminToken: ${adminToken ? '存在' : '不存�?}</div>`;
+                result += `<div>adminUser: ${adminUser ? '存在' : '不存�?}</div>`;
+                
+                // 测试写入
+                localStorage.setItem('testKey', 'testValue');
+                const testValue = localStorage.getItem('testKey');
+                localStorage.removeItem('testKey');
+                
+                if (testValue === 'testValue') {
+                    result += '<div style="color: green;">�?localStorage 读写正常</div>';
+                } else {
+                    result += '<div style="color: red;">�?localStorage 读写异常</div>';
+                }
+                
+                log('localStorage检查完�?, 'info');
+            } catch (error) {
+                result += `<div style="color: red;">�?localStorage 检查失�? ${error.message}</div>`;
+                log(`localStorage检查失�? ${error.message}`, 'error');
+            }
+            
+            resultEl.innerHTML = result;
+        }
+
+        // 事件绑定
+        document.getElementById('check-browser').addEventListener('click', checkBrowser);
+        document.getElementById('test-fetch').addEventListener('click', testFetch);
+        document.getElementById('test-promise').addEventListener('click', testPromise);
+        document.getElementById('check-storage').addEventListener('click', checkStorage);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('登录控制台调试页面已加载', 'info');
+        });
+    </script>
+</body>
+</html>

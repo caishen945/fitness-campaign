@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP数据检�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 VIP数据检�?/h1>
+        <p>这是一个简单的测试页面，用于验证VIP数据是否正确更新�?/p>
+        
+        <button onclick="checkData()">🔄 检查数�?/button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function checkData() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div>正在检查数�?..</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const vip2 = data.data.find(level => level.id === 2);
+                    if (vip2) {
+                        let html = '<div class="success">';
+                        html += '<h3>�?VIP等级2数据检查结�?</h3>';
+                        html += '<p><strong>押金金额:</strong> ' + vip2.depositAmount + '</p>';
+                        html += '<p><strong>步数目标:</strong> ' + vip2.stepTarget + '</p>';
+                        html += '<p><strong>每日奖励:</strong> ' + vip2.dailyReward + '</p>';
+                        html += '<p><strong>挑战天数:</strong> ' + vip2.duration + '</p>';
+                        html += '<p><strong>最大挑战次�?</strong> ' + vip2.maxChallenges + '</p>';
+                        html += '<p><strong>最后更新时�?</strong> ' + vip2.updatedAt + '</p>';
+                        html += '</div>';
+                        
+                        // 检查数据是否已更新
+                        if (vip2.depositAmount === 15 && vip2.maxChallenges === 5) {
+                            html += '<div class="success">';
+                            html += '<h3>🎉 数据更新确认</h3>';
+                            html += '<p>VIP等级2的数据已经成功更新！</p>';
+                            html += '<p>后端API工作正常，数据已正确保存到数据库�?/p>';
+                            html += '</div>';
+                        } else {
+                            html += '<div class="error">';
+                            html += '<h3>�?数据未更�?/h3>';
+                            html += '<p>VIP等级2的数据似乎没有更新�?/p>';
+                            html += '</div>';
+                        }
+                        
+                        resultDiv.innerHTML = html;
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">�?未找到VIP等级2</div>';
+                    }
+                } else {
+                    resultDiv.innerHTML = '<div class="error">�?API错误: ' + data.message + '</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="error">�?请求失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 页面加载时自动检查数�?
+        window.onload = function() {
+            setTimeout(checkData, 1000);
+        };
+    </script>
+</body>
+</html>

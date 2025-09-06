@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP调试页面 - 强制无缓�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f0f0f0; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .result { padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid; }
+        .success { background: #d4edda; color: #155724; border-color: #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-color: #dc3545; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #17a2b8; }
+        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        .highlight { background-color: #fff3cd; }
+        .timestamp { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 VIP数据调试页面</h1>
+        <p class="timestamp">页面加载时间: <span id="loadTime"></span></p>
+        
+        <div>
+            <button onclick="testAPI()">🔍 测试API数据</button>
+            <button onclick="testUpdate()">✏️ 测试更新VIP等级2</button>
+            <button onclick="clearResults()">🗑�?清空结果</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 显示页面加载时间
+        document.getElementById('loadTime').textContent = new Date().toLocaleString();
+        
+        function clearResults() {
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        function addResult(type, title, content) {
+            const resultDiv = document.getElementById('result');
+            const timestamp = new Date().toLocaleTimeString();
+            resultDiv.innerHTML += `
+                <div class="result ${type}">
+                    <h3>${title}</h3>
+                    <p class="timestamp">时间: ${timestamp}</p>
+                    ${content}
+                </div>
+            `;
+        }
+        
+        async function testAPI() {
+            addResult('info', '🔄 开始测试API', '正在获取VIP等级数据...');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<h4>�?API调用成功</h4>';
+                    html += '<p><strong>返回数据:</strong></p>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    
+                    html += '<h4>📊 数据表格:</h4>';
+                    html += '<table>';
+                    html += '<tr><th>ID</th><th>名称</th><th>押金</th><th>步数目标</th><th>每日奖励</th><th>挑战天数</th><th>最大挑战次�?/th><th>状�?/th></tr>';
+                    
+                    data.data.forEach(level => {
+                        const isVip2 = level.id === 2;
+                        html += `<tr ${isVip2 ? 'class="highlight"' : ''}>
+                            <td>${level.id}</td>
+                            <td>${level.name || 'N/A'}</td>
+                            <td>${level.depositAmount || 'N/A'}</td>
+                            <td>${level.stepTarget || 'N/A'}</td>
+                            <td>${level.dailyReward || 'N/A'}</td>
+                            <td>${level.duration || 'N/A'}</td>
+                            <td>${level.maxChallenges || 'N/A'}</td>
+                            <td>${level.isActive ? '�?激�? : '�?未激�?}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</table>';
+                    
+                    // 特别显示VIP等级2的详细信�?
+                    const vip2 = data.data.find(level => level.id === 2);
+                    if (vip2) {
+                        html += '<h4>🎯 VIP等级2详细信息:</h4>';
+                        html += '<table>';
+                        html += '<tr><th>字段�?/th><th>�?/th><th>类型</th></tr>';
+                        Object.keys(vip2).forEach(key => {
+                            html += `<tr>
+                                <td><strong>${key}</strong></td>
+                                <td>${vip2[key]}</td>
+                                <td>${typeof vip2[key]}</td>
+                            </tr>`;
+                        });
+                        html += '</table>';
+                    }
+                    
+                    addResult('success', '�?API测试成功', html);
+                } else {
+                    addResult('error', '�?API返回错误', `<p>错误信息: ${data.message}</p>`);
+                }
+            } catch (error) {
+                addResult('error', '�?请求失败', `<p>错误详情: ${error.message}</p>`);
+            }
+        }
+        
+        async function testUpdate() {
+            addResult('info', '🔄 开始测试更�?, '正在更新VIP等级2...');
+            
+            try {
+                const updateData = {
+                    name: "VIP1",
+                    description: "调试测试更新",
+                    stepTarget: 1500,
+                    depositAmount: 15,
+                    dailyReward: 2,
+                    duration: 2,
+                    maxChallenges: 5,  // 改为5�?
+                    maxFailedDays: 2,
+                    cancelDeductRatio: 0.15,
+                    cancelRewardRatio: 0,
+                    partialRefundRatio: 0.85,
+                    color: "#FF6B6B",
+                    isActive: true
+                };
+                
+                addResult('info', '📤 发送更新数�?, '<pre>' + JSON.stringify(updateData, null, 2) + '</pre>');
+                
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels/2', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    addResult('success', '�?更新成功', `
+                        <p>更新操作成功完成�?/p>
+                        <p><strong>返回数据:</strong></p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                        <p>现在请点�?测试API数据"查看更新后的结果�?/p>
+                    `);
+                } else {
+                    addResult('error', '�?更新失败', `<p>错误信息: ${result.message}</p>`);
+                }
+            } catch (error) {
+                addResult('error', '�?更新请求失败', `<p>错误详情: ${error.message}</p>`);
+            }
+        }
+        
+        // 页面加载时自动测试API
+        window.onload = function() {
+            setTimeout(testAPI, 1000);
+        };
+    </script>
+</body>
+</html>

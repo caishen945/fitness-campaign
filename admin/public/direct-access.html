@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitChallenge 管理后台 - 直接访问版本</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f8f9fa; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 50px auto; 
+            padding: 20px; 
+        }
+        .card { 
+            border-radius: 15px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            margin-bottom: 30px; 
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 20px;
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .feature-card {
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-3px);
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #6a11cb;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #5810b0 0%, #1e68e0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1><i class="fas fa-tachometer-alt me-2"></i>FitChallenge 管理后台</h1>
+                <p class="mb-0">直接访问版本 - 避免缓存问题</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h4><i class="fas fa-info-circle me-2"></i>关于直接访问版本</h4>
+                    <p>这个版本直接从后端API获取数据，避免了缓存问题。所有页面都是独立的HTML文件，不依赖于编译后的JavaScript文件�?/p>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                            <h3>VIP等级管理</h3>
+                            <p>管理VIP等级，设置解锁金额、步数目标、奖励等参数�?/p>
+                            <a href="direct-vip-management.html" class="btn btn-custom mt-2">
+                                <i class="fas fa-arrow-right me-2"></i>打开VIP管理
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <h3>用户余额管理</h3>
+                            <p>管理用户余额，执行余额调整、扣款等管理员操作�?/p>
+                            <a href="direct-user-balance.html" class="btn btn-custom mt-2">
+                                <i class="fas fa-arrow-right me-2"></i>打开余额管理
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-vial"></i>
+                            </div>
+                            <h3>测试工具</h3>
+                            <p>用于测试API和功能的工具页面�?/p>
+                            <a href="test-fixes.html" class="btn btn-custom mt-2">
+                                <i class="fas fa-arrow-right me-2"></i>打开测试工具
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3>原始管理后台</h3>
+                            <p>返回原始的管理后台页面�?/p>
+                            <a href="index.html" class="btn btn-custom mt-2">
+                                <i class="fas fa-arrow-right me-2"></i>原始管理后台
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <h4>如何避免缓存问题�?/h4>
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <ol class="text-start">
+                                        <li>使用这些直接访问页面，它们不依赖于编译后的JavaScript文件</li>
+                                        <li>在浏览器中使用强制刷�?(Ctrl+F5 �?Cmd+Shift+R)</li>
+                                        <li>使用无痕模式或隐私浏览模�?/li>
+                                        <li>清除浏览器缓�?/li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center text-muted">
+                <p>FitChallenge 管理后台 &copy; 2025</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

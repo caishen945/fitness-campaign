@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>详细登录API测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-content { margin-top: 10px; }
+        input, button { margin: 5px; padding: 8px; }
+        .response-details { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔐 详细登录API测试页面</h1>
+    
+    <div class="test-section">
+        <div class="test-title">1. 测试登录端点（显示完整响应）</div>
+        <div class="test-content">
+            <button id="test-login-detailed">测试登录端点（详细）</button>
+            <div id="detailed-result">点击按钮测试端点...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">2. 检查后端路�?/div>
+        <div class="test-content">
+            <button id="check-routes">检查路�?/button>
+            <div id="routes-result">点击按钮检查路�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">3. 调试日志</div>
+        <pre id="debug-log" style="max-height: 300px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 测试登录端点（详细）
+        async function testLoginDetailed() {
+            const resultEl = document.getElementById('detailed-result');
+            resultEl.innerHTML = '测试�?..';
+            
+            try {
+                log('开始详细测试登录端�?..', 'info');
+                
+                // 测试不同的请求体格式
+                const testCases = [
+                    { name: '空请求体', body: {} },
+                    { name: '只有用户�?, body: { username: 'admin' } },
+                    { name: '只有密码', body: { password: 'admin123' } },
+                    { name: '完整凭据', body: { username: 'admin', password: 'admin123' } }
+                ];
+                
+                let results = '<div class="response-details">';
+                results += '<h4>测试结果:</h4>';
+                
+                for (const testCase of testCases) {
+                    try {
+                        log(`测试: ${testCase.name}`, 'info');
+                        
+                        const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(testCase.body)
+                        });
+                        
+                        const data = await response.text();
+                        let parsedData;
+                        
+                        try {
+                            parsedData = JSON.parse(data);
+                        } catch (e) {
+                            parsedData = { raw: data };
+                        }
+                        
+                        const statusClass = response.ok ? 'success' : 'warning';
+                        results += `<div style="margin: 10px 0; padding: 10px; border-left: 3px solid ${response.ok ? 'green' : 'orange'}; background: #f8f9fa;">`;
+                        results += `<strong>${testCase.name}:</strong><br>`;
+                        results += `状�? ${response.status} ${response.statusText}<br>`;
+                        results += `响应: <pre style="margin: 5px 0; font-size: 12px;">${JSON.stringify(parsedData, null, 2)}</pre>`;
+                        results += '</div>';
+                        
+                        log(`${testCase.name}: ${response.status}`, response.ok ? 'success' : 'warning');
+                        
+                    } catch (error) {
+                        results += `<div style="margin: 10px 0; padding: 10px; border-left: 3px solid red; background: #f8f9fa;">`;
+                        results += `<strong>${testCase.name}:</strong><br>`;
+                        results += `错误: ${error.message}`;
+                        results += '</div>';
+                        
+                        log(`${testCase.name} 错误: ${error.message}`, 'error');
+                    }
+                }
+                
+                results += '</div>';
+                resultEl.innerHTML = results;
+                
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">�?测试失败: ${error.message}</span>`;
+                log(`测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 检查路�?
+        async function checkRoutes() {
+            const resultEl = document.getElementById('routes-result');
+            resultEl.innerHTML = '检查中...';
+            
+            try {
+                log('开始检查后端路�?..', 'info');
+                
+                const routes = [
+                    '/',
+                    '/api',
+                    '/api/admin',
+                    '/api/admin/auth',
+                    '/api/admin/auth/login',
+                    '/api/admin/users',
+                    '/api-docs'
+                ];
+                
+                let results = '<div class="response-details">';
+                results += '<h4>路由检查结�?</h4>';
+                
+                for (const route of routes) {
+                    try {
+                        log(`检查路�? ${route}`, 'info');
+                        
+                        const response = await fetch(`http://localhost:3000${route}`, {
+                            method: 'GET'
+                        });
+                        
+                        const data = await response.text();
+                        const statusClass = response.ok ? 'success' : 'warning';
+                        
+                        results += `<div style="margin: 10px 0; padding: 10px; border-left: 3px solid ${response.ok ? 'green' : 'orange'}; background: #f8f9fa;">`;
+                        results += `<strong>${route}:</strong><br>`;
+                        results += `状�? ${response.status} ${response.statusText}<br>`;
+                        results += `响应长度: ${data.length} 字符<br>`;
+                        if (data.length < 200) {
+                            results += `响应: <pre style="margin: 5px 0; font-size: 12px;">${data}</pre>`;
+                        } else {
+                            results += `响应: <pre style="margin: 5px 0; font-size: 12px;">${data.substring(0, 200)}...</pre>`;
+                        }
+                        results += '</div>';
+                        
+                    } catch (error) {
+                        results += `<div style="margin: 10px 0; padding: 10px; border-left: 3px solid red; background: #f8f9fa;">`;
+                        results += `<strong>${route}:</strong><br>`;
+                        results += `错误: ${error.message}`;
+                        results += '</div>';
+                    }
+                }
+                
+                results += '</div>';
+                resultEl.innerHTML = results;
+                
+            } catch (error) {
+                resultEl.innerHTML = `<span class="error">�?路由检查失�? ${error.message}</span>`;
+                log(`路由检查失�? ${error.message}`, 'error');
+            }
+        }
+
+        // 事件绑定
+        document.getElementById('test-login-detailed').addEventListener('click', testLoginDetailed);
+        document.getElementById('check-routes').addEventListener('click', checkRoutes);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('详细登录API测试页面已加�?, 'info');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP数据检�?- 最新数�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: #007bff; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .data-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 10px 0; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .highlight { background: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #218838; }
+        .refresh-btn { background: #17a2b8; }
+        .refresh-btn:hover { background: #138496; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .vip2-row { background-color: #fff3cd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 VIP数据检查页�?/h1>
+            <p>此页面显示最新的API数据，不受缓存影�?/p>
+        </div>
+        
+        <div>
+            <button onclick="loadData()" class="refresh-btn">🔄 刷新数据</button>
+            <button onclick="testUpdate()">✏️ 测试更新VIP等级2</button>
+        </div>
+        
+        <div id="status" class="data-box">
+            <h3>📊 状态信�?/h3>
+            <p>页面加载时间: <span id="loadTime"></span></p>
+            <p>最后更�? <span id="lastUpdate">未加�?/span></p>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 显示页面加载时间
+        document.getElementById('loadTime').textContent = new Date().toLocaleString();
+        
+        function updateStatus(message) {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString() + ' - ' + message;
+        }
+        
+        async function loadData() {
+            updateStatus('正在加载数据...');
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="data-box">正在获取数据...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<div class="data-box success">';
+                    html += '<h3>�?数据加载成功</h3>';
+                    html += '<p>共找�?' + data.data.length + ' 个VIP等级</p>';
+                    html += '</div>';
+                    
+                    // 显示所有VIP等级
+                    html += '<div class="data-box">';
+                    html += '<h3>📋 所有VIP等级</h3>';
+                    html += '<table>';
+                    html += '<tr><th>ID</th><th>名称</th><th>押金</th><th>步数目标</th><th>每日奖励</th><th>挑战天数</th><th>最大挑战次�?/th></tr>';
+                    
+                    data.data.forEach(level => {
+                        const isVip2 = level.id === 2;
+                        html += `<tr ${isVip2 ? 'class="vip2-row"' : ''}>
+                            <td>${level.id}</td>
+                            <td>${level.name || 'N/A'}</td>
+                            <td>${level.depositAmount || 'N/A'}</td>
+                            <td>${level.stepTarget || 'N/A'}</td>
+                            <td>${level.dailyReward || 'N/A'}</td>
+                            <td>${level.duration || 'N/A'}</td>
+                            <td>${level.maxChallenges || 'N/A'}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</table>';
+                    html += '</div>';
+                    
+                    // 特别显示VIP等级2的详细信�?
+                    const vip2 = data.data.find(level => level.id === 2);
+                    if (vip2) {
+                        html += '<div class="data-box highlight">';
+                        html += '<h3>🎯 VIP等级2详细信息 (重点检�?</h3>';
+                        html += '<table>';
+                        html += '<tr><th>字段�?/th><th>当前�?/th><th>说明</th></tr>';
+                        
+                        const fields = [
+                            {key: 'id', desc: '等级ID'},
+                            {key: 'name', desc: '等级名称'},
+                            {key: 'depositAmount', desc: '押金金额'},
+                            {key: 'stepTarget', desc: '步数目标'},
+                            {key: 'dailyReward', desc: '每日奖励'},
+                            {key: 'duration', desc: '挑战天数'},
+                            {key: 'maxChallenges', desc: '最大挑战次�?},
+                            {key: 'maxFailedDays', desc: '最大失败天�?},
+                            {key: 'cancelDeductRatio', desc: '取消扣除比例'},
+                            {key: 'partialRefundRatio', desc: '部分退款比�?},
+                            {key: 'color', desc: '颜色'},
+                            {key: 'isActive', desc: '是否激�?},
+                            {key: 'updatedAt', desc: '最后更新时�?}
+                        ];
+                        
+                        fields.forEach(field => {
+                            const value = vip2[field.key];
+                            html += `<tr>
+                                <td><strong>${field.key}</strong></td>
+                                <td>${value}</td>
+                                <td>${field.desc}</td>
+                            </tr>`;
+                        });
+                        
+                        html += '</table>';
+                        html += '</div>';
+                        
+                        // 检查数据是否已更新
+                        if (vip2.depositAmount === 15 && vip2.maxChallenges === 5) {
+                            html += '<div class="data-box success">';
+                            html += '<h3>�?数据更新确认</h3>';
+                            html += '<p>VIP等级2的数据已经成功更新！</p>';
+                            html += '<ul>';
+                            html += '<li>押金金额: ' + vip2.depositAmount + ' (已更�?</li>';
+                            html += '<li>最大挑战次�? ' + vip2.maxChallenges + ' (已更�?</li>';
+                            html += '<li>步数目标: ' + vip2.stepTarget + ' (已更�?</li>';
+                            html += '<li>每日奖励: ' + vip2.dailyReward + ' (已更�?</li>';
+                            html += '<li>挑战天数: ' + vip2.duration + ' (已更�?</li>';
+                            html += '</ul>';
+                            html += '</div>';
+                        } else {
+                            html += '<div class="data-box error">';
+                            html += '<h3>�?数据未更�?/h3>';
+                            html += '<p>VIP等级2的数据似乎没有更新，请检查后端API�?/p>';
+                            html += '</div>';
+                        }
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                    updateStatus('数据加载完成');
+                } else {
+                    resultDiv.innerHTML = '<div class="data-box error"><h3>�?API错误</h3><p>错误信息: ' + data.message + '</p></div>';
+                    updateStatus('API错误');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="data-box error"><h3>�?请求失败</h3><p>错误详情: ' + error.message + '</p></div>';
+                updateStatus('请求失败');
+            }
+        }
+        
+        async function testUpdate() {
+            updateStatus('正在测试更新...');
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="data-box">正在测试更新...</div>';
+            
+            try {
+                const updateData = {
+                    name: "VIP1",
+                    description: "数据检查测试更�?,
+                    stepTarget: 2000,
+                    depositAmount: 25,
+                    dailyReward: 3,
+                    duration: 3,
+                    maxChallenges: 7,
+                    maxFailedDays: 2,
+                    cancelDeductRatio: 0.2,
+                    cancelRewardRatio: 0,
+                    partialRefundRatio: 0.9,
+                    color: "#28a745",
+                    isActive: true
+                };
+                
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels/2', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<div class="data-box success"><h3>�?更新测试成功</h3><p>VIP等级2已更新，现在请点�?刷新数据"查看最新结果�?/p></div>';
+                    updateStatus('更新测试成功');
+                } else {
+                    resultDiv.innerHTML = '<div class="data-box error"><h3>�?更新测试失败</h3><p>错误信息: ' + result.message + '</p></div>';
+                    updateStatus('更新测试失败');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="data-box error"><h3>�?更新请求失败</h3><p>错误详情: ' + error.message + '</p></div>';
+                updateStatus('更新请求失败');
+            }
+        }
+        
+        // 页面加载时自动加载数�?
+        window.onload = function() {
+            setTimeout(loadData, 1000);
+        };
+    </script>
+</body>
+</html>

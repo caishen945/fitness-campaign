@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精确登录问题诊断页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-content { margin-top: 10px; }
+        input, button { margin: 5px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🔐 精确登录问题诊断页面</h1>
+    
+    <div class="test-section">
+        <div class="test-title">1. 测试无效凭据（应该快速失败）</div>
+        <div class="test-content">
+            <button id="test-invalid-credentials">测试无效凭据</button>
+            <div id="invalid-result">点击按钮测试无效凭据...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">2. 测试空凭据（应该快速失败）</div>
+        <div class="test-content">
+            <button id="test-empty-credentials">测试空凭�?/button>
+            <div id="empty-result">点击按钮测试空凭�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">3. 测试真实凭据（可能卡住）</div>
+        <div class="test-content">
+            <input type="text" id="username" placeholder="用户�? value="admin">
+            <input type="password" id="password" placeholder="密码" value="admin123">
+            <button id="test-real-credentials">测试真实凭据</button>
+            <div id="real-result">输入凭据后点击按钮测�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">4. 测试不同用户�?/div>
+        <div class="test-content">
+            <button id="test-different-username">测试不同用户�?/button>
+            <div id="different-result">点击按钮测试不同用户�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">5. 调试日志</div>
+        <pre id="debug-log" style="max-height: 300px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 测试无效凭据
+        async function testInvalidCredentials() {
+            const resultEl = document.getElementById('invalid-result');
+            resultEl.innerHTML = '<div>�?正在测试无效凭据...</div>';
+            
+            try {
+                log('开始测试无效凭�?..', 'info');
+                const startTime = Date.now();
+                
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'invalid', password: 'invalid' })
+                });
+                
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`无效凭据测试完成，耗时: ${responseTime}ms`, 'info');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (responseTime < 1000) {
+                    resultEl.innerHTML = `<div style="color: green;">�?无效凭据测试成功 (耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('无效凭据测试成功 - 响应快�?, 'success');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 无效凭据测试缓慢 (耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('无效凭据测试缓慢', 'warning');
+                }
+                
+            } catch (error) {
+                log(`无效凭据测试失败: ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?无效凭据测试失败</div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试空凭�?
+        async function testEmptyCredentials() {
+            const resultEl = document.getElementById('empty-result');
+            resultEl.innerHTML = '<div>�?正在测试空凭�?..</div>';
+            
+            try {
+                log('开始测试空凭据...', 'info');
+                const startTime = Date.now();
+                
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: '', password: '' })
+                });
+                
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`空凭据测试完成，耗时: ${responseTime}ms`, 'info');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (responseTime < 1000) {
+                    resultEl.innerHTML = `<div style="color: green;">�?空凭据测试成�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('空凭据测试成�?- 响应快�?, 'success');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 空凭据测试缓�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('空凭据测试缓�?, 'warning');
+                }
+                
+            } catch (error) {
+                log(`空凭据测试失�? ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?空凭据测试失�?/div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试真实凭据
+        async function testRealCredentials() {
+            const resultEl = document.getElementById('real-result');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                resultEl.innerHTML = '<span class="error">�?请输入用户名和密�?/span>';
+                return;
+            }
+            
+            resultEl.innerHTML = '<div>�?正在测试真实凭据...</div>';
+            
+            try {
+                log(`开始测试真实凭�? ${username}`, 'info');
+                const startTime = Date.now();
+                
+                // 设置超时
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 15000); // 15秒超�?
+                
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`真实凭据测试完成，耗时: ${responseTime}ms`, 'success');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (response.ok) {
+                    try {
+                        const responseData = JSON.parse(data);
+                        if (responseData.success) {
+                            resultEl.innerHTML = `<div style="color: green;">🎉 登录成功�?耗时: ${responseTime}ms)</div>`;
+                            resultEl.innerHTML += `<div>Token: ${responseData.data.token ? responseData.data.token.substring(0, 50) + '...' : '�?}</div>`;
+                        } else {
+                            resultEl.innerHTML = `<div style="color: orange;">⚠️ 登录失败: ${responseData.message} (耗时: ${responseTime}ms)</div>`;
+                        }
+                    } catch (e) {
+                        resultEl.innerHTML = `<div style="color: orange;">⚠️ 响应解析失败: ${e.message} (耗时: ${responseTime}ms)</div>`;
+                    }
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 请求失败 (状�? ${response.status}, 耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>错误信息: ${data}</div>`;
+                }
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                if (error.name === 'AbortError') {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    log(`真实凭据测试超时，总耗时: ${responseTime}ms`, 'warning');
+                    resultEl.innerHTML = `<div style="color: red;">�?请求超时 (${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>真实凭据测试�?5秒内没有响应</div>';
+                } else {
+                    log(`真实凭据测试失败: ${error.message}`, 'error');
+                    resultEl.innerHTML = `<div style="color: red;">�?真实凭据测试失败</div>`;
+                    resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // 测试不同用户�?
+        async function testDifferentUsername() {
+            const resultEl = document.getElementById('different-result');
+            resultEl.innerHTML = '<div>�?正在测试不同用户�?..</div>';
+            
+            try {
+                log('开始测试不同用户名...', 'info');
+                const startTime = Date.now();
+                
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'nonexistent', password: 'wrongpassword' })
+                });
+                
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                const data = await response.text();
+                log(`不同用户名测试完成，耗时: ${responseTime}ms`, 'info');
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (responseTime < 1000) {
+                    resultEl.innerHTML = `<div style="color: green;">�?不同用户名测试成�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('不同用户名测试成�?- 响应快�?, 'success');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 不同用户名测试缓�?(耗时: ${responseTime}ms)</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('不同用户名测试缓�?, 'warning');
+                }
+                
+            } catch (error) {
+                log(`不同用户名测试失�? ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?不同用户名测试失�?/div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 事件绑定
+        document.getElementById('test-invalid-credentials').addEventListener('click', testInvalidCredentials);
+        document.getElementById('test-empty-credentials').addEventListener('click', testEmptyCredentials);
+        document.getElementById('test-real-credentials').addEventListener('click', testRealCredentials);
+        document.getElementById('test-different-username').addEventListener('click', testDifferentUsername);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('精确登录问题诊断页面已加�?, 'info');
+        });
+    </script>
+</body>
+</html>

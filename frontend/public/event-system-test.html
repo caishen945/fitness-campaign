@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event System Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-title {
+            font-size: 24px;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .test-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .test-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .test-btn.secondary {
+            background: #6b7280;
+        }
+        
+        .test-btn.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .test-info {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h3 {
+            margin: 0 0 16px 0;
+            color: #374151;
+        }
+        
+        .test-info p {
+            margin: 0 0 12px 0;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .console-output {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .console-output::before {
+            content: 'Console Output:';
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1 class="test-title">Event System Test</h1>
+            <p class="test-subtitle">Test the newly added event system in App class</p>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="test-btn" id="testEventBtn">Test Event System</button>
+            <button class="test-btn secondary" id="testAppStatusBtn">Test App Status</button>
+            <button class="test-btn secondary" id="clearConsoleBtn">Clear Console</button>
+        </div>
+        
+        <div class="test-info">
+            <h3>Test Instructions</h3>
+            <p><strong>1. Test Event System:</strong> Tests the on/emit/off methods</p>
+            <p><strong>2. Test App Status:</strong> Tests the overall App functionality</p>
+            <p><strong>3. Clear Console:</strong> Clears the console output below</p>
+        </div>
+        
+        <div class="test-info">
+            <h3>Expected Results</h3>
+            <p>✅ Event system should work without errors</p>
+            <p>✅ App should initialize properly</p>
+            <p>✅ No more "this.app.on is not a function" errors</p>
+        </div>
+        
+        <div class="console-output" id="consoleOutput">
+            Ready to test event system...
+        </div>
+    </div>
+
+    <script type="module">
+        // 重写console.log来捕获输出
+        const originalLog = console.log;
+        const originalError = console.error;
+        const consoleOutput = document.getElementById('consoleOutput');
+        
+        function addToConsole(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '📝';
+            consoleOutput.textContent += `\n[${timestamp}] ${prefix} ${message}`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole(args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole(args.join(' '), 'warn');
+        };
+        
+        // 导入并初始化App
+        import('./src/App.js').then(module => {
+            const App = module.default;
+            
+            try {
+                console.log('🚀 开始初始化App...');
+                
+                // 创建App实例
+                const app = new App();
+                window.globalAppInstance = app;
+                
+                console.log('✅ App初始化成功');
+                console.log('📡 事件系统已就绪');
+                
+                // 测试事件系统
+                const testEventBtn = document.getElementById('testEventBtn');
+                testEventBtn.addEventListener('click', () => {
+                    console.log('🧪 手动测试事件系统...');
+                    
+                    // 注册测试事件
+                    let callbackCalled = false;
+                    const testCallback = (data) => {
+                        console.log('✅ 测试事件回调被调用:', data);
+                        callbackCalled = true;
+                    };
+                    
+                    app.on('manualTest', testCallback);
+                    
+                    // 触发事件
+                    app.emit('manualTest', { message: 'Manual test successful!' });
+                    
+                    // 验证结果
+                    setTimeout(() => {
+                        if (callbackCalled) {
+                            console.log('✅ 手动事件系统测试成功！');
+                            app.showToast('手动事件系统测试成功！', 'success');
+                        } else {
+                            console.log('❌ 手动事件系统测试失败！');
+                            app.showToast('手动事件系统测试失败！', 'error');
+                        }
+                        
+                        // 清理
+                        app.off('manualTest', testCallback);
+                    }, 100);
+                });
+                
+                // 测试App状态
+                const testAppStatusBtn = document.getElementById('testAppStatusBtn');
+                testAppStatusBtn.addEventListener('click', () => {
+                    console.log('🧪 测试App状态...');
+                    app.testAppStatus();
+                });
+                
+                // 清除控制台
+                const clearConsoleBtn = document.getElementById('clearConsoleBtn');
+                clearConsoleBtn.addEventListener('click', () => {
+                    consoleOutput.textContent = 'Console cleared...';
+                });
+                
+                console.log('🎯 所有测试按钮已就绪');
+                
+            } catch (error) {
+                console.error('❌ App初始化失败:', error);
+                addToConsole(`App初始化失败: ${error.message}`, 'error');
+            }
+        }).catch(error => {
+            console.error('❌ 模块导入失败:', error);
+            addToConsole(`模块导入失败: ${error.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

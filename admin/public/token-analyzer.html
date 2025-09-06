@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Token详细分析�?/title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .analyzer-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-info { background: #17a2b8; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        
+        .token-details {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .jwt-parts {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .jwt-part {
+            flex: 1;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+        }
+        
+        .jwt-part.header {
+            background: #d1ecf1;
+        }
+        
+        .jwt-part.payload {
+            background: #d4edda;
+        }
+        
+        .jwt-part.signature {
+            background: #f8d7da;
+        }
+        
+        .time-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .countdown {
+            font-size: 18px;
+            font-weight: bold;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Token详细分析�?/h1>
+    
+    <div class="analyzer-section">
+        <h2>1. 当前Token状�?/h2>
+        <button onclick="analyzeCurrentToken()">分析当前Token</button>
+        <button onclick="clearToken()" class="danger">清除Token</button>
+        <div id="tokenAnalysis"></div>
+    </div>
+
+    <div class="analyzer-section">
+        <h2>2. 实时倒计�?/h2>
+        <div id="countdownDisplay"></div>
+    </div>
+
+    <div class="analyzer-section">
+        <h2>3. Token历史记录</h2>
+        <button onclick="loadTokenHistory()">加载历史记录</button>
+        <div id="tokenHistory"></div>
+    </div>
+
+    <script>
+        let countdownInterval = null;
+
+        // 分析当前Token
+        function analyzeCurrentToken() {
+            const output = document.getElementById('tokenAnalysis');
+            const adminToken = localStorage.getItem('adminToken');
+            
+            if (!adminToken) {
+                output.innerHTML = '<div class="status-indicator status-error"></span>没有找到Token</div>';
+                return;
+            }
+
+            let analysis = '<h3>Token详细分析:</h3>';
+            
+            try {
+                // 解析JWT Token
+                const parts = adminToken.split('.');
+                if (parts.length !== 3) {
+                    analysis += '<div class="status-indicator status-error"></span>无效的JWT格式</div>';
+                    output.innerHTML = analysis;
+                    return;
+                }
+
+                // 显示JWT各部�?
+                analysis += '<div class="jwt-parts">';
+                analysis += `<div class="jwt-part header"><strong>Header:</strong><br>${parts[0]}</div>`;
+                analysis += `<div class="jwt-part payload"><strong>Payload:</strong><br>${parts[1]}</div>`;
+                analysis += `<div class="jwt-part signature"><strong>Signature:</strong><br>${parts[2]}</div>`;
+                analysis += '</div>';
+
+                // 解析Header
+                try {
+                    const header = JSON.parse(atob(parts[0]));
+                    analysis += '<div class="token-details">';
+                    analysis += '<strong>Header信息:</strong><br>';
+                    analysis += `算法: ${header.alg}<br>`;
+                    analysis += `类型: ${header.typ}<br>`;
+                    analysis += '</div>';
+                } catch (e) {
+                    analysis += '<div class="status-indicator status-error"></span>Header解析失败</div>';
+                }
+
+                // 解析Payload
+                try {
+                    const payload = JSON.parse(atob(parts[1]));
+                    analysis += '<div class="token-details">';
+                    analysis += '<strong>Payload信息:</strong><br>';
+                    analysis += `用户ID: ${payload.id}<br>`;
+                    analysis += `用户�? ${payload.username}<br>`;
+                    analysis += `角色: ${payload.role}<br>`;
+                    analysis += `签发�? ${payload.iss}<br>`;
+                    analysis += `受众: ${payload.aud}<br>`;
+                    analysis += `签发时间: ${new Date(payload.iat * 1000).toLocaleString()}<br>`;
+                    analysis += `过期时间: ${new Date(payload.exp * 1000).toLocaleString()}<br>`;
+                    analysis += '</div>';
+
+                    // 时间分析
+                    const now = Math.floor(Date.now() / 1000);
+                    const exp = payload.exp;
+                    const iat = payload.iat;
+                    const timeLeft = exp - now;
+                    const totalDuration = exp - iat;
+
+                    analysis += '<div class="time-info">';
+                    analysis += '<strong>时间分析:</strong><br>';
+                    analysis += `当前时间�? ${now} (${new Date(now * 1000).toLocaleString()})<br>`;
+                    analysis += `签发时间�? ${iat} (${new Date(iat * 1000).toLocaleString()})<br>`;
+                    analysis += `过期时间�? ${exp} (${new Date(exp * 1000).toLocaleString()})<br>`;
+                    analysis += `剩余时间: ${timeLeft} �?(${Math.floor(timeLeft / 60)} 分钟)<br>`;
+                    analysis += `总有效期: ${totalDuration} �?(${Math.floor(totalDuration / 3600)} 小时)<br>`;
+                    
+                    if (timeLeft > 0) {
+                        analysis += '<div class="status-indicator status-success"></span>Token有效</div>';
+                    } else {
+                        analysis += '<div class="status-indicator status-error"></span>Token已过�?/div>';
+                    }
+                    analysis += '</div>';
+
+                    // 开始倒计�?
+                    startCountdown(exp);
+
+                } catch (e) {
+                    analysis += '<div class="status-indicator status-error"></span>Payload解析失败: ' + e.message + '</div>';
+                }
+
+            } catch (error) {
+                analysis += '<div class="status-indicator status-error"></span>Token分析失败: ' + error.message + '</div>';
+            }
+
+            output.innerHTML = analysis;
+        }
+
+        // 开始倒计�?
+        function startCountdown(expTime) {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            countdownInterval = setInterval(() => {
+                const now = Math.floor(Date.now() / 1000);
+                const timeLeft = expTime - now;
+                const output = document.getElementById('countdownDisplay');
+
+                if (timeLeft > 0) {
+                    const hours = Math.floor(timeLeft / 3600);
+                    const minutes = Math.floor((timeLeft % 3600) / 60);
+                    const seconds = timeLeft % 60;
+                    
+                    output.innerHTML = `
+                        <div class="countdown">
+                            <div class="status-indicator status-success"></span>Token剩余时间: ${hours}小时 ${minutes}分钟 ${seconds}�?
+                        </div>
+                        <div>过期时间: ${new Date(expTime * 1000).toLocaleString()}</div>
+                    `;
+                } else {
+                    output.innerHTML = `
+                        <div class="countdown">
+                            <div class="status-indicator status-error"></span>Token已过�?
+                        </div>
+                        <div>过期时间: ${new Date(expTime * 1000).toLocaleString()}</div>
+                    `;
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+        }
+
+        // 清除Token
+        function clearToken() {
+            if (confirm('确定要清除Token吗？')) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminUser');
+                document.getElementById('tokenAnalysis').innerHTML = '<div class="status-indicator status-success"></span>Token已清�?/div>';
+                document.getElementById('countdownDisplay').innerHTML = '';
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+            }
+        }
+
+        // 加载Token历史记录
+        function loadTokenHistory() {
+            const output = document.getElementById('tokenHistory');
+            const adminToken = localStorage.getItem('adminToken');
+            
+            if (!adminToken) {
+                output.innerHTML = '<div>没有Token历史记录</div>';
+                return;
+            }
+
+            try {
+                const parts = adminToken.split('.');
+                const payload = JSON.parse(atob(parts[1]));
+                
+                let history = '<h3>Token历史信息:</h3>';
+                history += '<div class="token-details">';
+                history += `<strong>Token创建时间:</strong> ${new Date(payload.iat * 1000).toLocaleString()}<br>`;
+                history += `<strong>Token过期时间:</strong> ${new Date(payload.exp * 1000).toLocaleString()}<br>`;
+                history += `<strong>Token有效�?</strong> ${Math.floor((payload.exp - payload.iat) / 3600)} 小时<br>`;
+                history += `<strong>用户信息:</strong> ${payload.username} (ID: ${payload.id})<br>`;
+                history += `<strong>用户角色:</strong> ${payload.role}<br>`;
+                history += '</div>';
+
+                output.innerHTML = history;
+            } catch (error) {
+                output.innerHTML = '<div class="status-indicator status-error"></span>无法解析Token历史: ' + error.message + '</div>';
+            }
+        }
+
+        // 页面加载时自动分�?
+        window.addEventListener('load', () => {
+            analyzeCurrentToken();
+            loadTokenHistory();
+        });
+    </script>
+</body>
+</html>

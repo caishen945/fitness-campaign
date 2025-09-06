@@ -1,0 +1,69 @@
+{
+  "timestamp": "2025-08-29T14:48:46.314Z",
+  "testEnvExists": true,
+  "requiredFiles": [
+    {
+      "name": "index.html",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\index.html"
+    },
+    {
+      "name": "main.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\main.js"
+    },
+    {
+      "name": "telegram-mock.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\telegram-mock.js"
+    },
+    {
+      "name": "api-mock.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\api-mock.js"
+    },
+    {
+      "name": "device-simulator.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\device-simulator.js"
+    },
+    {
+      "name": "language-tester.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\language-tester.js"
+    },
+    {
+      "name": "styles.css",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\styles.css"
+    }
+  ],
+  "jsFiles": [
+    {
+      "name": "telegram-mock.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\telegram-mock.js"
+    },
+    {
+      "name": "api-mock.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\api-mock.js"
+    },
+    {
+      "name": "device-simulator.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\device-simulator.js"
+    },
+    {
+      "name": "language-tester.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\language-tester.js"
+    },
+    {
+      "name": "main.js",
+      "exists": true,
+      "path": "C:\\Users\\honor1\\Desktop\\FitChallenge\\frontend\\public\\test-env\\main.js"
+    }
+  ],
+  "htmlExists": true
+}

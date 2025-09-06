@@ -1,0 +1,1187 @@
+/* 主样式文件 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #007AFF;
+    --secondary: #34C759;
+    --success: #34C759;
+    --danger: #FF3B30;
+    --warning: #FF9500;
+    --info: #5AC8FA;
+    --light: #F2F2F7;
+    --dark: #1C1C1E;
+    --gray: #8E8E93;
+    --ios-background: #fff;
+    --ios-header: #f9f9f9;
+    --ios-border: #C6C6C8;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--ios-background);
+    color: #000;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    padding: 0 16px;
+    margin: 0 auto;
+}
+
+/* iOS风格按钮 */
+.btn {
+    display: inline-block;
+    padding: 10px 16px; /* 从 12px 20px 改为 10px 16px */
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-align: center;
+    font-size: 16px; /* 从 17px 改为 16px */
+    font-weight: 600;
+    line-height: 1.2;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: #0062CC;
+    opacity: 0.9;
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: white;
+    box-shadow: 0 2px 4px rgba(52, 199, 89, 0.2);
+}
+
+.btn-success:hover {
+    background-color: #2DB44E;
+    opacity: 0.9;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary);
+    border: 1px solid var(--ios-border);
+}
+
+.btn-outline:hover {
+    background-color: var(--light);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+    box-shadow: 0 2px 4px rgba(255, 59, 48, 0.2);
+}
+
+.btn-danger:hover {
+    background-color: #E0352D;
+    opacity: 0.9;
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    color: white;
+    box-shadow: 0 2px 4px rgba(255, 149, 0, 0.2);
+}
+
+.btn-warning:hover {
+    background-color: #E68A00;
+    opacity: 0.9;
+}
+
+/* iOS风格卡片 */
+.card {
+    background-color: var(--ios-background);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--ios-border);
+}
+
+.card-header {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ios-border);
+}
+
+/* iOS风格导航栏 */
+.app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* iOS顶部栏 */
+header {
+    background-color: var(--ios-header);
+    color: #000;
+    padding: 0.5rem 0; /* 从 1rem 0 改为 0.5rem 0 */
+    box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid var(--ios-border);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+}
+
+.logo {
+    font-size: 18px; /* 从 20px 改为 18px */
+    font-weight: 600; /* 从 700 改为 600 */
+}
+
+/* iOS风格主内容区 */
+main {
+    flex: 1;
+    padding: 16px;
+    background-color: #fff;
+    padding-bottom: 100px; /* 给底部留出空间 */
+}
+
+/* iOS风格页脚 */
+footer {
+    background-color: var(--ios-header);
+    color: var(--gray);
+    text-align: center;
+    padding: 16px;
+    font-size: 13px;
+    border-top: 0.5px solid var(--ios-border);
+    display: none; /* 隐藏页脚，因为有底部导航栏 */
+}
+
+/* iOS风格输入框 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--ios-border);
+    font-size: 17px;
+    background-color: var(--ios-background);
+    appearance: none;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* iOS风格列表 */
+.list {
+    list-style: none;
+}
+
+.list-item {
+    padding: 16px;
+    border-bottom: 0.5px solid var(--ios-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.list-item-title {
+    font-size: 17px;
+    font-weight: 400;
+}
+
+.list-item-subtitle {
+    font-size: 15px;
+    color: var(--gray);
+    margin-top: 2px;
+}
+
+/* iOS风格分隔线 */
+.divider {
+    height: 0.5px;
+    background-color: var(--ios-border);
+    margin: 16px 0;
+}
+
+/* iOS风格图标按钮 */
+.icon-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-button:hover {
+    background-color: var(--light);
+}
+
+/* 底部导航栏 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 80px;
+    background-color: var(--ios-header);
+    border-top: 0.5px solid var(--ios-border);
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 1000;
+}
+
+.bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    height: 100%;
+    text-decoration: none;
+    color: var(--gray);
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.bottom-nav .nav-item i {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.bottom-nav .nav-item.active {
+    color: var(--primary);
+}
+
+.bottom-nav .nav-item:hover {
+    color: var(--primary);
+}
+
+/* 主内容区域需要添加底部边距以防止被底部导航栏遮挡 */
+main {
+    flex: 1;
+    padding: 16px;
+    background-color: #fff;
+    padding-bottom: 100px; /* 给底部留出空间 */
+}
+
+/* 隐藏原来的顶部导航链接 */
+.nav-links {
+    display: none;
+}
+
+/* 移动端优化 */
+@media (max-width: 500px) {
+    body {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .container {
+        padding: 0 16px;
+    }
+    
+    .app {
+        max-width: 100%;
+        box-shadow: none;
+    }
+    
+    .hero-section {
+        padding: 1rem 0;
+        text-align: center;
+    }
+    
+    .hero-section h1 {
+        font-size: 28px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hero-section p {
+        font-size: 15px;
+        padding: 0 10px;
+    }
+    
+    .features-grid {
+        gap: 12px;
+    }
+    
+    .card {
+        padding: 16px;
+    }
+    
+    .btn {
+        padding: 14px;
+        font-size: 17px;
+    }
+    
+    main {
+        padding: 16px;
+    }
+}
+
+/* 加载动画 */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 122, 255, 0.2);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Toast通知 */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+}
+
+.toast {
+    background: #333;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideInRight 0.3s, fadeOut 0.3s 2.5s forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* 个人中心页面样式 */
+.profile-page {
+    padding: 0;
+    background-color: var(--ios-background);
+    min-height: 100vh;
+}
+
+.login-prompt {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    margin: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.login-icon {
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.profile-header {
+    background: white;
+    padding: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 2rem;
+}
+
+.user-info h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.user-info p {
+    margin: 0;
+    color: var(--gray);
+    font-size: 0.875rem;
+}
+
+.user-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+}
+
+.profile-section {
+    background: white;
+    margin-bottom: 0.5rem;
+    padding: 0 1rem;
+}
+
+.profile-section h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray);
+    padding: 1rem 0 0.5rem;
+    margin: 0;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    padding: 1rem 0;
+}
+
+.menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: var(--light);
+}
+
+.menu-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.menu-text {
+    font-size: 0.75rem;
+    color: var(--dark);
+    text-align: center;
+    line-height: 1.3;
+}
+
+.menu-list {
+    padding: 0.5rem 0;
+}
+
+.menu-list .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.menu-list .menu-item:last-child {
+    border-bottom: none;
+}
+
+.menu-list .menu-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    margin-right: 1rem;
+    margin-bottom: 0;
+}
+
+.menu-list .menu-text {
+    flex: 1;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.menu-arrow {
+    color: var(--gray);
+    font-size: 0.875rem;
+}
+
+.logout-item {
+    justify-content: flex-start;
+    padding: 0.75rem 0;
+}
+
+.bg-blue { background: var(--primary); }
+.bg-green { background: var(--success); }
+.bg-orange { background: var(--warning); }
+.bg-red { background: var(--danger); }
+.bg-purple { background: #a55eea; }
+.bg-yellow { background: #f1c40f; }
+.bg-teal { background: #1abc9c; }
+.bg-indigo { background: #3498db; }
+.bg-gray { background: #95a5a6; }
+
+/* 优化个人中心页面在不同屏幕尺寸下的显示 */
+@media (max-width: 400px) {
+    .menu-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .menu-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .menu-text {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .menu-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .menu-text {
+        font-size: 0.6rem;
+    }
+}
+
+/* 在较大屏幕上保持4列布局 */
+@media (min-width: 401px) {
+    .menu-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 移动端优化样式 */
+
+/* 优化表单元素在移动端的显示 */
+@media (max-width: 480px) {
+    .form-control {
+        font-size: 16px; /* 防止iOS缩放 */
+        padding: 14px;
+    }
+    
+    .btn {
+        padding: 16px;
+        font-size: 18px;
+    }
+    
+    .card {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+}
+
+/* 优化个人中心页面 */
+@media (max-width: 480px) {
+    .profile-section {
+        margin-bottom: 12px;
+        padding: 0 12px;
+    }
+    
+    .profile-section h3 {
+        font-size: 16px;
+        padding: 12px 0 8px;
+    }
+    
+    .menu-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+    
+    .menu-text {
+        font-size: 0.7rem;
+    }
+}
+
+/* 优化底部导航栏 */
+@media (max-width: 350px) {
+    .bottom-nav .nav-item {
+        font-size: 10px;
+    }
+    
+    .bottom-nav .nav-item i {
+        font-size: 20px;
+    }
+}
+
+/* 滚动优化 */
+@media (max-width: 480px) {
+    main {
+        padding: 12px;
+        padding-bottom: 100px;
+    }
+    
+    .container {
+        padding: 0 12px;
+    }
+}
+
+/* 防止页面水平滚动 */
+body, html {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.app {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* 优化列表项在移动端的显示 */
+@media (max-width: 480px) {
+    .list-item {
+        padding: 12px;
+    }
+    
+    .list-item-title {
+        font-size: 16px;
+    }
+    
+    .list-item-subtitle {
+        font-size: 14px;
+    }
+}
+
+/* 优化标题和段落在移动端的显示 */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+    }
+    
+    h2 {
+        font-size: 20px;
+    }
+    
+    h3 {
+        font-size: 18px;
+    }
+    
+    p {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+}
+
+/* 优化按钮在移动端的触摸目标 */
+@media (max-width: 480px) {
+    .btn {
+        min-height: 48px;
+        min-width: 48px;
+    }
+    
+    .icon-button {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* 首页美化样式 */
+
+/* 英雄区域 */
+.hero-section {
+    padding: 1.5rem 1rem; /* 从 2rem 1rem 改为 1.5rem 1rem */
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    will-change: transform;
+}
+
+.hero-section.guest {
+    background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%);
+}
+
+.hero-section.logged-in {
+    background: linear-gradient(135deg, #34C759 0%, #007AFF 100%);
+}
+
+.app-logo .logo-circle {
+    width: 60px; /* 从 80px 改为 60px */
+    height: 60px; /* 从 80px 改为 60px */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.app-logo .logo-circle i {
+    font-size: 2rem; /* 从 3rem 改为 2rem */
+}
+
+.user-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.greeting-avatar {
+    font-size: 2rem; /* 从 3rem 改为 2rem */
+    margin-right: 1rem;
+}
+
+.greeting-text h1 {
+    font-size: 1.3rem; /* 从 1.5rem 改为 1.3rem */
+    margin-bottom: 0.5rem;
+}
+
+.greeting-text p {
+    opacity: 0.9;
+    font-size: 0.9rem; /* 从 1rem 改为 0.9rem */
+}
+
+.app-title h1 {
+    font-size: 2rem; /* 从 2.5rem 改为 2rem */
+    margin-bottom: 0.5rem;
+}
+
+.app-title p {
+    font-size: 1rem; /* 从 1.2rem 改为 1rem */
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.app-description {
+    font-size: 1rem; /* 从 1.1rem 改为 1rem */
+    margin-bottom: 1.5rem; /* 从 2rem 改为 1.5rem */
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.cta-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.cta-buttons .btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+}
+
+.cta-buttons .btn i {
+    margin-right: 0.5rem;
+}
+
+/* 快速统计 */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem; /* 从 1.5rem 1rem 改为 1.2rem */
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    will-change: transform;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 40px; /* 从 50px 改为 40px */
+    height: 40px; /* 从 50px 改为 40px */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem; /* 从 1.5rem 改为 1.2rem */
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-info {
+    flex: 1;
+    text-align: left;
+}
+
+.stat-value {
+    font-size: 1.2rem; /* 从 1.5rem 改为 1.2rem */
+    font-weight: bold;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem; /* 从 0.9rem 改为 0.8rem */
+    color: var(--gray);
+}
+
+/* 功能区域 */
+.features-section {
+    padding: 0 1rem 2rem;
+}
+
+.features-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--dark);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.2rem;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.3rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    will-change: transform;
+}
+
+.feature-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.feature-content h3 {
+    margin-bottom: 0.4rem;
+    font-size: 1rem;
+    color: var(--dark);
+}
+
+.feature-content p {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* 用户评价 */
+.testimonials-section {
+    padding: 0 1rem 2rem;
+}
+
+.testimonials-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--dark);
+}
+
+.testimonials-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.testimonial-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.testimonial-avatar {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.testimonial-card p {
+    font-style: italic;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.testimonial-author {
+    text-align: right;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+/* 每日小贴士 */
+.daily-tip {
+    background: linear-gradient(135deg, #FF9500 0%, #FF5722 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 0 1rem 2rem;
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    box-shadow: 0 4px 6px rgba(255, 149, 0, 0.2);
+}
+
+.tip-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tip-content h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.tip-content p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* App下载CTA */
+.app-download-cta {
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 0 1rem 2rem;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 122, 255, 0.2);
+}
+
+.app-download-cta h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.app-download-cta p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 1.5rem 1rem;
+    }
+    
+    .app-title h1 {
+        font-size: 2rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .user-greeting {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .greeting-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .cta-buttons {
+        max-width: 100%;
+    }
+    
+    .quick-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .daily-tip {
+        flex-direction: column;
+    }
+    
+    .tip-icon {
+        margin-bottom: 1rem;
+    }
+    
+    .features-grid {
+        gap: 1rem;
+    }
+    
+    .feature-card {
+        padding: 1.2rem;
+    }
+}
+
+/* 淡入动画效果 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

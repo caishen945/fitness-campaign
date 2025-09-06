@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单VIP测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>简单VIP数据测试</h1>
+    <button onclick="testAPI()">测试API数据</button>
+    <button onclick="testUpdate()">测试更新VIP等级2</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">正在加载数据...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<div class="result success">�?API数据获取成功</div>';
+                    html += '<table><tr><th>ID</th><th>名称</th><th>押金</th><th>步数目标</th><th>每日奖励</th><th>挑战天数</th><th>最大挑战次�?/th></tr>';
+                    
+                    data.data.forEach(level => {
+                        html += `<tr>
+                            <td>${level.id}</td>
+                            <td>${level.name}</td>
+                            <td>${level.depositAmount}</td>
+                            <td>${level.stepTarget}</td>
+                            <td>${level.dailyReward}</td>
+                            <td>${level.duration}</td>
+                            <td>${level.maxChallenges}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</table>';
+                    
+                    // 特别显示VIP等级2的数�?
+                    const vip2 = data.data.find(level => level.id === 2);
+                    if (vip2) {
+                        html += `<div class="result success">
+                            <h3>VIP等级2详细数据:</h3>
+                            <p><strong>maxChallenges:</strong> ${vip2.maxChallenges}</p>
+                            <p><strong>duration:</strong> ${vip2.duration}</p>
+                            <p><strong>dailyReward:</strong> ${vip2.dailyReward}</p>
+                            <p><strong>stepTarget:</strong> ${vip2.stepTarget}</p>
+                            <p><strong>depositAmount:</strong> ${vip2.depositAmount}</p>
+                        </div>`;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">�?API错误: ${data.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">�?请求失败: ${error.message}</div>`;
+            }
+        }
+        
+        async function testUpdate() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">正在更新数据...</div>';
+            
+            try {
+                const updateData = {
+                    name: "VIP1",
+                    description: "测试更新",
+                    stepTarget: 1000,
+                    depositAmount: 10,
+                    dailyReward: 1,
+                    duration: 1,
+                    maxChallenges: 3,  // 改为3�?
+                    maxFailedDays: 3,
+                    cancelDeductRatio: 0.1,
+                    cancelRewardRatio: 0,
+                    partialRefundRatio: 0.8,
+                    color: "#FFD700",
+                    isActive: true
+                };
+                
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels/2', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<div class="result success">�?更新成功！现在请点击"测试API数据"查看更新后的结果</div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">�?更新失败: ${result.message}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">�?更新请求失败: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitChallenge 本地测试环境 (修复版)</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="test-container">
+        <!-- 头部 -->
+        <header class="test-header">
+            <h1 class="test-title">🚀 FitChallenge 本地测试环境 (修复版)</h1>
+            <p class="test-subtitle">完整的本地测试环境，模拟真实手机和Telegram环境</p>
+        </header>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <!-- 设备模拟器 -->
+            <div class="control-section">
+                <h3>📱 设备模拟器</h3>
+                <div class="device-controls">
+                    <select id="deviceSelect" class="control-select">
+                        <option value="desktop">桌面端 (1920x1080)</option>
+                        <option value="tablet">平板 (768x1024)</option>
+                        <option value="mobile">手机 (375x667)</option>
+                        <option value="android">安卓手机 (360x640)</option>
+                        <option value="smallMobile">小屏手机 (320x568)</option>
+                        <option value="largeMobile">大屏手机 (414x896)</option>
+                    </select>
+                    <button id="orientationBtn" class="control-btn">🔄 横屏/竖屏</button>
+                    <button id="customSizeBtn" class="control-btn">📐 自定义尺寸</button>
+                </div>
+            </div>
+
+            <!-- 语言切换器 -->
+            <div class="control-section">
+                <h3>🌍 语言切换器</h3>
+                <div class="language-controls">
+                    <select id="languageSelect" class="control-select">
+                        <option value="en-US">🇺🇸 English</option>
+                        <option value="zh-CN">🇨🇳 简体中文</option>
+                        <option value="ja-JP">🇯🇵 日本語</option>
+                        <option value="ko-KR">🇰🇷 한국어</option>
+                        <option value="ar-SA">🇸🇦 العربية</option>
+                    </select>
+                    <button id="testTranslationsBtn" class="control-btn">🧪 测试翻译</button>
+                </div>
+            </div>
+
+            <!-- Telegram模拟器 -->
+            <div class="control-section">
+                <h3>📱 Telegram模拟器</h3>
+                <div class="telegram-controls">
+                    <button id="simulateAuthBtn" class="control-btn primary">🔐 模拟授权</button>
+                    <button id="switchThemeBtn" class="control-btn">🎨 切换主题</button>
+                    <button id="resetTelegramBtn" class="control-btn">🔄 重置</button>
+                </div>
+            </div>
+
+            <!-- API模拟器 -->
+            <div class="control-section">
+                <h3>🌐 API模拟器</h3>
+                <div class="api-controls">
+                    <input type="number" id="apiDelayInput" class="control-input" placeholder="延迟(ms)" value="500">
+                    <button id="setDelayBtn" class="control-btn">⏱️ 设置延迟</button>
+                    <button id="resetApiBtn" class="control-btn">🔄 重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试区域 -->
+        <div class="test-area">
+            <!-- 设备框架 -->
+            <div id="deviceFrame" class="device-frame">
+                <div class="device-content">
+                    <h2>📱 设备内容区域</h2>
+                    <p>这里将显示模拟设备的内容</p>
+                    
+                    <!-- 测试按钮 -->
+                    <div class="test-buttons">
+                        <button class="test-btn" data-i18n="common.loading">Loading...</button>
+                        <button class="test-btn" data-i18n="common.success">Success</button>
+                        <button class="test-btn" data-i18n="navigation.home">Home</button>
+                        <button class="test-btn" data-i18n="user.username">Username</button>
+                    </div>
+                    
+                    <!-- 表单测试 -->
+                    <div class="form-test">
+                        <h3>表单测试</h3>
+                        <input type="text" placeholder="用户名" data-i18n-placeholder="user.username">
+                        <input type="email" placeholder="邮箱" data-i18n-placeholder="user.email">
+                        <input type="password" placeholder="密码" data-i18n-placeholder="user.password">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态监控 -->
+        <div class="status-monitor">
+            <h3>📊 状态监控</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h4>设备状态</h4>
+                    <div id="deviceStatus" class="status-content">加载中...</div>
+                </div>
+                <div class="status-item">
+                    <h4>语言状态</h4>
+                    <div id="languageStatus" class="status-content">加载中...</div>
+                </div>
+                <div class="status-item">
+                    <h4>Telegram状态</h4>
+                    <div id="telegramStatus" class="status-content">加载中...</div>
+                </div>
+                <div class="status-item">
+                    <h4>API状态</h4>
+                    <div id="apiStatus" class="status-content">加载中...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能测试 -->
+        <div class="function-tests">
+            <h3>🧪 功能测试</h3>
+            <div class="test-grid">
+                <div class="test-card">
+                    <h4>📱 Telegram功能测试</h4>
+                    <button id="testTelegramBtn" class="test-btn">测试Telegram</button>
+                    <button id="testWebAppBtn" class="test-btn">测试WebApp</button>
+                    <button id="testAuthBtn" class="test-btn">测试认证</button>
+                </div>
+                
+                <div class="test-card">
+                    <h4>🌐 API功能测试</h4>
+                    <button id="testLoginBtn" class="test-btn">测试登录</button>
+                    <button id="testRegisterBtn" class="test-btn">测试注册</button>
+                    <button id="testProfileBtn" class="test-btn">测试资料</button>
+                </div>
+                
+                <div class="test-card">
+                    <h4>🌍 多语言测试</h4>
+                    <button id="testLanguageBtn" class="test-btn">测试语言</button>
+                    <button id="testFormatBtn" class="test-btn">测试格式</button>
+                    <button id="testDirectionBtn" class="test-btn">测试方向</button>
+                </div>
+                
+                <div class="test-card">
+                    <h4>📐 响应式测试</h4>
+                    <button id="testResponsiveBtn" class="test-btn">测试响应式</button>
+                    <button id="testOrientationBtn" class="test-btn">测试方向</button>
+                    <button id="testTouchBtn" class="test-btn">测试触摸</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制台输出 -->
+        <div class="console-output">
+            <div class="console-header">
+                <h3>📝 控制台输出</h3>
+                <button id="clearConsoleBtn" class="console-btn">清空</button>
+                <button id="exportConsoleBtn" class="console-btn">导出</button>
+            </div>
+            <div id="consoleContent" class="console-content">
+                <div class="console-line">🚀 测试环境初始化中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义尺寸弹窗 -->
+    <div id="customSizeModal" class="modal">
+        <div class="modal-content">
+            <h3>自定义设备尺寸</h3>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="customWidth">宽度 (px):</label>
+                    <input type="number" id="customWidth" min="200" max="3000" value="375">
+                </div>
+                <div class="input-group">
+                    <label for="customHeight">高度 (px):</label>
+                    <input type="number" id="customHeight" min="200" max="3000" value="667">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="applyCustomSizeBtn" class="btn primary">应用</button>
+                <button id="cancelCustomSizeBtn" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本加载 -->
+    <script src="telegram-mock.js"></script>
+    <script src="api-mock.js"></script>
+    <script src="device-simulator.js"></script>
+    <script src="language-tester.js"></script>
+    
+    <!-- 修复版主逻辑 -->
+    <script>
+        /**
+         * 修复版测试环境主逻辑
+         * 解决模块加载和事件绑定问题
+         */
+        
+        class FixedTestEnvironment {
+            constructor() {
+                this.consoleOutput = document.getElementById('consoleContent');
+                this.deviceFrame = document.getElementById('deviceFrame');
+                this.customSizeModal = document.getElementById('customSizeModal');
+                this.isInitialized = false;
+                
+                this.init();
+            }
+            
+            /**
+             * 初始化测试环境
+             */
+            init() {
+                this.log('🚀 初始化修复版测试环境...');
+                
+                // 等待所有模块加载完成
+                this.waitForModules().then(() => {
+                    this.setupEventListeners();
+                    this.updateStatus();
+                    this.isInitialized = true;
+                    this.log('✅ 修复版测试环境初始化完成');
+                    
+                    // 应用响应式样式
+                    if (window.deviceSimulator) {
+                        window.deviceSimulator.applyResponsiveStyles();
+                    }
+                }).catch(error => {
+                    this.log(`❌ 初始化失败: ${error.message}`, 'error');
+                });
+            }
+            
+            /**
+             * 等待所有模块加载
+             */
+            async waitForModules() {
+                const modules = ['telegramMock', 'apiMock', 'deviceSimulator', 'languageTester'];
+                const maxWaitTime = 10000; // 最大等待10秒
+                const startTime = Date.now();
+                
+                this.log('⏳ 等待模块加载...');
+                
+                for (const module of modules) {
+                    while (!window[module]) {
+                        if (Date.now() - startTime > maxWaitTime) {
+                            throw new Error(`模块 ${module} 加载超时`);
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                    this.log(`✅ 模块 ${module} 已加载`);
+                }
+                
+                this.log('✅ 所有模块已加载完成');
+            }
+            
+            /**
+             * 设置事件监听器
+             */
+            setupEventListeners() {
+                this.log('🔧 设置事件监听器...');
+                
+                try {
+                    // 设备模拟器控制
+                    this.setupDeviceControls();
+                    
+                    // 语言切换器控制
+                    this.setupLanguageControls();
+                    
+                    // Telegram模拟器控制
+                    this.setupTelegramControls();
+                    
+                    // API模拟器控制
+                    this.setupApiControls();
+                    
+                    // 功能测试控制
+                    this.setupFunctionTests();
+                    
+                    // 控制台控制
+                    this.setupConsoleControls();
+                    
+                    // 模态框控制
+                    this.setupModalControls();
+                    
+                    // 监听设备变化事件
+                    this.setupGlobalEventListeners();
+                    
+                    this.log('✅ 事件监听器设置完成');
+                } catch (error) {
+                    this.log(`❌ 设置事件监听器失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 设置设备控制
+             */
+            setupDeviceControls() {
+                const deviceSelect = document.getElementById('deviceSelect');
+                const orientationBtn = document.getElementById('orientationBtn');
+                const customSizeBtn = document.getElementById('customSizeBtn');
+                
+                if (deviceSelect) {
+                    deviceSelect.addEventListener('change', (e) => {
+                        const deviceType = e.target.value;
+                        if (window.deviceSimulator) {
+                            window.deviceSimulator.switchDevice(deviceType);
+                            this.updateDeviceFrame();
+                            this.log(`📱 切换到设备: ${deviceType}`);
+                        }
+                    });
+                }
+                
+                if (orientationBtn) {
+                    orientationBtn.addEventListener('click', () => {
+                        if (window.deviceSimulator) {
+                            const currentOrientation = window.deviceSimulator.currentOrientation;
+                            const newOrientation = currentOrientation === 'portrait' ? 'landscape' : 'portrait';
+                            window.deviceSimulator.switchOrientation(newOrientation);
+                            this.updateDeviceFrame();
+                            this.log(`🔄 切换到方向: ${newOrientation}`);
+                        }
+                    });
+                }
+                
+                if (customSizeBtn) {
+                    customSizeBtn.addEventListener('click', () => {
+                        this.showCustomSizeModal();
+                    });
+                }
+            }
+            
+            /**
+             * 设置语言控制
+             */
+            setupLanguageControls() {
+                const languageSelect = document.getElementById('languageSelect');
+                const testTranslationsBtn = document.getElementById('testTranslationsBtn');
+                
+                if (languageSelect) {
+                    languageSelect.addEventListener('change', (e) => {
+                        const languageCode = e.target.value;
+                        if (window.languageTester) {
+                            window.languageTester.switchLanguage(languageCode);
+                            this.log(`🌍 切换到语言: ${languageCode}`);
+                        }
+                    });
+                }
+                
+                if (testTranslationsBtn) {
+                    testTranslationsBtn.addEventListener('click', () => {
+                        if (window.languageTester) {
+                            const results = window.languageTester.testTranslations();
+                            this.log('🧪 翻译测试完成，结果已输出到控制台');
+                            console.log('翻译测试结果:', results);
+                        }
+                    });
+                }
+            }
+            
+            /**
+             * 设置Telegram控制
+             */
+            setupTelegramControls() {
+                const simulateAuthBtn = document.getElementById('simulateAuthBtn');
+                const switchThemeBtn = document.getElementById('switchThemeBtn');
+                const resetTelegramBtn = document.getElementById('resetTelegramBtn');
+                
+                if (simulateAuthBtn) {
+                    simulateAuthBtn.addEventListener('click', () => {
+                        if (window.telegramMock) {
+                            window.telegramMock.simulateAuth();
+                            this.log('🔐 模拟Telegram用户授权');
+                        }
+                    });
+                }
+                
+                if (switchThemeBtn) {
+                    switchThemeBtn.addEventListener('click', () => {
+                        if (window.telegramMock) {
+                            const currentTheme = window.telegramMock.colorScheme;
+                            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                            window.telegramMock.switchTheme(newTheme);
+                            this.log(`🎨 切换到主题: ${newTheme}`);
+                        }
+                    });
+                }
+                
+                if (resetTelegramBtn) {
+                    resetTelegramBtn.addEventListener('click', () => {
+                        if (window.telegramMock) {
+                            window.telegramMock.reset();
+                            this.log('🔄 Telegram模拟器已重置');
+                        }
+                    });
+                }
+            }
+            
+            /**
+             * 设置API控制
+             */
+            setupApiControls() {
+                const setDelayBtn = document.getElementById('setDelayBtn');
+                const resetApiBtn = document.getElementById('resetApiBtn');
+                
+                if (setDelayBtn) {
+                    setDelayBtn.addEventListener('click', () => {
+                        const delay = parseInt(document.getElementById('apiDelayInput').value);
+                        if (delay >= 0 && window.apiMock) {
+                            window.apiMock.setDelay(delay);
+                            this.log(`⏱️ API延迟设置为: ${delay}ms`);
+                        }
+                    });
+                }
+                
+                if (resetApiBtn) {
+                    resetApiBtn.addEventListener('click', () => {
+                        if (window.apiMock) {
+                            window.apiMock.reset();
+                            this.log('🔄 API模拟器已重置');
+                        }
+                    });
+                }
+            }
+            
+            /**
+             * 设置功能测试
+             */
+            setupFunctionTests() {
+                this.log('🧪 设置功能测试...');
+                
+                // Telegram功能测试
+                this.setupTestButton('testTelegramBtn', () => this.testTelegramFunctions());
+                this.setupTestButton('testWebAppBtn', () => this.testWebAppFunctions());
+                this.setupTestButton('testAuthBtn', () => this.testAuthFunctions());
+                
+                // API功能测试
+                this.setupTestButton('testLoginBtn', () => this.testApiLogin());
+                this.setupTestButton('testRegisterBtn', () => this.testApiRegister());
+                this.setupTestButton('testProfileBtn', () => this.testApiProfile());
+                
+                // 多语言测试
+                this.setupTestButton('testLanguageBtn', () => this.testLanguageFunctions());
+                this.setupTestButton('testFormatBtn', () => this.testFormatFunctions());
+                this.setupTestButton('testDirectionBtn', () => this.testDirectionFunctions());
+                
+                // 响应式测试
+                this.setupTestButton('testResponsiveBtn', () => this.testResponsiveFunctions());
+                this.setupTestButton('testOrientationBtn', () => this.testOrientationFunctions());
+                this.setupTestButton('testTouchBtn', () => this.testTouchFunctions());
+            }
+            
+            /**
+             * 设置测试按钮
+             */
+            setupTestButton(buttonId, testFunction) {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.addEventListener('click', () => {
+                        if (this.isInitialized) {
+                            testFunction.call(this);
+                        } else {
+                            this.log('⚠️ 测试环境尚未初始化完成，请稍候...', 'warning');
+                        }
+                    });
+                    this.log(`✅ 测试按钮 ${buttonId} 已设置`);
+                } else {
+                    this.log(`❌ 未找到测试按钮: ${buttonId}`, 'error');
+                }
+            }
+            
+            /**
+             * 设置控制台控制
+             */
+            setupConsoleControls() {
+                const clearConsoleBtn = document.getElementById('clearConsoleBtn');
+                const exportConsoleBtn = document.getElementById('exportConsoleBtn');
+                
+                if (clearConsoleBtn) {
+                    clearConsoleBtn.addEventListener('click', () => {
+                        this.clearConsole();
+                    });
+                }
+                
+                if (exportConsoleBtn) {
+                    exportConsoleBtn.addEventListener('click', () => {
+                        this.exportConsole();
+                    });
+                }
+            }
+            
+            /**
+             * 设置模态框控制
+             */
+            setupModalControls() {
+                const applyCustomSizeBtn = document.getElementById('applyCustomSizeBtn');
+                const cancelCustomSizeBtn = document.getElementById('cancelCustomSizeBtn');
+                
+                if (applyCustomSizeBtn) {
+                    applyCustomSizeBtn.addEventListener('click', () => {
+                        this.applyCustomSize();
+                    });
+                }
+                
+                if (cancelCustomSizeBtn) {
+                    cancelCustomSizeBtn.addEventListener('click', () => {
+                        this.hideCustomSizeModal();
+                    });
+                }
+            }
+            
+            /**
+             * 设置全局事件监听器
+             */
+            setupGlobalEventListeners() {
+                // 监听设备变化
+                window.addEventListener('device-changed', (e) => {
+                    this.updateDeviceFrame();
+                    this.updateStatus();
+                    this.log(`📱 设备已切换到: ${e.detail.deviceInfo.name}`);
+                });
+                
+                // 监听方向变化
+                window.addEventListener('orientation-changed', (e) => {
+                    this.updateDeviceFrame();
+                    this.log(`🔄 方向已切换到: ${e.detail.orientation}`);
+                });
+                
+                // 监听语言变化
+                window.addEventListener('language-changed', (e) => {
+                    this.updateStatus();
+                    this.log(`🌍 语言已切换到: ${e.detail.languageInfo.name}`);
+                });
+            }
+            
+            /**
+             * 更新设备框架
+             */
+            updateDeviceFrame() {
+                if (!window.deviceSimulator || !this.deviceFrame) return;
+                
+                try {
+                    const deviceInfo = window.deviceSimulator.getCurrentDeviceInfo();
+                    const frame = this.deviceFrame;
+                    
+                    // 更新框架类名
+                    frame.className = `device-frame ${deviceInfo.platform}`;
+                    
+                    // 更新尺寸
+                    frame.style.width = `${deviceInfo.actualWidth}px`;
+                    frame.style.height = `${deviceInfo.actualHeight}px`;
+                    
+                    // 更新内容
+                    const content = frame.querySelector('.device-content');
+                    if (content) {
+                        content.style.width = `${deviceInfo.actualWidth - 60}px`;
+                        content.style.height = `${deviceInfo.actualHeight - 60}px`;
+                    }
+                } catch (error) {
+                    this.log(`❌ 更新设备框架失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 更新状态显示
+             */
+            updateStatus() {
+                try {
+                    // 设备状态
+                    if (window.deviceSimulator) {
+                        const deviceStatus = document.getElementById('deviceStatus');
+                        if (deviceStatus) {
+                            const status = window.deviceSimulator.getStatus();
+                            deviceStatus.innerHTML = `
+                                <div><strong>当前设备:</strong> ${status.deviceInfo.name}</div>
+                                <div><strong>尺寸:</strong> ${status.deviceInfo.actualWidth}x${status.deviceInfo.actualHeight}</div>
+                                <div><strong>方向:</strong> ${status.orientation}</div>
+                                <div><strong>平台:</strong> ${status.deviceInfo.platform}</div>
+                            `;
+                        }
+                    }
+                    
+                    // 语言状态
+                    if (window.languageTester) {
+                        const languageStatus = document.getElementById('languageStatus');
+                        if (languageStatus) {
+                            const status = window.languageTester.getStatus();
+                            languageStatus.innerHTML = `
+                                <div><strong>当前语言:</strong> ${status.currentLanguageInfo.name}</div>
+                                <div><strong>代码:</strong> ${status.currentLanguageInfo.code}</div>
+                                <div><strong>方向:</strong> ${status.currentLanguageInfo.direction}</div>
+                                <div><strong>HTML:</strong> ${status.htmlLang}</div>
+                            `;
+                        }
+                    }
+                    
+                    // Telegram状态
+                    if (window.telegramMock) {
+                        const telegramStatus = document.getElementById('telegramStatus');
+                        if (telegramStatus) {
+                            const status = window.telegramMock.getStatus();
+                            telegramStatus.innerHTML = `
+                                <div><strong>平台:</strong> ${status.platform}</div>
+                                <div><strong>主题:</strong> ${status.colorScheme}</div>
+                                <div><strong>视口高度:</strong> ${status.viewportHeight}</div>
+                                <div><strong>用户:</strong> ${status.currentUser?.username || '无'}</div>
+                            `;
+                        }
+                    }
+                    
+                    // API状态
+                    if (window.apiMock) {
+                        const apiStatus = document.getElementById('apiStatus');
+                        if (apiStatus) {
+                            const status = window.apiMock.getStatus();
+                            apiStatus.innerHTML = `
+                                <div><strong>延迟:</strong> ${status.delay}ms</div>
+                                <div><strong>用户数:</strong> ${status.userCount}</div>
+                                <div><strong>Token数:</strong> ${status.tokenCount}</div>
+                                <div><strong>基础URL:</strong> ${status.baseUrl}</div>
+                            `;
+                        }
+                    }
+                } catch (error) {
+                    this.log(`❌ 更新状态失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 显示自定义尺寸模态框
+             */
+            showCustomSizeModal() {
+                if (this.customSizeModal) {
+                    this.customSizeModal.classList.add('show');
+                }
+            }
+            
+            /**
+             * 隐藏自定义尺寸模态框
+             */
+            hideCustomSizeModal() {
+                if (this.customSizeModal) {
+                    this.customSizeModal.classList.remove('show');
+                }
+            }
+            
+            /**
+             * 应用自定义尺寸
+             */
+            applyCustomSize() {
+                const width = parseInt(document.getElementById('customWidth').value);
+                const height = parseInt(document.getElementById('customHeight').value);
+                
+                if (width >= 200 && height >= 200 && width <= 3000 && height <= 3000) {
+                    if (window.deviceSimulator) {
+                        window.deviceSimulator.setCustomDimensions(width, height);
+                        this.hideCustomSizeModal();
+                        this.log(`📐 自定义尺寸已设置: ${width}x${height}`);
+                    }
+                } else {
+                    alert('请输入有效的尺寸 (200-3000px)');
+                }
+            }
+            
+            /**
+             * 测试Telegram功能
+             */
+            testTelegramFunctions() {
+                this.log('🧪 开始测试Telegram功能...');
+                
+                try {
+                    // 测试WebApp对象
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        this.log('✅ Telegram WebApp对象存在');
+                        
+                        // 测试基本属性
+                        const webApp = window.Telegram.WebApp;
+                        this.log(`📱 平台: ${webApp.platform}`);
+                        this.log(`📱 版本: ${webApp.version}`);
+                        this.log(`📱 主题: ${webApp.colorScheme}`);
+                        
+                        // 测试方法
+                        if (webApp.ready) {
+                            webApp.ready().then(() => {
+                                this.log('✅ WebApp.ready() 成功');
+                            }).catch(error => {
+                                this.log(`❌ WebApp.ready() 失败: ${error.message}`, 'error');
+                            });
+                        }
+                        
+                        if (webApp.expand) {
+                            webApp.expand().then(() => {
+                                this.log('✅ WebApp.expand() 成功');
+                            }).catch(error => {
+                                this.log(`❌ WebApp.expand() 失败: ${error.message}`, 'error');
+                            });
+                        }
+                        
+                    } else {
+                        this.log('❌ Telegram WebApp对象不存在');
+                    }
+                    
+                    // 测试用户信息
+                    if (window.telegramMock) {
+                        const user = window.telegramMock.currentUser;
+                        this.log(`👤 当前用户: ${user.username} (${user.first_name} ${user.last_name})`);
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ Telegram功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试WebApp功能
+             */
+            testWebAppFunctions() {
+                this.log('🧪 开始测试WebApp功能...');
+                
+                try {
+                    const webApp = window.Telegram?.WebApp;
+                    if (!webApp) {
+                        this.log('❌ WebApp不可用');
+                        return;
+                    }
+                    
+                    // 测试按钮功能
+                    const mainButton = webApp.MainButton;
+                    if (mainButton) {
+                        mainButton.setText('测试按钮');
+                        mainButton.show();
+                        this.log('✅ 主按钮显示成功');
+                        
+                        setTimeout(() => {
+                            mainButton.hide();
+                            this.log('✅ 主按钮隐藏成功');
+                        }, 2000);
+                    }
+                    
+                    // 测试触觉反馈
+                    const haptic = webApp.HapticFeedback;
+                    if (haptic) {
+                        haptic.impactOccurred();
+                        this.log('✅ 触觉反馈测试成功');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ WebApp功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试认证功能
+             */
+            testAuthFunctions() {
+                this.log('🧪 开始测试认证功能...');
+                
+                try {
+                    // 模拟认证
+                    if (window.telegramMock) {
+                        window.telegramMock.simulateAuth();
+                        this.log('✅ 认证模拟成功');
+                        
+                        // 检查认证状态
+                        setTimeout(() => {
+                            const user = window.telegramMock.currentUser;
+                            if (user) {
+                                this.log(`✅ 用户认证成功: ${user.username}`);
+                            } else {
+                                this.log('❌ 用户认证失败');
+                            }
+                        }, 1000);
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 认证功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试API登录
+             */
+            async testApiLogin() {
+                this.log('🧪 开始测试API登录...');
+                
+                try {
+                    if (window.apiMock) {
+                        const response = await window.apiMock.request('/api/auth/login', 'POST', {
+                            email: 'test1@example.com',
+                            password: 'password123'
+                        });
+                        
+                        if (response.success) {
+                            this.log('✅ API登录测试成功');
+                            this.log(`👤 用户: ${response.user.username}`);
+                            this.log(`🔑 Token: ${response.token.substring(0, 20)}...`);
+                        } else {
+                            this.log('❌ API登录测试失败');
+                        }
+                    } else {
+                        this.log('❌ API模拟器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ API登录测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试API注册
+             */
+            async testApiRegister() {
+                this.log('🧪 开始测试API注册...');
+                
+                try {
+                    if (window.apiMock) {
+                        const response = await window.apiMock.request('/api/auth/register', 'POST', {
+                            username: `testuser_${Date.now()}`,
+                            email: `test_${Date.now()}@example.com`,
+                            password: 'password123'
+                        });
+                        
+                        if (response.success) {
+                            this.log('✅ API注册测试成功');
+                            this.log(`👤 新用户: ${response.user.username}`);
+                        } else {
+                            this.log('❌ API注册测试失败');
+                        }
+                    } else {
+                        this.log('❌ API模拟器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ API注册测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试API资料
+             */
+            async testApiProfile() {
+                this.log('🧪 开始测试API资料...');
+                
+                try {
+                    if (window.apiMock) {
+                        // 先登录获取token
+                        const loginResponse = await window.apiMock.request('/api/auth/login', 'POST', {
+                            email: 'test1@example.com',
+                            password: 'password123'
+                        });
+                        
+                        if (loginResponse.success) {
+                            const token = loginResponse.token;
+                            
+                            // 获取资料
+                            const profileResponse = await window.apiMock.request('/api/users/profile', 'GET', { token });
+                            
+                            if (profileResponse.success) {
+                                this.log('✅ API资料获取成功');
+                                this.log(`👤 用户资料: ${profileResponse.user.username}`);
+                            } else {
+                                this.log('❌ API资料获取失败');
+                            }
+                        } else {
+                            this.log('❌ 登录失败，无法测试资料功能');
+                        }
+                    } else {
+                        this.log('❌ API模拟器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ API资料测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试语言功能
+             */
+            testLanguageFunctions() {
+                this.log('🧪 开始测试语言功能...');
+                
+                try {
+                    if (window.languageTester) {
+                        const results = window.languageTester.testTranslations();
+                        this.log('✅ 语言功能测试完成');
+                        
+                        // 显示测试结果
+                        Object.entries(results).forEach(([lang, translations]) => {
+                            this.log(`🌍 ${lang}: ${Object.values(translations).filter(t => t !== 'MISSING').length}/${Object.keys(translations).length} 翻译可用`);
+                        });
+                    } else {
+                        this.log('❌ 语言测试器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 语言功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试格式功能
+             */
+            testFormatFunctions() {
+                this.log('🧪 开始测试格式功能...');
+                
+                try {
+                    if (window.languageTester) {
+                        const now = new Date();
+                        const number = 1234567.89;
+                        
+                        // 测试日期格式
+                        const dateFormats = ['en-US', 'zh-CN', 'ja-JP'];
+                        dateFormats.forEach(lang => {
+                            window.languageTester.switchLanguage(lang);
+                            const formattedDate = window.languageTester.formatDate(now);
+                            this.log(`📅 ${lang}: ${formattedDate}`);
+                        });
+                        
+                        // 测试数字格式
+                        const formattedNumber = window.languageTester.formatNumber(number, { showThousands: true });
+                        this.log(`🔢 数字格式: ${formattedNumber}`);
+                        
+                        // 恢复当前语言
+                        const currentLang = window.languageTester.getCurrentLanguageInfo().code;
+                        window.languageTester.switchLanguage(currentLang);
+                        
+                        this.log('✅ 格式功能测试完成');
+                    } else {
+                        this.log('❌ 语言测试器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 格式功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试方向功能
+             */
+            testDirectionFunctions() {
+                this.log('🧪 开始测试方向功能...');
+                
+                try {
+                    if (window.languageTester) {
+                        const languages = window.languageTester.getSupportedLanguages();
+                        
+                        languages.forEach(lang => {
+                            const direction = lang.direction;
+                            const testText = lang.nativeName;
+                            const detectedDirection = window.languageTester.detectTextDirection(testText);
+                            
+                            this.log(`🌍 ${lang.code}: ${direction} (检测: ${detectedDirection})`);
+                        });
+                        
+                        this.log('✅ 方向功能测试完成');
+                    } else {
+                        this.log('❌ 语言测试器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 方向功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试响应式功能
+             */
+            testResponsiveFunctions() {
+                this.log('🧪 开始测试响应式功能...');
+                
+                try {
+                    if (window.deviceSimulator) {
+                        const devices = window.deviceSimulator.getAvailableDevices();
+                        
+                        devices.forEach(device => {
+                            this.log(`📱 ${device.name}: ${device.width}x${device.height} (${device.platform})`);
+                        });
+                        
+                        this.log('✅ 响应式功能测试完成');
+                    } else {
+                        this.log('❌ 设备模拟器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 响应式功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试方向功能
+             */
+            testOrientationFunctions() {
+                this.log('🧪 开始测试方向功能...');
+                
+                try {
+                    if (window.deviceSimulator) {
+                        const currentOrientation = window.deviceSimulator.currentOrientation;
+                        this.log(`📐 当前方向: ${currentOrientation}`);
+                        
+                        // 测试方向切换
+                        const newOrientation = currentOrientation === 'portrait' ? 'landscape' : 'portrait';
+                        window.deviceSimulator.switchOrientation(newOrientation);
+                        
+                        setTimeout(() => {
+                            this.log(`📐 方向切换完成: ${newOrientation}`);
+                            // 恢复原方向
+                            window.deviceSimulator.switchOrientation(currentOrientation);
+                        }, 1000);
+                        
+                    } else {
+                        this.log('❌ 设备模拟器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 方向功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 测试触摸功能
+             */
+            testTouchFunctions() {
+                this.log('🧪 开始测试触摸功能...');
+                
+                try {
+                    if (window.deviceSimulator) {
+                        const deviceInfo = window.deviceSimulator.getCurrentDeviceInfo();
+                        
+                        this.log(`📱 设备类型: ${deviceInfo.platform}`);
+                        this.log(`📱 是否移动设备: ${deviceInfo.isMobile}`);
+                        this.log(`📱 触摸点数量: ${navigator.maxTouchPoints || 0}`);
+                        
+                        if (deviceInfo.isMobile) {
+                            this.log('✅ 触摸功能可用');
+                        } else {
+                            this.log('ℹ️ 触摸功能不可用（非移动设备）');
+                        }
+                        
+                    } else {
+                        this.log('❌ 设备模拟器不可用');
+                    }
+                    
+                } catch (error) {
+                    this.log(`❌ 触摸功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            /**
+             * 添加日志
+             */
+            log(message, type = 'info') {
+                if (!this.consoleOutput) return;
+                
+                const timestamp = new Date().toLocaleTimeString();
+                const line = document.createElement('div');
+                line.className = `console-line ${type}`;
+                line.textContent = `[${timestamp}] ${message}`;
+                
+                this.consoleOutput.appendChild(line);
+                this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight;
+                
+                // 同时输出到控制台
+                console.log(message);
+            }
+            
+            /**
+             * 清空控制台
+             */
+            clearConsole() {
+                if (this.consoleOutput) {
+                    this.consoleOutput.innerHTML = '';
+                    this.log('🧹 控制台已清空');
+                }
+            }
+            
+            /**
+             * 导出控制台
+             */
+            exportConsole() {
+                if (!this.consoleOutput) return;
+                
+                const content = this.consoleOutput.textContent;
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test-console-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+                a.click();
+                
+                URL.revokeObjectURL(url);
+                this.log('📁 控制台已导出');
+            }
+        }
+        
+        // 等待DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 开始初始化修复版测试环境...');
+            window.fixedTestEnvironment = new FixedTestEnvironment();
+        });
+        
+        // 全局测试函数
+        window.testAll = function() {
+            if (window.fixedTestEnvironment) {
+                window.fixedTestEnvironment.log('🧪 开始执行所有测试...');
+                
+                // 执行所有测试
+                setTimeout(() => window.fixedTestEnvironment.testTelegramFunctions(), 100);
+                setTimeout(() => window.fixedTestEnvironment.testWebAppFunctions(), 200);
+                setTimeout(() => window.fixedTestEnvironment.testAuthFunctions(), 300);
+                setTimeout(() => window.fixedTestEnvironment.testApiLogin(), 400);
+                setTimeout(() => window.fixedTestEnvironment.testApiRegister(), 500);
+                setTimeout(() => window.fixedTestEnvironment.testLanguageFunctions(), 600);
+                setTimeout(() => window.fixedTestEnvironment.testResponsiveFunctions(), 700);
+                
+                window.fixedTestEnvironment.log('🎯 所有测试已启动，请查看控制台输出');
+            } else {
+                console.error('修复版测试环境未初始化');
+            }
+        };
+        
+        console.log('📱 修复版测试环境主逻辑已加载');
+    </script>
+</body>
+</html>

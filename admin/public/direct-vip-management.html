@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP管理 - 直接访问版本</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .btn { margin: 2px; }
+        .table th { background-color: #f8f9fa; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2><i class="fas fa-crown"></i> VIP等级管理 - 直接访问版本</h2>
+                <p class="mb-0">这个页面直接从后端API获取数据，避免缓存问�?/p>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-4">
+                    <h3>VIP等级列表</h3>
+                    <button id="addVipBtn" class="btn btn-success">
+                        <i class="fas fa-plus"></i> 添加VIP等级
+                    </button>
+                </div>
+                
+                <div id="loadingMessage" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">加载�?..</p>
+                </div>
+                
+                <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+                
+                <div id="vipTable" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>等级名称</th>
+                                    <th>解锁金额</th>
+                                    <th>每日目标</th>
+                                    <th>次日奖励</th>
+                                    <th>挑战天数</th>
+                                    <th>最大挑战次�?/th>
+                                    <th>状�?/th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vipTableBody">
+                                <!-- 数据将在这里动态加�?-->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <button id="refreshBtn" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> 刷新数据
+                    </button>
+                    <div>
+                        <span id="lastUpdated" class="text-muted"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h3>API请求日志</h3>
+            </div>
+            <div class="card-body">
+                <div id="apiLog" style="max-height: 300px; overflow-y: auto; font-family: monospace; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+                    <!-- API日志将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div class="modal fade" id="vipModal" tabindex="-1" aria-labelledby="vipModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vipModalLabel">编辑VIP等级</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="vipForm">
+                        <input type="hidden" id="vipId">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">等级名称</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="depositAmount" class="form-label">解锁金额 (USDT)</label>
+                                <input type="number" class="form-control" id="depositAmount" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="stepTarget" class="form-label">每日目标 (步数)</label>
+                                <input type="number" class="form-control" id="stepTarget" min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="dailyReward" class="form-label">次日奖励 (USDT)</label>
+                                <input type="number" class="form-control" id="dailyReward" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">挑战天数</label>
+                                <input type="number" class="form-control" id="duration" min="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="maxChallenges" class="form-label">最大挑战次�?/label>
+                                <input type="number" class="form-control" id="maxChallenges" min="1" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="maxFailedDays" class="form-label">最大失败天�?/label>
+                                <input type="number" class="form-control" id="maxFailedDays" min="0" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="color" class="form-label">等级颜色</label>
+                                <input type="color" class="form-control" id="color" value="#FFD700">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">等级描述</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="isActive" checked>
+                            <label class="form-check-label" for="isActive">
+                                启用此等�?
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveVipBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 全局变量
+        let vipLevels = [];
+        let currentVipId = null;
+        
+        // 页面加载完成后执�?
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始加载数据
+            loadVipLevels();
+            
+            // 绑定事件
+            document.getElementById('refreshBtn').addEventListener('click', loadVipLevels);
+            document.getElementById('addVipBtn').addEventListener('click', () => showVipModal());
+            document.getElementById('saveVipBtn').addEventListener('click', saveVipLevel);
+        });
+        
+        // 加载VIP等级数据
+        async function loadVipLevels() {
+            showLoading(true);
+            hideError();
+            
+            try {
+                logApi('GET', '/api/admin/vip-levels', null, '开始加载VIP等级数据');
+                
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                logApi('GET', '/api/admin/vip-levels', result, '加载VIP等级数据成功');
+                
+                if (result.success && result.data) {
+                    vipLevels = result.data;
+                    renderVipTable();
+                    updateLastUpdated();
+                } else {
+                    throw new Error(result.message || '加载数据失败');
+                }
+            } catch (error) {
+                logApi('ERROR', '', error, '加载VIP等级数据失败');
+                showError('加载VIP等级数据失败: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // 渲染VIP等级表格
+        function renderVipTable() {
+            const tableBody = document.getElementById('vipTableBody');
+            const table = document.getElementById('vipTable');
+            
+            if (vipLevels.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-4">暂无VIP等级数据</td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = vipLevels.map(level => `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2" style="font-size: 1.2rem;">${level.icon || '🏆'}</span>
+                                <span>${level.name || '未命�?}</span>
+                            </div>
+                        </td>
+                        <td>${level.depositAmount || 0} USDT</td>
+                        <td>${level.stepTarget || 0} �?/td>
+                        <td>${level.dailyReward || 0} USDT</td>
+                        <td>${level.duration || 0} �?/td>
+                        <td>${level.maxChallenges || 0} �?/td>
+                        <td>
+                            <span class="badge ${level.isActive ? 'bg-success' : 'bg-secondary'}">
+                                ${level.isActive ? '启用' : '禁用'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showVipModal(${level.id})">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-${level.isActive ? 'warning' : 'success'}" onclick="toggleVipStatus(${level.id}, ${!level.isActive})">
+                                ${level.isActive ? '禁用' : '启用'}
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            table.style.display = 'block';
+        }
+        
+        // 显示VIP等级编辑模态框
+        function showVipModal(id = null) {
+            currentVipId = id;
+            const modal = new bootstrap.Modal(document.getElementById('vipModal'));
+            const title = document.getElementById('vipModalLabel');
+            const form = document.getElementById('vipForm');
+            
+            // 重置表单
+            form.reset();
+            
+            if (id) {
+                // 编辑现有VIP等级
+                const level = vipLevels.find(l => l.id === id);
+                if (!level) return;
+                
+                title.textContent = '编辑VIP等级';
+                document.getElementById('vipId').value = level.id;
+                document.getElementById('name').value = level.name || '';
+                document.getElementById('description').value = level.description || '';
+                document.getElementById('stepTarget').value = level.stepTarget || 0;
+                document.getElementById('depositAmount').value = level.depositAmount || 0;
+                document.getElementById('dailyReward').value = level.dailyReward || 0;
+                document.getElementById('duration').value = level.duration || 1;
+                document.getElementById('maxChallenges').value = level.maxChallenges || 1;
+                document.getElementById('maxFailedDays').value = level.maxFailedDays || 0;
+                document.getElementById('color').value = level.color || '#FFD700';
+                document.getElementById('isActive').checked = level.isActive !== false;
+            } else {
+                // 添加新VIP等级
+                title.textContent = '添加VIP等级';
+                document.getElementById('vipId').value = '';
+                document.getElementById('color').value = '#FFD700';
+                document.getElementById('isActive').checked = true;
+            }
+            
+            modal.show();
+        }
+        
+        // 保存VIP等级
+        async function saveVipLevel() {
+            const id = currentVipId;
+            const formData = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                stepTarget: parseInt(document.getElementById('stepTarget').value) || 0,
+                depositAmount: parseFloat(document.getElementById('depositAmount').value) || 0,
+                dailyReward: parseFloat(document.getElementById('dailyReward').value) || 0,
+                duration: parseInt(document.getElementById('duration').value) || 1,
+                maxChallenges: parseInt(document.getElementById('maxChallenges').value) || 1,
+                maxFailedDays: parseInt(document.getElementById('maxFailedDays').value) || 0,
+                color: document.getElementById('color').value,
+                isActive: document.getElementById('isActive').checked
+            };
+            
+            try {
+                const url = id ? `http://localhost:3000/api/admin/vip-levels/${id}` : 'http://localhost:3000/api/admin/vip-levels';
+                const method = id ? 'PUT' : 'POST';
+                
+                logApi(method, url, formData, `开�?{id ? '更新' : '创建'}VIP等级`);
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                logApi(method, url, result, `${id ? '更新' : '创建'}VIP等级成功`);
+                
+                if (result.success) {
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('vipModal'));
+                    modal.hide();
+                    
+                    // 重新加载数据
+                    await loadVipLevels();
+                    
+                    // 显示成功消息
+                    alert(`VIP等级${id ? '更新' : '创建'}成功！`);
+                } else {
+                    throw new Error(result.message || `${id ? '更新' : '创建'}失败`);
+                }
+            } catch (error) {
+                logApi('ERROR', '', error, `${id ? '更新' : '创建'}VIP等级失败`);
+                alert('操作失败: ' + error.message);
+            }
+        }
+        
+        // 切换VIP等级状�?
+        async function toggleVipStatus(id, isActive) {
+            try {
+                const url = `http://localhost:3000/api/admin/vip-levels/${id}`;
+                
+                logApi('PATCH', url, { isActive }, '开始切换VIP等级状�?);
+                
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    body: JSON.stringify({ isActive })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                logApi('PATCH', url, result, '切换VIP等级状态成�?);
+                
+                if (result.success) {
+                    // 重新加载数据
+                    await loadVipLevels();
+                    
+                    // 显示成功消息
+                    alert(`VIP等级�?{isActive ? '启用' : '禁用'}！`);
+                } else {
+                    throw new Error(result.message || '操作失败');
+                }
+            } catch (error) {
+                logApi('ERROR', '', error, '切换VIP等级状态失�?);
+                alert('操作失败: ' + error.message);
+            }
+        }
+        
+        // 显示/隐藏加载�?
+        function showLoading(show) {
+            document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+        
+        // 隐藏错误信息
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        // 更新最后更新时�?
+        function updateLastUpdated() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent = `最后更�? ${now.toLocaleString()}`;
+        }
+        
+        // 记录API调用日志
+        function logApi(method, url, data, message) {
+            const logEl = document.getElementById('apiLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logItem = document.createElement('div');
+            
+            logItem.innerHTML = `
+                <div class="mb-2 p-2 border-bottom">
+                    <span class="text-${method === 'ERROR' ? 'danger' : 'primary'} fw-bold">[${timestamp}] ${method}</span> ${url}
+                    <div>${message}</div>
+                    ${data ? `<details>
+                        <summary>详细数据</summary>
+                        <pre class="mt-2" style="max-height: 200px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </details>` : ''}
+                </div>
+            `;
+            
+            logEl.insertBefore(logItem, logEl.firstChild);
+            
+            // 限制日志条数
+            if (logEl.children.length > 50) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>

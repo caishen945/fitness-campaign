@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; border: none; border-radius: 5px; background: #007bff; color: white; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 3px; font-family: monospace; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .console { background: #f8f9fa; padding: 15px; border-radius: 5px; max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 工作测试页面</h1>
+        <p>这个页面用于测试基本功能，解决复杂测试环境的无响应问题。</p>
+        
+        <div class="test-section">
+            <h3>🔧 基础功能测试</h3>
+            <button onclick="testBasic()">测试基础功能</button>
+            <button onclick="testDOM()">测试DOM操作</button>
+            <button onclick="testEvents()">测试事件系统</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📱 模块测试</h3>
+            <button onclick="testModules()">测试模块加载</button>
+            <button onclick="testTelegram()">测试Telegram</button>
+            <button onclick="testAPI()">测试API</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎯 综合测试</h3>
+            <button onclick="runAll()">运行所有测试</button>
+            <button onclick="clearResults()">清空结果</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>📝 测试结果</h3>
+            <div id="results" class="console">
+                <div class="result info">🚀 测试页面已加载，等待测试...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const result = document.createElement('div');
+            result.className = `result ${type}`;
+            result.textContent = `[${timestamp}] ${message}`;
+            
+            const container = document.getElementById('results');
+            container.appendChild(result);
+            container.scrollTop = container.scrollHeight;
+            
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            log('🧹 测试结果已清空', 'info');
+        }
+        
+        function testBasic() {
+            log('🧪 开始测试基础功能...', 'info');
+            
+            try {
+                // 测试基本JavaScript功能
+                const testArray = [1, 2, 3, 4, 5];
+                const doubled = testArray.map(x => x * 2);
+                if (doubled.join(',') === '2,4,6,8,10') {
+                    log('✅ 数组操作测试成功', 'success');
+                } else {
+                    log('❌ 数组操作测试失败', 'error');
+                }
+                
+                // 测试JSON操作
+                const testObj = { name: 'test', value: 123 };
+                const jsonStr = JSON.stringify(testObj);
+                const parsedObj = JSON.parse(jsonStr);
+                if (parsedObj.name === 'test' && parsedObj.value === 123) {
+                    log('✅ JSON操作测试成功', 'success');
+                } else {
+                    log('❌ JSON操作测试失败', 'error');
+                }
+                
+                log('✅ 基础功能测试完成', 'success');
+                
+            } catch (error) {
+                log(`❌ 基础功能测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function testDOM() {
+            log('🧪 开始测试DOM操作...', 'info');
+            
+            try {
+                // 测试DOM创建
+                const testElement = document.createElement('div');
+                testElement.textContent = '测试元素';
+                testElement.className = 'test-dom-element';
+                document.body.appendChild(testElement);
+                
+                // 测试DOM查询
+                const foundElement = document.querySelector('.test-dom-element');
+                if (foundElement && foundElement.textContent === '测试元素') {
+                    log('✅ DOM创建和查询测试成功', 'success');
+                } else {
+                    log('❌ DOM创建和查询测试失败', 'error');
+                }
+                
+                // 清理测试元素
+                document.body.removeChild(testElement);
+                log('✅ DOM清理测试成功', 'success');
+                
+                log('✅ DOM操作测试完成', 'success');
+                
+            } catch (error) {
+                log(`❌ DOM操作测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function testEvents() {
+            log('🧪 开始测试事件系统...', 'info');
+            
+            try {
+                let eventTriggered = false;
+                
+                // 创建测试按钮
+                const testButton = document.createElement('button');
+                testButton.textContent = '测试事件按钮';
+                testButton.style.position = 'absolute';
+                testButton.style.left = '-9999px';
+                document.body.appendChild(testButton);
+                
+                // 添加事件监听器
+                testButton.addEventListener('click', () => {
+                    eventTriggered = true;
+                    log('✅ 事件监听器被触发', 'success');
+                });
+                
+                // 触发事件
+                testButton.click();
+                
+                // 等待事件处理
+                setTimeout(() => {
+                    if (eventTriggered) {
+                        log('✅ 事件系统测试成功', 'success');
+                    } else {
+                        log('❌ 事件系统测试失败', 'error');
+                    }
+                    
+                    // 清理
+                    document.body.removeChild(testButton);
+                }, 100);
+                
+            } catch (error) {
+                log(`❌ 事件系统测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function testModules() {
+            log('🧪 开始测试模块加载...', 'info');
+            
+            const modules = [
+                { name: 'Telegram模拟器', global: 'telegramMock' },
+                { name: 'API模拟器', global: 'apiMock' },
+                { name: '设备模拟器', global: 'deviceSimulator' },
+                { name: '语言测试器', global: 'languageTester' }
+            ];
+            
+            modules.forEach(module => {
+                if (window[module.global]) {
+                    log(`✅ ${module.name} 已加载`, 'success');
+                } else {
+                    log(`❌ ${module.name} 未加载`, 'error');
+                }
+            });
+            
+            log('✅ 模块加载测试完成', 'success');
+        }
+        
+        function testTelegram() {
+            log('🧪 开始测试Telegram功能...', 'info');
+            
+            if (window.telegramMock) {
+                try {
+                    const status = window.telegramMock.getStatus();
+                    log(`✅ Telegram模拟器状态: ${JSON.stringify(status)}`, 'success');
+                    
+                    // 测试模拟认证
+                    window.telegramMock.simulateAuth();
+                    log('✅ Telegram认证模拟成功', 'success');
+                    
+                } catch (error) {
+                    log(`❌ Telegram测试失败: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ Telegram模拟器未加载', 'error');
+            }
+        }
+        
+        function testAPI() {
+            log('🧪 开始测试API功能...', 'info');
+            
+            if (window.apiMock) {
+                try {
+                    const status = window.apiMock.getStatus();
+                    log(`✅ API模拟器状态: ${JSON.stringify(status)}`, 'success');
+                    
+                    // 测试API请求
+                    window.apiMock.request('/api/test', 'GET').then(response => {
+                        log('✅ API请求测试成功', 'success');
+                    }).catch(error => {
+                        log(`❌ API请求测试失败: ${error.message}`, 'error');
+                    });
+                    
+                } catch (error) {
+                    log(`❌ API测试失败: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ API模拟器未加载', 'error');
+            }
+        }
+        
+        function runAll() {
+            log('🎯 开始运行所有测试...', 'info');
+            
+            setTimeout(() => testBasic(), 100);
+            setTimeout(() => testDOM(), 200);
+            setTimeout(() => testEvents(), 300);
+            setTimeout(() => testModules(), 400);
+            setTimeout(() => testTelegram(), 500);
+            setTimeout(() => testAPI(), 600);
+            
+            log('✅ 所有测试已启动', 'success');
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 工作测试页面已加载', 'success');
+        });
+        
+        console.log('📱 工作测试页面已初始化');
+    </script>
+</body>
+</html>

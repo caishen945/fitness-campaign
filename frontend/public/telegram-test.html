@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram 登录测试</title>
+    <!-- Telegram WebApp 脚本 -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-telegram {
+            background: #0088cc;
+            color: white;
+        }
+        .btn-telegram:hover {
+            background: #006699;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .error-box {
+            background: #ffe7e7;
+            border: 1px solid #ffb3b3;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success-box {
+            background: #e7ffe7;
+            border: 1px solid #b3ffb3;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Telegram 登录功能测试</h1>
+        
+        <div class="info-box">
+            <h3>📱 测试说明</h3>
+            <p>此页面用于测试 Telegram 登录功能。请在 Telegram 应用中打开此页面以获得最佳体验。</p>
+            <p><strong>当前状态：</strong> <span id="telegramStatus">检测中...</span></p>
+        </div>
+
+        <div class="divider">
+            <span>测试按钮</span>
+        </div>
+
+        <button class="btn btn-telegram" onclick="testTelegramLogin()">
+            📱 Telegram 快捷登录
+        </button>
+
+        <button class="btn btn-primary" onclick="testBotInfo()">
+            🤖 获取 Bot 信息
+        </button>
+
+        <div class="divider">
+            <span>测试结果</span>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // 检查 Telegram Web App 支持
+        function checkTelegramSupport() {
+            const statusElement = document.getElementById('telegramStatus');
+            
+            if (window.Telegram && window.Telegram.WebApp) {
+                const webApp = window.Telegram.WebApp;
+                statusElement.innerHTML = '✅ Telegram Web App 已加载';
+                statusElement.style.color = 'green';
+                
+                // 初始化 Telegram Web App
+                webApp.ready();
+                webApp.expand();
+                
+                console.log('Telegram Web App 信息:', {
+                    initData: webApp.initData,
+                    initDataUnsafe: webApp.initDataUnsafe,
+                    version: webApp.version,
+                    platform: webApp.platform
+                });
+            } else {
+                statusElement.innerHTML = '❌ 未检测到 Telegram Web App';
+                statusElement.style.color = 'red';
+            }
+        }
+
+        // 测试 Telegram 登录
+        async function testTelegramLogin() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            try {
+                // 检查是否支持Telegram登录
+                if (!window.Telegram || !window.Telegram.WebApp) {
+                    showResult('❌ 请在Telegram应用中打开此页面', 'error');
+                    return;
+                }
+
+                const webApp = window.Telegram.WebApp;
+                
+                // 检查用户是否已授权
+                if (!webApp.initDataUnsafe || !webApp.initDataUnsafe.user) {
+                    showResult('❌ 无法获取Telegram用户信息', 'error');
+                    return;
+                }
+
+                const telegramUser = webApp.initDataUnsafe.user;
+                showResult(`📋 获取到Telegram用户信息: ${JSON.stringify(telegramUser, null, 2)}`, 'info');
+
+                // 调用后端API
+                showResult('🔄 正在调用后端登录API...', 'info');
+                
+                const response = await fetch('http://localhost:3000/api/auth/telegram', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(telegramUser)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showResult(`✅ Telegram登录成功！\n用户ID: ${result.user.id}\n用户名: ${result.user.username}\n是否新用户: ${result.isNewUser ? '是' : '否'}`, 'success');
+                } else {
+                    showResult(`❌ Telegram登录失败: ${result.error || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ 测试过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 测试获取 Bot 信息
+        async function testBotInfo() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            try {
+                showResult('🔄 正在获取Bot信息...', 'info');
+                
+                const response = await fetch('http://localhost:3000/api/auth/telegram/bot-info');
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showResult(`✅ Bot信息获取成功！\nBot名称: ${result.data.result.first_name}\n用户名: ${result.data.result.username}`, 'success');
+                } else {
+                    showResult(`❌ Bot信息获取失败: ${result.error || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ 测试过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 显示测试结果
+        function showResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultElement = document.createElement('div');
+            resultElement.className = type === 'error' ? 'error-box' : type === 'success' ? 'success-box' : 'info-box';
+            resultElement.innerHTML = `<pre>${message}</pre>`;
+            resultsDiv.appendChild(resultElement);
+            
+            // 自动滚动到底部
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // 页面加载完成后检查 Telegram 支持
+        document.addEventListener('DOMContentLoaded', checkTelegramSupport);
+    </script>
+</body>
+</html>

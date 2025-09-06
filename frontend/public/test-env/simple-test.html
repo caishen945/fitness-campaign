@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简化测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.loaded { background-color: #d4edda; color: #155724; }
+        .status.not-loaded { background-color: #f8d7da; color: #721c24; }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-btn:hover { background: #0056b3; }
+        .console {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 简化测试页面</h1>
+    <p>这个页面用于测试模块加载是否正常</p>
+
+    <div class="test-section">
+        <h2>📋 模块状态检查</h2>
+        <div id="moduleStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 功能测试</h2>
+        <button class="test-btn" onclick="testBasicFunctions()">测试基础功能</button>
+        <button class="test-btn" onclick="testTelegramMock()">测试Telegram模拟器</button>
+        <button class="test-btn" onclick="testApiMock()">测试API模拟器</button>
+        <button class="test-btn" onclick="testDeviceSimulator()">测试设备模拟器</button>
+        <button class="test-btn" onclick="testLanguageTester()">测试语言测试器</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 控制台输出</h2>
+        <div id="console" class="console"></div>
+        <button class="test-btn" onclick="clearConsole()">清空控制台</button>
+    </div>
+
+    <!-- 脚本加载 -->
+    <script src="telegram-mock.js"></script>
+    <script src="api-mock.js"></script>
+    <script src="device-simulator.js"></script>
+    <script src="language-tester.js"></script>
+
+    <script>
+        // 控制台输出函数
+        function log(message) {
+            const console = document.getElementById('console');
+            const line = document.createElement('div');
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+        }
+
+        // 检查模块状态
+        function checkModuleStatus() {
+            const modules = [
+                { name: 'Telegram模拟器', global: 'telegramMock' },
+                { name: 'API模拟器', global: 'apiMock' },
+                { name: '设备模拟器', global: 'deviceSimulator' },
+                { name: '语言测试器', global: 'languageTester' }
+            ];
+
+            const statusDiv = document.getElementById('moduleStatus');
+            let statusHTML = '';
+
+            modules.forEach(module => {
+                const isLoaded = window[module.global] !== undefined;
+                const statusClass = isLoaded ? 'loaded' : 'not-loaded';
+                const statusText = isLoaded ? '✅ 已加载' : '❌ 未加载';
+                
+                statusHTML += `
+                    <div class="status ${statusClass}">
+                        ${module.name}: ${statusText}
+                    </div>
+                `;
+            });
+
+            statusDiv.innerHTML = statusHTML;
+        }
+
+        // 测试基础功能
+        function testBasicFunctions() {
+            log('🧪 开始测试基础功能...');
+            
+            try {
+                // 测试DOM操作
+                const testDiv = document.createElement('div');
+                testDiv.textContent = '测试DOM操作';
+                document.body.appendChild(testDiv);
+                document.body.removeChild(testDiv);
+                log('✅ DOM操作测试成功');
+
+                // 测试事件系统
+                let eventTriggered = false;
+                const testEvent = new CustomEvent('test-event');
+                document.addEventListener('test-event', () => { eventTriggered = true; });
+                document.dispatchEvent(testEvent);
+                log(eventTriggered ? '✅ 事件系统测试成功' : '❌ 事件系统测试失败');
+
+                // 测试异步操作
+                setTimeout(() => {
+                    log('✅ 异步操作测试成功');
+                }, 100);
+
+            } catch (error) {
+                log(`❌ 基础功能测试失败: ${error.message}`);
+            }
+        }
+
+        // 测试Telegram模拟器
+        function testTelegramMock() {
+            log('🧪 开始测试Telegram模拟器...');
+            
+            if (window.telegramMock) {
+                try {
+                    const status = window.telegramMock.getStatus();
+                    log(`✅ Telegram模拟器状态: ${JSON.stringify(status)}`);
+                    
+                    // 测试模拟授权
+                    window.telegramMock.simulateAuth();
+                    log('✅ Telegram模拟授权测试成功');
+                    
+                } catch (error) {
+                    log(`❌ Telegram模拟器测试失败: ${error.message}`);
+                }
+            } else {
+                log('❌ Telegram模拟器未加载');
+            }
+        }
+
+        // 测试API模拟器
+        function testApiMock() {
+            log('🧪 开始测试API模拟器...');
+            
+            if (window.apiMock) {
+                try {
+                    const status = window.apiMock.getStatus();
+                    log(`✅ API模拟器状态: ${JSON.stringify(status)}`);
+                    
+                    // 测试API请求
+                    window.apiMock.request('/api/test', 'GET').then(response => {
+                        log(`✅ API请求测试成功: ${JSON.stringify(response)}`);
+                    }).catch(error => {
+                        log(`❌ API请求测试失败: ${error.message}`);
+                    });
+                    
+                } catch (error) {
+                    log(`❌ API模拟器测试失败: ${error.message}`);
+                }
+            } else {
+                log('❌ API模拟器未加载');
+            }
+        }
+
+        // 测试设备模拟器
+        function testDeviceSimulator() {
+            log('🧪 开始测试设备模拟器...');
+            
+            if (window.deviceSimulator) {
+                try {
+                    const status = window.deviceSimulator.getStatus();
+                    log(`✅ 设备模拟器状态: ${JSON.stringify(status)}`);
+                    
+                    // 测试设备切换
+                    window.deviceSimulator.switchDevice('mobile');
+                    log('✅ 设备切换测试成功');
+                    
+                } catch (error) {
+                    log(`❌ 设备模拟器测试失败: ${error.message}`);
+                }
+            } else {
+                log('❌ 设备模拟器未加载');
+            }
+        }
+
+        // 测试语言测试器
+        function testLanguageTester() {
+            log('🧪 开始测试语言测试器...');
+            
+            if (window.languageTester) {
+                try {
+                    const status = window.languageTester.getStatus();
+                    log(`✅ 语言测试器状态: ${JSON.stringify(status)}`);
+                    
+                    // 测试语言切换
+                    window.languageTester.switchLanguage('zh-CN');
+                    log('✅ 语言切换测试成功');
+                    
+                } catch (error) {
+                    log(`❌ 语言测试器测试失败: ${error.message}`);
+                }
+            } else {
+                log('❌ 语言测试器未加载');
+            }
+        }
+
+        // 页面加载完成后检查模块状态
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 页面加载完成，开始检查模块状态...');
+            
+            // 延迟检查，确保脚本有时间加载
+            setTimeout(() => {
+                checkModuleStatus();
+                log('📋 模块状态检查完成');
+            }, 500);
+        });
+
+        // 监听模块加载事件
+        window.addEventListener('load', () => {
+            log('📱 所有资源加载完成');
+            checkModuleStatus();
+        });
+    </script>
+</body>
+</html>

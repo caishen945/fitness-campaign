@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块导入测试 - 详细�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-result { margin-top: 10px; }
+        h2 { margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h1>模块导入测试 - 详细调试�?/h1>
+    
+    <div class="test-section">
+        <div class="test-title">环境信息</div>
+        <div id="env-info"></div>
+    </div>
+
+    <h2>1. 测试相对路径导入</h2>
+    <div class="test-section">
+        <div class="test-title">使用相对路径 './pages/UserManagement.js'</div>
+        <button id="test-relative">测试相对路径</button>
+        <div id="relative-result" class="test-result">点击按钮开始测�?..</div>
+    </div>
+
+    <h2>2. 测试绝对路径导入</h2>
+    <div class="test-section">
+        <div class="test-title">使用绝对路径 '/src/pages/UserManagement.js'</div>
+        <button id="test-absolute">测试绝对路径</button>
+        <div id="absolute-result" class="test-result">点击按钮开始测�?..</div>
+    </div>
+
+    <h2>3. 测试带查询参数的导入</h2>
+    <div class="test-section">
+        <div class="test-title">使用带查询参数的路径 '/src/pages/UserManagement.js?v=20250819220000'</div>
+        <button id="test-query">测试带查询参�?/button>
+        <div id="query-result" class="test-result">点击按钮开始测�?..</div>
+    </div>
+
+    <h2>4. 测试直接获取文件</h2>
+    <div class="test-section">
+        <div class="test-title">使用fetch直接获取文件内容</div>
+        <button id="test-fetch">测试直接获取</button>
+        <div id="fetch-result" class="test-result">点击按钮开始测�?..</div>
+        <pre id="fetch-content" style="display:none;"></pre>
+    </div>
+
+    <h2>5. 测试其他模块</h2>
+    <div class="test-section">
+        <div class="test-title">测试导入 VIPManagement 模块</div>
+        <button id="test-vip">测试VIP模块</button>
+        <div id="vip-result" class="test-result">点击按钮开始测�?..</div>
+    </div>
+
+    <script type="module">
+        // 显示环境信息
+        const envInfo = document.getElementById('env-info');
+        envInfo.innerHTML = `
+            <p>当前URL: ${window.location.href}</p>
+            <p>当前路径: ${window.location.pathname}</p>
+            <p>当前主机: ${window.location.host}</p>
+            <p>当前协议: ${window.location.protocol}</p>
+            <p>当前时间: ${new Date().toLocaleString()}</p>
+        `;
+
+        // 测试相对路径
+        document.getElementById('test-relative').addEventListener('click', async () => {
+            const resultEl = document.getElementById('relative-result');
+            resultEl.innerHTML = "测试�?..";
+            
+            try {
+                console.log('开始导入相对路径模�?..');
+                const importPath = './pages/UserManagement.js';
+                console.log('导入路径:', importPath);
+                
+                const module = await import(importPath);
+                console.log('模块加载成功:', module);
+                
+                resultEl.innerHTML = `<span class="success">�?导入成功�?/span><br>模块类型: ${typeof module}<br>默认导出: ${typeof module.default}`;
+            } catch (error) {
+                console.error('模块加载失败:', error);
+                resultEl.innerHTML = `<span class="error">�?导入失败:</span><br>${error.message}<br>${error.stack}`;
+            }
+        });
+
+        // 测试绝对路径
+        document.getElementById('test-absolute').addEventListener('click', async () => {
+            const resultEl = document.getElementById('absolute-result');
+            resultEl.innerHTML = "测试�?..";
+            
+            try {
+                console.log('开始导入绝对路径模�?..');
+                const importPath = '/src/pages/UserManagement.js';
+                console.log('导入路径:', importPath);
+                
+                const module = await import(importPath);
+                console.log('模块加载成功:', module);
+                
+                resultEl.innerHTML = `<span class="success">�?导入成功�?/span><br>模块类型: ${typeof module}<br>默认导出: ${typeof module.default}`;
+            } catch (error) {
+                console.error('模块加载失败:', error);
+                resultEl.innerHTML = `<span class="error">�?导入失败:</span><br>${error.message}<br>${error.stack}`;
+            }
+        });
+
+        // 测试带查询参数的路径
+        document.getElementById('test-query').addEventListener('click', async () => {
+            const resultEl = document.getElementById('query-result');
+            resultEl.innerHTML = "测试�?..";
+            
+            try {
+                console.log('开始导入带查询参数的模�?..');
+                const importPath = '/src/pages/UserManagement.js?v=20250819220000';
+                console.log('导入路径:', importPath);
+                
+                const module = await import(importPath);
+                console.log('模块加载成功:', module);
+                
+                resultEl.innerHTML = `<span class="success">�?导入成功�?/span><br>模块类型: ${typeof module}<br>默认导出: ${typeof module.default}`;
+            } catch (error) {
+                console.error('模块加载失败:', error);
+                resultEl.innerHTML = `<span class="error">�?导入失败:</span><br>${error.message}<br>${error.stack}`;
+            }
+        });
+
+        // 测试直接获取文件
+        document.getElementById('test-fetch').addEventListener('click', async () => {
+            const resultEl = document.getElementById('fetch-result');
+            const contentEl = document.getElementById('fetch-content');
+            resultEl.innerHTML = "测试�?..";
+            contentEl.style.display = 'none';
+            
+            try {
+                console.log('开始直接获取文�?..');
+                const fetchPath = '/src/pages/UserManagement.js';
+                console.log('获取路径:', fetchPath);
+                
+                const response = await fetch(fetchPath);
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const content = await response.text();
+                console.log('文件获取成功, 内容长度:', content.length);
+                
+                resultEl.innerHTML = `<span class="success">�?获取成功�?/span><br>内容长度: ${content.length} 字符<br>内容类型: ${response.headers.get('content-type')}`;
+                contentEl.textContent = content.slice(0, 500) + '...';
+                contentEl.style.display = 'block';
+            } catch (error) {
+                console.error('文件获取失败:', error);
+                resultEl.innerHTML = `<span class="error">�?获取失败:</span><br>${error.message}`;
+            }
+        });
+
+        // 测试VIP模块
+        document.getElementById('test-vip').addEventListener('click', async () => {
+            const resultEl = document.getElementById('vip-result');
+            resultEl.innerHTML = "测试�?..";
+            
+            try {
+                console.log('开始导入VIP管理模块...');
+                const importPath = '/src/pages/VIPManagement.js';
+                console.log('导入路径:', importPath);
+                
+                const module = await import(importPath);
+                console.log('模块加载成功:', module);
+                
+                resultEl.innerHTML = `<span class="success">�?导入成功�?/span><br>模块类型: ${typeof module}<br>默认导出: ${typeof module.default}`;
+            } catch (error) {
+                console.error('模块加载失败:', error);
+                resultEl.innerHTML = `<span class="error">�?导入失败:</span><br>${error.message}<br>${error.stack}`;
+            }
+        });
+    </script>
+</body>
+</html>

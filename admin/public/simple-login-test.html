@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单登录测试页�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-content { margin-top: 10px; }
+        input, button { margin: 5px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🔐 简单登录测试页�?/h1>
+    
+    <div class="test-section">
+        <div class="test-title">1. 带超时的登录测试</div>
+        <div class="test-content">
+            <input type="text" id="username" placeholder="用户�? value="admin">
+            <input type="password" id="password" placeholder="密码" value="admin123">
+            <button id="test-login-timeout">测试登录（带超时�?/button>
+            <div id="timeout-result">点击按钮开始测�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">2. 检查请求状�?/div>
+        <div class="test-content">
+            <button id="check-request-status">检查请求状�?/button>
+            <div id="status-result">点击按钮检查状�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">3. 调试日志</div>
+        <pre id="debug-log" style="max-height: 300px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        let currentRequest = null;
+        let requestStartTime = null;
+        
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 带超时的登录测试
+        async function testLoginWithTimeout() {
+            const resultEl = document.getElementById('timeout-result');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                resultEl.innerHTML = '<span class="error">�?请输入用户名和密�?/span>';
+                return;
+            }
+            
+            resultEl.innerHTML = '<div>�?开始测试登录（带超时）...</div>';
+            
+            try {
+                log('开始带超时的登录测�?, 'info');
+                
+                // 创建AbortController用于超时控制
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    log('请求超时，正在中�?..', 'warning');
+                    controller.abort();
+                }, 10000); // 10秒超�?
+                
+                requestStartTime = Date.now();
+                log(`请求开始时�? ${new Date(requestStartTime).toLocaleTimeString()}`, 'info');
+                
+                // 发送请�?
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password }),
+                    signal: controller.signal
+                });
+                
+                // 清除超时
+                clearTimeout(timeoutId);
+                
+                const endTime = Date.now();
+                const responseTime = endTime - requestStartTime;
+                
+                log(`请求完成，耗时: ${responseTime}ms`, 'success');
+                resultEl.innerHTML += `<div style="color: green;">�?请求完成 (耗时: ${responseTime}ms)</div>`;
+                
+                // 处理响应
+                const responseText = await response.text();
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${responseText}`, 'info');
+                
+                if (response.ok) {
+                    try {
+                        const responseData = JSON.parse(responseText);
+                        if (responseData.success) {
+                            resultEl.innerHTML += '<div style="color: green;">🎉 登录成功�?/div>';
+                            resultEl.innerHTML += `<div>Token: ${responseData.data.token ? responseData.data.token.substring(0, 50) + '...' : '�?}</div>`;
+                        } else {
+                            resultEl.innerHTML += `<div style="color: orange;">⚠️ 登录失败: ${responseData.message}</div>`;
+                        }
+                    } catch (e) {
+                        resultEl.innerHTML += `<div style="color: orange;">⚠️ 响应解析失败: ${e.message}</div>`;
+                    }
+                } else {
+                    resultEl.innerHTML += `<div style="color: orange;">⚠️ 请求失败 (状�? ${response.status})</div>`;
+                    resultEl.innerHTML += `<div>错误信息: ${responseText}</div>`;
+                }
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                if (error.name === 'AbortError') {
+                    const endTime = Date.now();
+                    const responseTime = endTime - requestStartTime;
+                    log(`请求超时中止，总耗时: ${responseTime}ms`, 'warning');
+                    resultEl.innerHTML += `<div style="color: red;">�?请求超时 (${responseTime}ms)</div>`;
+                    resultEl.innerHTML += '<div>请求�?0秒内没有响应，可能的原因�?/div>';
+                    resultEl.innerHTML += '<div>- 后端服务器处理缓�?/div>';
+                    resultEl.innerHTML += '<div>- 网络连接问题</div>';
+                    resultEl.innerHTML += '<div>- 后端代码卡住</div>';
+                } else {
+                    log(`请求错误: ${error.message}`, 'error');
+                    resultEl.innerHTML += `<div style="color: red;">�?请求错误: ${error.message}</div>`;
+                }
+            }
+        }
+
+        // 检查请求状�?
+        function checkRequestStatus() {
+            const resultEl = document.getElementById('status-result');
+            const now = Date.now();
+            
+            if (requestStartTime) {
+                const elapsed = now - requestStartTime;
+                resultEl.innerHTML = `<div>请求状态检�?</div>`;
+                resultEl.innerHTML += `<div>请求开始时�? ${new Date(requestStartTime).toLocaleTimeString()}</div>`;
+                resultEl.innerHTML += `<div>当前时间: ${new Date(now).toLocaleTimeString()}</div>`;
+                resultEl.innerHTML += `<div>已耗时: ${elapsed}ms</div>`;
+                
+                if (elapsed > 10000) {
+                    resultEl.innerHTML += `<div style="color: red;">⚠️ 请求已超�?0秒，可能卡住</div>`;
+                } else {
+                    resultEl.innerHTML += `<div style="color: green;">�?请求时间正常</div>`;
+                }
+            } else {
+                resultEl.innerHTML = '<div>没有正在进行的请�?/div>';
+            }
+            
+            log('请求状态检查完�?, 'info');
+        }
+
+        // 事件绑定
+        document.getElementById('test-login-timeout').addEventListener('click', testLoginWithTimeout);
+        document.getElementById('check-request-status').addEventListener('click', checkRequestStatus);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('简单登录测试页面已加载', 'info');
+        });
+    </script>
+</body>
+</html>

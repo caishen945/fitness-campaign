@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitChallenge 管理后台 - 模块化版�?/title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding: 0; }
+        .admin-app { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: #2c3e50; color: white; box-shadow: 2px 0 5px rgba(0,0,0,0.1); position: fixed; height: 100vh; overflow-y: auto; }
+        .main-content { flex: 1; margin-left: 240px; padding: 2rem; background: #f8f9fa; min-height: 100vh; }
+        .nav-links a { color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid transparent; transition: all 0.3s ease; }
+        .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.1); border-left-color: #4cc9f0; transform: translateX(5px); }
+        .login-container { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .login-form { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+        .btn-primary { background-color: #4361ee; border-color: #4361ee; }
+        .btn-primary:hover { background-color: #3a0ca3; border-color: #3a0ca3; }
+        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .loading-indicator { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 10px; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px; }
+        .toast { background: #28a745; color: white; padding: 12px 16px; border-radius: 4px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transform: translateX(100%); transition: transform 0.3s ease; font-size: 14px; max-width: 300px; word-wrap: break-word; }
+        .page-content { background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 2rem; }
+    </style>
+</head>
+<body>
+    <div id="loading-indicator" class="loading-indicator">
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <div>加载�?..</div>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="toast-container"></div>
+    
+    <div id="admin-root">
+        <div id="login-page" class="login-container">
+            <div class="login-form">
+                <div class="text-center mb-4">
+                    <h2 style="color: #2c3e50; margin-bottom: 0.5rem;">
+                        <i class="fas fa-cogs" style="margin-right: 10px;"></i>
+                        FitChallenge 管理后台
+                    </h2>
+                    <p style="color: #7f8c8d; font-size: 0.9rem;">请输入管理员凭据</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group mb-3">
+                        <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户�?/label>
+                        <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="password" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">密码</label>
+                        <input type="password" id="password" class="form-control" placeholder="请输入密�? required>
+                    </div>
+                    
+                    <button type="submit" id="loginBtn" class="btn btn-primary w-100" style="padding: 0.75rem; font-size: 1rem;">
+                        <span class="button-text">登录</span>
+                        <span class="loading-spinner" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <small style="color: #95a5a6;">测试账户: admin / Admin123!@#</small>
+                </div>
+                
+                <div id="login-message" class="alert mt-3" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div id="main-interface" class="admin-app" style="display: none;">
+            <div class="sidebar">
+                <div style="font-size: 1.5rem; font-weight: bold; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-cogs"></i> FitChallenge
+                </div>
+                <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: #ecf0f1; font-size: 0.9rem;">
+                        <i class="fas fa-user" style="margin-right: 8px;"></i>
+                        <span id="current-user">管理�?/span>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-sm btn-outline-light mt-2" style="width: 100%; font-size: 0.8rem;">
+                        <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>退出登�?
+                    </button>
+                </div>
+                <nav style="padding: 1rem 0;">
+                    <ul class="nav-links" style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="dashboard" class="active">
+                                <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表�?
+                                <small style="float: right; opacity: 0.7;">Ctrl+1</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="users">
+                                <i class="fas fa-users" style="margin-right: 10px;"></i> 用户管理
+                                <small style="float: right; opacity: 0.7;">Ctrl+2</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="vip">
+                                <i class="fas fa-crown" style="margin-right: 10px;"></i> VIP管理
+                                <small style="float: right; opacity: 0.7;">Ctrl+3</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="wallet">
+                                <i class="fas fa-wallet" style="margin-right: 10px;"></i> 钱包管理
+                                <small style="float: right; opacity: 0.7;">Ctrl+4</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="checkin">
+                                <i class="fas fa-calendar-check" style="margin-right: 10px;"></i> 签到管理
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="pk">
+                                <i class="fas fa-trophy" style="margin-right: 10px;"></i> PK挑战管理
+                                <small style="float: right; opacity: 0.7;">Ctrl+5</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="achievements">
+                                <i class="fas fa-medal" style="margin-right: 10px;"></i> 成就管理
+                                <small style="float: right; opacity: 0.7;">Ctrl+6</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="team">
+                                <i class="fas fa-users" style="margin-right: 10px;"></i> 团队管理
+                                <small style="float: right; opacity: 0.7;">Ctrl+7</small>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 0.5rem;">
+                            <a href="#" data-page="settings">
+                                <i class="fas fa-cogs" style="margin-right: 10px;"></i> 系统设置
+                                <small style="float: right; opacity: 0.7;">Ctrl+8</small>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="main-content">
+                <div id="page-content">
+                    <!-- 页面内容将通过JavaScript动态加�?-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module">
+        // 管理后台应用 - 模块化版�?
+        class AdminApp {
+            constructor() {
+                this.currentPage = 'dashboard';
+                this.isAuthenticated = false;
+                this.user = null;
+                this.token = null;
+                this.pageModules = new Map();
+            }
+            
+            async init() {
+                console.log('🚀 管理后台初始�?..');
+                this.checkAuthStatus();
+                this.setupEventListeners();
+                this.render();
+            }
+            
+            checkAuthStatus() {
+                const adminToken = localStorage.getItem('adminToken');
+                const adminUser = localStorage.getItem('adminUser');
+                
+                if (adminToken && adminUser) {
+                    try {
+                        const user = JSON.parse(adminUser);
+                        let tokenData;
+                        if (adminToken.includes('.')) {
+                            const parts = adminToken.split('.');
+                            if (parts.length === 3) {
+                                try {
+                                    tokenData = JSON.parse(atob(parts[1]));
+                                } catch (e) {
+                                    console.error('JWT payload解析失败:', e);
+                                    tokenData = null;
+                                }
+                            }
+                        } else {
+                            tokenData = {
+                                exp: Date.now() + (24 * 60 * 60 * 1000),
+                                username: user.username || 'admin'
+                            };
+                        }
+                        
+                        if (tokenData && tokenData.exp && tokenData.exp > Date.now()) {
+                            this.isAuthenticated = true;
+                            this.token = adminToken;
+                            this.user = user;
+                            console.log('�?管理员已登录:', user.username);
+                        } else {
+                            this.clearAuth();
+                        }
+                    } catch (error) {
+                        console.error('�?解析认证信息失败:', error);
+                        this.clearAuth();
+                    }
+                } else {
+                    this.clearAuth();
+                }
+            }
+            
+            clearAuth() {
+                this.isAuthenticated = false;
+                this.token = null;
+                this.user = null;
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminUser');
+            }
+            
+            setupEventListeners() {
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const username = document.getElementById('username').value.trim();
+                        const password = document.getElementById('password').value.trim();
+                        const loginBtn = document.getElementById('loginBtn');
+                        const message = document.getElementById('login-message');
+                        
+                        loginBtn.disabled = true;
+                        loginBtn.querySelector('.button-text').textContent = '登录�?..';
+                        loginBtn.querySelector('.loading-spinner').style.display = 'inline-block';
+                        message.style.display = 'none';
+                        
+                        try {
+                            const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ username, password })
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                localStorage.setItem('adminToken', result.token);
+                                localStorage.setItem('adminUser', JSON.stringify(result.user));
+                                
+                                this.isAuthenticated = true;
+                                this.token = result.token;
+                                this.user = result.user;
+                                
+                                this.showToast('登录成功�?, 'success');
+                                this.render();
+                            } else {
+                                message.textContent = result.message || '用户名或密码错误';
+                                message.className = 'alert alert-danger';
+                                message.style.display = 'block';
+                            }
+                        } catch (error) {
+                            console.error('登录错误:', error);
+                            message.textContent = '登录失败，请检查网络连�?;
+                            message.className = 'alert alert-danger';
+                            message.style.display = 'block';
+                        } finally {
+                            loginBtn.disabled = false;
+                            loginBtn.querySelector('.button-text').textContent = '登录';
+                            loginBtn.querySelector('.loading-spinner').style.display = 'none';
+                        }
+                    });
+                }
+                
+                document.addEventListener('click', async (e) => {
+                    if (e.target.matches('[data-page]')) {
+                        e.preventDefault();
+                        await this.navigate(e.target.getAttribute('data-page'));
+                    }
+                    
+                    if (e.target.matches('#logoutBtn') || e.target.closest('#logoutBtn')) {
+                        e.preventDefault();
+                        this.logout();
+                    }
+                });
+                
+                document.addEventListener('keydown', async (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch(e.key) {
+                            case '1': e.preventDefault(); await this.navigate('dashboard'); break;
+                            case '2': e.preventDefault(); await this.navigate('users'); break;
+                            case '3': e.preventDefault(); await this.navigate('vip'); break;
+                            case '4': e.preventDefault(); await this.navigate('wallet'); break;
+                            case '5': e.preventDefault(); await this.navigate('pk'); break;
+                        }
+                    }
+                });
+            }
+            
+            async navigate(page) {
+                if (!this.isAuthenticated && page !== 'login') return;
+                this.currentPage = page;
+                await this.render();
+            }
+            
+            logout() {
+                this.clearAuth();
+                this.showToast('已成功退出登�?, 'success');
+                this.render();
+            }
+            
+            async render() {
+                const loginPage = document.getElementById('login-page');
+                const mainInterface = document.getElementById('main-interface');
+                
+                if (this.isAuthenticated) {
+                    loginPage.style.display = 'none';
+                    mainInterface.style.display = 'flex';
+                    
+                    if (this.user) {
+                        document.getElementById('current-user').textContent = this.user.username;
+                    }
+                    
+                    await this.loadPageContent();
+                    this.updateNavigation();
+                } else {
+                    loginPage.style.display = 'flex';
+                    mainInterface.style.display = 'none';
+                }
+            }
+            
+            async loadPageContent() {
+                const pageContent = document.getElementById('page-content');
+                
+                try {
+                    let content = '';
+                    
+                    switch (this.currentPage) {
+                        case 'dashboard':
+                            content = this.renderDashboard();
+                            break;
+                        case 'users':
+                            content = await this.loadUserManagement();
+                            break;
+                        case 'vip':
+                            content = await this.loadVIPManagement();
+                            break;
+                        case 'wallet':
+                            content = await this.loadWalletManagement();
+                            break;
+                        case 'checkin':
+                            content = await this.loadCheckinManagement();
+                            break;
+                        case 'pk':
+                            content = await this.loadPKManagement();
+                            break;
+                        case 'achievements':
+                            content = await this.loadAchievementManagement();
+                            break;
+                        case 'team':
+                            content = await this.loadTeamManagement();
+                            break;
+                        case 'settings':
+                            content = await this.loadSystemSettings();
+                            break;
+                        default:
+                            content = '<h1>页面不存�?/h1>';
+                    }
+                    
+                    pageContent.innerHTML = content;
+                    
+                } catch (error) {
+                    console.error('页面加载错误:', error);
+                    pageContent.innerHTML = `
+                        <div class="page-content">
+                            <h1>页面加载失败</h1>
+                            <p>错误信息: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            renderDashboard() {
+                return `
+                    <div class="page-content">
+                        <h1 style="margin-bottom: 1.5rem; color: #2c3e50;">仪表�?/h1>
+                        <div class="dashboard-stats">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white;">
+                                <div style="font-size: 2rem; margin-bottom: 1rem;">👥</div>
+                                <div style="font-size: 2rem; font-weight: bold;">1,258</div>
+                                <div style="font-size: 1.1rem;">总用户数</div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white;">
+                                <div style="font-size: 2rem; margin-bottom: 1rem;">🏆</div>
+                                <div style="font-size: 2rem; font-weight: bold;">8,742,105</div>
+                                <div style="font-size: 1.1rem;">总步�?/div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #f8961e, #f3722c); color: white;">
+                                <div style="font-size: 2rem; margin-bottom: 1rem;">💰</div>
+                                <div style="font-size: 2rem; font-weight: bold;">24,580</div>
+                                <div style="font-size: 1.1rem;">总奖励发�?/div>
+                            </div>
+                            <div class="stat-card" style="background: linear-gradient(135deg, #f94144, #f9844a); color: white;">
+                                <div style="font-size: 2rem; margin-bottom: 1rem;">🚩</div>
+                                <div style="font-size: 2rem; font-weight: bold;">3,421</div>
+                                <div style="font-size: 1.1rem;">进行中的挑战</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            async loadUserManagement() {
+                try {
+                    const module = await import('./src/pages/UserManagement.js?v=3.0.2&t=' + Date.now());
+                    const UserManagement = module.default;
+                    const userManagement = new UserManagement(this);
+                    return userManagement.render();
+                } catch (error) {
+                    console.error('用户管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>用户管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadVIPManagement() {
+                try {
+                    const module = await import('./src/pages/VIPManagement.js?v=3.0.2&t=' + Date.now());
+                    const VIPManagement = module.default;
+                    const vipManagement = new VIPManagement(this);
+                    return vipManagement.render();
+                } catch (error) {
+                    console.error('VIP管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>VIP管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadWalletManagement() {
+                try {
+                    const module = await import('./src/pages/WalletManagement.js?v=3.0.2&t=' + Date.now());
+                    const WalletManagement = module.default;
+                    const walletManagement = new WalletManagement(this);
+                    return walletManagement.render();
+                } catch (error) {
+                    console.error('钱包管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>钱包管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadCheckinManagement() {
+                try {
+                    const module = await import('./src/pages/CheckinManagement.js?v=3.0.2&t=' + Date.now());
+                    const CheckinManagement = module.default;
+                    const checkinManagement = new CheckinManagement(this);
+                    return checkinManagement.render();
+                } catch (error) {
+                    console.error('签到管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>签到管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadPKManagement() {
+                try {
+                    const module = await import('./src/pages/PKChallengeManagement.js?v=3.0.2&t=' + Date.now());
+                    const PKChallengeManagement = module.default;
+                    const pkManagement = new PKChallengeManagement(this);
+                    return pkManagement.render();
+                } catch (error) {
+                    console.error('PK挑战管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>PK挑战管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadAchievementManagement() {
+                try {
+                    const module = await import('./src/pages/AchievementManagement.js?v=3.0.2&t=' + Date.now());
+                    const AchievementManagement = module.default;
+                    const achievementManagement = new AchievementManagement(this);
+                    return achievementManagement.render();
+                } catch (error) {
+                    console.error('成就管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>成就管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadTeamManagement() {
+                try {
+                    const module = await import('./src/pages/TeamManagement.js?v=3.0.2&t=' + Date.now());
+                    const TeamManagement = module.default;
+                    const teamManagement = new TeamManagement(this);
+                    return teamManagement.render();
+                } catch (error) {
+                    console.error('团队管理模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>团队管理</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            async loadSystemSettings() {
+                try {
+                    const module = await import('./src/pages/SystemSettings.js?v=3.0.2&t=' + Date.now());
+                    const SystemSettings = module.default;
+                    const systemSettings = new SystemSettings(this);
+                    await systemSettings.loadVersionInfo();
+                    const content = systemSettings.render();
+                    
+                    // 设置事件监听器需要在DOM更新后执�?
+                    setTimeout(() => {
+                        systemSettings.setupEventListeners();
+                    }, 100);
+                    
+                    return content;
+                } catch (error) {
+                    console.error('系统设置模块加载失败:', error);
+                    return `
+                        <div class="page-content">
+                            <h1>系统设置</h1>
+                            <p>模块加载失败: ${error.message}</p>
+                            <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            updateNavigation() {
+                const navLinks = document.querySelectorAll('.nav-links a');
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('data-page') === this.currentPage) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.style.background = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+                toast.textContent = message;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+        }
+        
+        // 初始化应�?
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔍 页面加载完成，初始化模块化管理后�?..');
+            const app = new AdminApp();
+            window.adminApp = app;
+            await app.init();
+        });
+    </script>
+</body>
+</html>

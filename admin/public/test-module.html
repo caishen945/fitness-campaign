@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块导入测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>模块导入测试</h1>
+    <div id="result">测试�?..</div>
+    <pre id="details"></pre>
+
+    <script type="module">
+        const resultEl = document.getElementById('result');
+        const detailsEl = document.getElementById('details');
+        
+        try {
+            console.log('开始导入模�?..');
+            const importPath = '/src/pages/UserManagement.js';
+            console.log('导入路径:', importPath);
+            
+            const module = await import(importPath);
+            console.log('模块加载成功:', module);
+            
+            resultEl.innerHTML = `<span class="success">�?导入成功！模�? ${JSON.stringify(module)}</span>`;
+            detailsEl.textContent = `模块内容:\n${JSON.stringify(module, null, 2)}`;
+        } catch (error) {
+            console.error('模块加载失败:', error);
+            resultEl.innerHTML = `<span class="error">�?导入失败: ${error.message}</span>`;
+            detailsEl.textContent = `错误详情:\n${error.stack}`;
+        }
+    </script>
+</body>
+</html>

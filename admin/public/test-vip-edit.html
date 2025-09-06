@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP编辑功能测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: white; margin: 15% auto; padding: 20px; border-radius: 5px; width: 80%; max-width: 500px; }
+        .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 VIP编辑功能测试</h1>
+    
+    <div class="status info">
+        <h3>测试说明</h3>
+        <p>此页面用于测试VIP等级编辑功能�?/p>
+        <ul>
+            <li>�?获取VIP等级列表</li>
+            <li>�?编辑VIP等级信息</li>
+            <li>�?验证数据保存</li>
+            <li>�?错误处理测试</li>
+        </ul>
+    </div>
+    
+    <div id="testResults"></div>
+    
+    <div style="margin: 20px 0;">
+        <button class="btn-primary" onclick="loadVipLevels()">加载VIP等级</button>
+        <button class="btn-success" onclick="testEditVip()">测试编辑VIP</button>
+        <button class="btn-danger" onclick="testDuplicateName()">测试重复名称</button>
+        <button class="btn-primary" onclick="showEditModal()">显示编辑模态框</button>
+    </div>
+    
+    <!-- VIP编辑模态框 -->
+    <div id="vipEditModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>编辑VIP等级</h2>
+            <form id="vipEditForm">
+                <div class="form-group">
+                    <label for="levelName">等级名称:</label>
+                    <input type="text" id="levelName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="stepGoal">每日目标步数:</label>
+                    <input type="number" id="stepGoal" name="step_goal" required>
+                </div>
+                <div class="form-group">
+                    <label for="deposit">押金金额:</label>
+                    <input type="number" id="deposit" name="deposit" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="reward">每日奖励:</label>
+                    <input type="number" id="reward" name="reward" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="challengeTimes">挑战次数:</label>
+                    <input type="number" id="challengeTimes" name="challenge_times" required>
+                </div>
+                <div class="form-group">
+                    <label for="levelColor">等级颜色:</label>
+                    <input type="color" id="levelColor" name="color" value="#FFD700">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" name="is_active" checked>
+                        启用状�?
+                    </label>
+                </div>
+                <button type="submit" class="btn-success">保存</button>
+                <button type="button" class="btn-danger" onclick="closeModal()">取消</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let vipLevels = [];
+        let currentEditLevel = null;
+        
+        async function loadVipLevels() {
+            let html = '<h3>🏆 VIP等级列表</h3>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    vipLevels = result.data;
+                    html += '<div class="status success">�?VIP等级加载成功</div>';
+                    html += `<div class="status info">�?${vipLevels.length} 个等�?/div>`;
+                    
+                    html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">';
+                    html += '<tr style="background: #f8f9fa;"><th style="padding: 10px; text-align: left;">ID</th><th style="padding: 10px; text-align: left;">名称</th><th style="padding: 10px; text-align: left;">押金</th><th style="padding: 10px; text-align: left;">奖励</th><th style="padding: 10px; text-align: left;">操作</th></tr>';
+                    
+                    vipLevels.forEach(level => {
+                        html += `<tr style="border-bottom: 1px solid #ddd;">`;
+                        html += `<td style="padding: 10px;">${level.id}</td>`;
+                        html += `<td style="padding: 10px;">${level.name || level.level_name || '未知'}</td>`;
+                        html += `<td style="padding: 10px;">${level.deposit_amount || level.deposit || 0}</td>`;
+                        html += `<td style="padding: 10px;">${level.reward_amount || level.reward || 0}</td>`;
+                        html += `<td style="padding: 10px;"><button onclick="editLevel(${level.id})" class="btn-primary">编辑</button></td>`;
+                        html += `</tr>`;
+                    });
+                    
+                    html += '</table>';
+                } else {
+                    html += '<div class="status error">�?VIP等级加载失败</div>';
+                    html += `<div class="status error">错误信息: ${result.message || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                html += '<div class="status error">�?VIP等级加载失败</div>';
+                html += `<div class="status error">错误: ${error.message}</div>`;
+            }
+            
+            document.getElementById('testResults').innerHTML = html;
+        }
+        
+        function editLevel(levelId) {
+            const level = vipLevels.find(l => l.id == levelId);
+            if (level) {
+                currentEditLevel = level;
+                showEditModal();
+                populateForm(level);
+            }
+        }
+        
+        function populateForm(level) {
+            document.getElementById('levelName').value = level.name || level.level_name || '';
+            document.getElementById('stepGoal').value = level.step_target || level.step_goal || level.stepGoal || '';
+            document.getElementById('deposit').value = level.deposit_amount || level.deposit || '';
+            document.getElementById('reward').value = level.reward_amount || level.reward || '';
+            document.getElementById('challengeTimes').value = level.challenge_times || level.challengeTimes || '';
+            document.getElementById('levelColor').value = level.color || '#FFD700';
+            document.getElementById('isActive').checked = level.is_active !== false && level.isActive !== false;
+        }
+        
+        function showEditModal() {
+            document.getElementById('vipEditModal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('vipEditModal').style.display = 'none';
+            currentEditLevel = null;
+            document.getElementById('vipEditForm').reset();
+        }
+        
+        async function testEditVip() {
+            if (vipLevels.length === 0) {
+                alert('请先加载VIP等级列表');
+                return;
+            }
+            
+            const level = vipLevels[0];
+            const testData = {
+                name: level.name + '_TEST_' + Date.now(),
+                step_goal: 10000,
+                deposit: 100.0,
+                reward: 10.0,
+                challenge_times: 3,
+                color: '#FF0000',
+                is_active: true
+            };
+            
+            let html = '<h3>🔧 VIP编辑测试</h3>';
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/vip-levels/${level.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    html += '<div class="status success">�?VIP编辑测试成功</div>';
+                    html += '<div class="status info">测试数据:</div>';
+                    html += `<div class="status info" style="font-family: monospace; font-size: 12px;">`;
+                    html += JSON.stringify(testData, null, 2);
+                    html += '</div>';
+                } else {
+                    html += '<div class="status error">�?VIP编辑测试失败</div>';
+                    html += `<div class="status error">错误信息: ${result.message || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                html += '<div class="status error">�?VIP编辑测试失败</div>';
+                html += `<div class="status error">错误: ${error.message}</div>`;
+            }
+            
+            document.getElementById('testResults').innerHTML = html;
+        }
+        
+        async function testDuplicateName() {
+            if (vipLevels.length === 0) {
+                alert('请先加载VIP等级列表');
+                return;
+            }
+            
+            const level = vipLevels[0];
+            const testData = {
+                name: level.name, // 使用相同的名�?
+                step_goal: 10000,
+                deposit: 100.0,
+                reward: 10.0,
+                challenge_times: 3,
+                color: '#FF0000',
+                is_active: true
+            };
+            
+            let html = '<h3>🔧 重复名称测试</h3>';
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/admin/vip-levels/${level.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.status === 400 && result.message.includes('已存�?)) {
+                    html += '<div class="status success">�?重复名称检测正�?/div>';
+                    html += `<div class="status info">错误信息: ${result.message}</div>`;
+                } else {
+                    html += '<div class="status warning">⚠️ 重复名称检测可能有问题</div>';
+                    html += `<div class="status info">响应: ${JSON.stringify(result)}</div>`;
+                }
+            } catch (error) {
+                html += '<div class="status error">�?重复名称测试失败</div>';
+                html += `<div class="status error">错误: ${error.message}</div>`;
+            }
+            
+            document.getElementById('testResults').innerHTML = html;
+        }
+        
+        // 表单提交处理
+        document.getElementById('vipEditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('levelName').value,
+                step_goal: parseInt(document.getElementById('stepGoal').value),
+                deposit: parseFloat(document.getElementById('deposit').value),
+                reward: parseFloat(document.getElementById('reward').value),
+                challenge_times: parseInt(document.getElementById('challengeTimes').value),
+                color: document.getElementById('levelColor').value,
+                is_active: document.getElementById('isActive').checked
+            };
+            
+            let html = '<h3>💾 保存VIP等级</h3>';
+            
+            try {
+                const url = currentEditLevel 
+                    ? `http://localhost:3000/api/admin/vip-levels/${currentEditLevel.id}`
+                    : 'http://localhost:3000/api/admin/vip-levels';
+                
+                const method = currentEditLevel ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    html += '<div class="status success">�?VIP等级保存成功</div>';
+                    closeModal();
+                    loadVipLevels(); // 重新加载列表
+                } else {
+                    html += '<div class="status error">�?VIP等级保存失败</div>';
+                    html += `<div class="status error">错误信息: ${result.message || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                html += '<div class="status error">�?VIP等级保存失败</div>';
+                html += `<div class="status error">错误: ${error.message}</div>`;
+            }
+            
+            document.getElementById('testResults').innerHTML = html;
+        });
+        
+        // 页面加载时自动加载VIP等级
+        window.onload = loadVipLevels;
+    </script>
+</body>
+</html>

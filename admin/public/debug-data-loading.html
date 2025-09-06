@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据加载调试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>数据加载调试页面</h1>
+    
+    <div class="test-section">
+        <h2>1. 测试API连接</h2>
+        <button onclick="testApiConnection()">测试API连接</button>
+        <div id="api-test-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 测试用户数据加载</h2>
+        <button onclick="testUserData()">测试用户数据</button>
+        <div id="user-test-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 测试VIP数据加载</h2>
+        <button onclick="testVipData()">测试VIP数据</button>
+        <div id="vip-test-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 测试adminApi对象</h2>
+        <button onclick="testAdminApi()">测试adminApi对象</button>
+        <div id="adminapi-test-log" class="log"></div>
+    </div>
+
+    <script type="module">
+        // 导入adminApi
+        import adminApi from './src/services/adminApi.js';
+        
+        // 全局函数
+        window.testApiConnection = async function() {
+            const log = document.getElementById('api-test-log');
+            log.innerHTML = '<span class="info">正在测试API连接...</span>';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/test');
+                const data = await response.json();
+                log.innerHTML = `<span class="success">�?API连接成功: ${JSON.stringify(data)}</span>`;
+            } catch (error) {
+                log.innerHTML = `<span class="error">�?API连接失败: ${error.message}</span>`;
+            }
+        };
+        
+        window.testUserData = async function() {
+            const log = document.getElementById('user-test-log');
+            log.innerHTML = '<span class="info">正在测试用户数据加载...</span>';
+            
+            try {
+                const response = await adminApi.getUsers();
+                log.innerHTML = `<span class="success">�?用户数据加载成功: ${JSON.stringify(response)}</span>`;
+            } catch (error) {
+                log.innerHTML = `<span class="error">�?用户数据加载失败: ${error.message}</span>`;
+            }
+        };
+        
+        window.testVipData = async function() {
+            const log = document.getElementById('vip-test-log');
+            log.innerHTML = '<span class="info">正在测试VIP数据加载...</span>';
+            
+            try {
+                const response = await adminApi.getVipLevels();
+                log.innerHTML = `<span class="success">�?VIP数据加载成功: ${JSON.stringify(response)}</span>`;
+            } catch (error) {
+                log.innerHTML = `<span class="error">�?VIP数据加载失败: ${error.message}</span>`;
+            }
+        };
+        
+        window.testAdminApi = function() {
+            const log = document.getElementById('adminapi-test-log');
+            log.innerHTML = '<span class="info">正在测试adminApi对象...</span>';
+            
+            try {
+                const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(adminApi));
+                log.innerHTML = `<span class="success">�?adminApi对象正常，方法数�? ${methods.length}</span><br>
+                                <span class="info">方法列表: ${methods.join(', ')}</span>`;
+            } catch (error) {
+                log.innerHTML = `<span class="error">�?adminApi对象测试失败: ${error.message}</span>`;
+            }
+        };
+        
+        // 页面加载完成后自动测�?
+        window.addEventListener('load', function() {
+            console.log('调试页面加载完成');
+            testAdminApi();
+        });
+    </script>
+</body>
+</html>

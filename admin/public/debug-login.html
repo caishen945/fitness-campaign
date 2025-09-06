@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试登录 - FitChallenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3a0ca3;
+        }
+        .debug-info {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2 style="text-align: center; color: #2c3e50; margin-bottom: 1.5rem;">
+            FitChallenge 调试登录
+        </h2>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户�?/label>
+                <input type="text" id="username" placeholder="请输入用户名" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密�? required>
+            </div>
+            
+            <button type="submit" id="loginBtn">登录</button>
+        </form>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="debug-info">
+            <strong>调试信息:</strong><br>
+            <span id="debugStatus">页面加载�?..</span><br>
+            <span id="debugForm">表单状�? 检查中...</span><br>
+            <span id="debugEvent">事件绑定: 检查中...</span>
+        </div>
+        
+        <div style="text-align: center; margin-top: 1rem;">
+            <small style="color: #95a5a6;">
+                测试账户: admin / Admin123!@#
+            </small>
+        </div>
+    </div>
+
+    <script>
+        // 调试信息更新
+        function updateDebugInfo(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+            }
+        }
+
+        // 页面加载完成后检�?
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 页面加载完成，开始调�?..');
+            updateDebugInfo('debugStatus', '页面加载完成');
+            
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (loginForm) {
+                updateDebugInfo('debugForm', '表单状�? 找到表单元素');
+                console.log('�?找到登录表单:', loginForm);
+            } else {
+                updateDebugInfo('debugForm', '表单状�? 未找到表单元�?);
+                console.error('�?未找到登录表�?);
+            }
+            
+            if (loginBtn) {
+                console.log('�?找到登录按钮:', loginBtn);
+            } else {
+                console.error('�?未找到登录按�?);
+            }
+        });
+
+        // 绑定登录事件
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            console.log('🚀 表单提交事件触发');
+            e.preventDefault(); // 阻止默认提交行为
+            e.stopPropagation(); // 阻止事件冒泡
+            
+            updateDebugInfo('debugEvent', '事件绑定: 表单提交事件已触�?);
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            const message = document.getElementById('message');
+            
+            console.log('📝 输入的用户名:', username);
+            console.log('📝 输入的密�?', password);
+            
+            // 显示加载状�?
+            loginBtn.textContent = '登录�?..';
+            loginBtn.disabled = true;
+            message.style.display = 'none';
+            
+            try {
+                console.log('🌐 开始API请求...');
+                updateDebugInfo('debugStatus', '正在发送API请求...');
+                
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                console.log('📡 API响应状�?', response.status);
+                updateDebugInfo('debugStatus', `API响应: ${response.status}`);
+                
+                const result = await response.json();
+                console.log('📄 API响应数据:', result);
+                
+                if (result.success) {
+                    message.textContent = '登录成功！正在跳�?..';
+                    message.className = 'message success';
+                    message.style.display = 'block';
+                    
+                    updateDebugInfo('debugStatus', '登录成功，保存token...');
+                    
+                    // 保存token
+                    localStorage.setItem('adminToken', result.token);
+                    localStorage.setItem('adminUser', JSON.stringify(result.user));
+                    
+                    console.log('💾 Token已保�?', result.token);
+                    console.log('💾 用户信息已保�?', result.user);
+                    
+                    // 延迟跳转
+                    setTimeout(() => {
+                        updateDebugInfo('debugStatus', '正在跳转到主页面...');
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    message.textContent = result.message || '登录失败';
+                    message.className = 'message error';
+                    message.style.display = 'block';
+                    updateDebugInfo('debugStatus', '登录失败: ' + (result.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('💥 登录错误:', error);
+                message.textContent = '登录失败，请检查网络连�?;
+                message.className = 'message error';
+                message.style.display = 'block';
+                updateDebugInfo('debugStatus', '网络错误: ' + error.message);
+            } finally {
+                loginBtn.textContent = '登录';
+                loginBtn.disabled = false;
+            }
+        });
+        
+        updateDebugInfo('debugEvent', '事件绑定: 已完�?);
+    </script>
+</body>
+</html>

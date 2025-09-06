@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员认证状态调�?/title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        .log-entry.error { color: #dc3545; }
+        .log-entry.success { color: #28a745; }
+        .log-entry.warning { color: #ffc107; }
+        .log-entry.info { color: #17a2b8; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        .token-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .real-time {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 管理员认证状态调试工�?/h1>
+        
+        <div class="section">
+            <h3>📊 当前状�?/h3>
+            <div id="currentStatus"></div>
+        </div>
+        
+        <div class="section">
+            <h3>🔧 操作控制</h3>
+            <button onclick="checkCurrentStatus()">检查当前状�?/button>
+            <button onclick="simulatePageRefresh()">模拟页面刷新</button>
+            <button onclick="clearAuthData()" class="danger">清除认证数据</button>
+            <button onclick="startMonitoring()">开始实时监�?/button>
+            <button onclick="stopMonitoring()" class="danger">停止监控</button>
+        </div>
+        
+        <div class="section">
+            <h3>📝 实时日志</h3>
+            <div id="logContainer" class="log"></div>
+        </div>
+        
+        <div class="section">
+            <h3>🔐 Token详情</h3>
+            <div id="tokenDetails"></div>
+        </div>
+        
+        <div class="section">
+            <h3>🔄 localStorage监控</h3>
+            <div id="localStorageMonitor" class="real-time">
+                <strong>localStorage变化监控已启�?/strong><br>
+                <small>任何localStorage的变化都会在这里显示</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let monitoringInterval = null;
+        let lastAuthStatus = null;
+        
+        // 日志函数
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // 检查当前状�?
+        function checkCurrentStatus() {
+            const adminToken = localStorage.getItem('adminToken');
+            const adminUser = localStorage.getItem('adminUser');
+            
+            const statusDiv = document.getElementById('currentStatus');
+            let statusHTML = '';
+            
+            if (adminToken && adminUser) {
+                try {
+                    const user = JSON.parse(adminUser);
+                    statusHTML += '<div class="status success">�?认证数据存在</div>';
+                    statusHTML += `<div class="status info">用户: ${user.username || '未知'}</div>`;
+                    statusHTML += `<div class="status info">Token: ${adminToken.substring(0, 50)}...</div>`;
+                    
+                    // 解析JWT token
+                    if (adminToken.includes('.')) {
+                        const parts = adminToken.split('.');
+                        if (parts.length === 3) {
+                            try {
+                                const payload = JSON.parse(atob(parts[1]));
+                                const expTime = payload.exp * 1000;
+                                const now = Date.now();
+                                const isValid = expTime > now;
+                                
+                                statusHTML += `<div class="status ${isValid ? 'success' : 'error'}">
+                                    ${isValid ? '�? : '�?} Token状�? ${isValid ? '有效' : '已过�?}
+                                </div>`;
+                                statusHTML += `<div class="status info">
+                                    过期时间: ${new Date(expTime).toLocaleString()}
+                                </div>`;
+                                statusHTML += `<div class="status info">
+                                    剩余时间: ${Math.floor((expTime - now) / 1000)} �?
+                                </div>`;
+                            } catch (e) {
+                                statusHTML += '<div class="status error">�?Token解析失败</div>';
+                            }
+                        }
+                    }
+                } catch (e) {
+                    statusHTML += '<div class="status error">�?用户数据解析失败</div>';
+                }
+            } else {
+                statusHTML += '<div class="status error">�?认证数据不存�?/div>';
+            }
+            
+            statusDiv.innerHTML = statusHTML;
+            log('状态检查完�?, 'info');
+        }
+        
+        // 模拟页面刷新
+        function simulatePageRefresh() {
+            log('开始模拟页面刷�?..', 'warning');
+            
+            // 保存当前状�?
+            const currentToken = localStorage.getItem('adminToken');
+            const currentUser = localStorage.getItem('adminUser');
+            
+            log(`刷新�?- Token: ${currentToken ? '存在' : '不存�?}, User: ${currentUser ? '存在' : '不存�?}`, 'info');
+            
+            // 模拟刷新（清除内存中的状态，但保留localStorage�?
+            setTimeout(() => {
+                log('模拟刷新完成，检查状�?..', 'info');
+                checkCurrentStatus();
+            }, 1000);
+        }
+        
+        // 清除认证数据
+        function clearAuthData() {
+            log('清除认证数据...', 'warning');
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            log('认证数据已清�?, 'success');
+            checkCurrentStatus();
+        }
+        
+        // 开始实时监�?
+        function startMonitoring() {
+            if (monitoringInterval) {
+                log('监控已在运行�?, 'warning');
+                return;
+            }
+            
+            log('开始实时监�?..', 'success');
+            monitoringInterval = setInterval(() => {
+                const adminToken = localStorage.getItem('adminToken');
+                const adminUser = localStorage.getItem('adminUser');
+                const currentStatus = { token: !!adminToken, user: !!adminUser };
+                
+                if (lastAuthStatus === null) {
+                    lastAuthStatus = currentStatus;
+                    log('初始状态记�?, 'info');
+                } else if (JSON.stringify(lastAuthStatus) !== JSON.stringify(currentStatus)) {
+                    log(`状态变化检测到: ${JSON.stringify(lastAuthStatus)} -> ${JSON.stringify(currentStatus)}`, 'warning');
+                    lastAuthStatus = currentStatus;
+                }
+                
+                // 更新localStorage监控
+                updateLocalStorageMonitor();
+            }, 1000);
+        }
+        
+        // 停止监控
+        function stopMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+                log('监控已停�?, 'info');
+            }
+        }
+        
+        // 更新localStorage监控
+        function updateLocalStorageMonitor() {
+            const monitor = document.getElementById('localStorageMonitor');
+            const adminToken = localStorage.getItem('adminToken');
+            const adminUser = localStorage.getItem('adminUser');
+            
+            let html = '<strong>localStorage 当前状�?</strong><br>';
+            html += `adminToken: ${adminToken ? '�?存在' : '�?不存�?}<br>`;
+            html += `adminUser: ${adminUser ? '�?存在' : '�?不存�?}<br>`;
+            html += `<small>最后更�? ${new Date().toLocaleTimeString()}</small>`;
+            
+            monitor.innerHTML = html;
+        }
+        
+        // 显示Token详情
+        function showTokenDetails() {
+            const adminToken = localStorage.getItem('adminToken');
+            const detailsDiv = document.getElementById('tokenDetails');
+            
+            if (!adminToken) {
+                detailsDiv.innerHTML = '<div class="status error">�?没有找到Token</div>';
+                return;
+            }
+            
+            let html = '<div class="token-info">';
+            html += `<strong>完整Token:</strong><br>${adminToken}<br><br>`;
+            
+            if (adminToken.includes('.')) {
+                const parts = adminToken.split('.');
+                if (parts.length === 3) {
+                    try {
+                        const header = JSON.parse(atob(parts[0]));
+                        const payload = JSON.parse(atob(parts[1]));
+                        
+                        html += '<strong>Header:</strong><br>';
+                        html += JSON.stringify(header, null, 2) + '<br><br>';
+                        
+                        html += '<strong>Payload:</strong><br>';
+                        html += JSON.stringify(payload, null, 2) + '<br><br>';
+                        
+                        if (payload.exp) {
+                            const expTime = payload.exp * 1000;
+                            const now = Date.now();
+                            const isValid = expTime > now;
+                            const remaining = Math.floor((expTime - now) / 1000);
+                            
+                            html += `<strong>时间分析:</strong><br>`;
+                            html += `当前时间: ${new Date(now).toLocaleString()}<br>`;
+                            html += `过期时间: ${new Date(expTime).toLocaleString()}<br>`;
+                            html += `剩余时间: ${remaining} �?(${Math.floor(remaining / 60)} 分钟)<br>`;
+                            html += `状�? ${isValid ? '�?有效' : '�?已过�?}<br>`;
+                        }
+                    } catch (e) {
+                        html += `<div class="status error">Token解析失败: ${e.message}</div>`;
+                    }
+                }
+            }
+            
+            html += '</div>';
+            detailsDiv.innerHTML = html;
+        }
+        
+        // 监听localStorage变化
+        window.addEventListener('storage', (e) => {
+            log(`localStorage变化: ${e.key} = ${e.newValue ? '设置' : '删除'}`, 'warning');
+        });
+        
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            log('调试工具已加�?, 'success');
+            checkCurrentStatus();
+            showTokenDetails();
+            updateLocalStorageMonitor();
+            startMonitoring();
+        });
+        
+        // 页面卸载时清�?
+        window.addEventListener('beforeunload', () => {
+            stopMonitoring();
+        });
+    </script>
+</body>
+</html>

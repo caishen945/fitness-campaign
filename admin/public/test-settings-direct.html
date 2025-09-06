@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直接测试系统设置</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3><i class="fas fa-flask"></i> 系统设置直接测试</h3>
+                <p class="mb-0">绕过管理员后台框架直接测试SystemSettings类</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-info-circle"></i> 测试说明</h6>
+                    <p>这个页面会直接导入并实例化SystemSettings类，绕过AdminApp框架进行测试。</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <button id="test-import" class="btn btn-primary mb-2 w-100">
+                            <i class="fas fa-download"></i> 测试导入SystemSettings
+                        </button>
+                        <button id="test-instance" class="btn btn-success mb-2 w-100">
+                            <i class="fas fa-play"></i> 创建实例
+                        </button>
+                        <button id="test-render" class="btn btn-warning mb-2 w-100">
+                            <i class="fas fa-eye"></i> 测试渲染
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <button id="test-admin-app" class="btn btn-info mb-2 w-100">
+                            <i class="fas fa-cogs"></i> 测试AdminApp
+                        </button>
+                        <button id="simulate-click" class="btn btn-secondary mb-2 w-100">
+                            <i class="fas fa-mouse-pointer"></i> 模拟菜单点击
+                        </button>
+                        <button id="clear-results" class="btn btn-outline-danger mb-2 w-100">
+                            <i class="fas fa-trash"></i> 清除结果
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>测试结果：</h5>
+                    <div id="test-results" class="alert alert-light border" style="min-height: 200px; max-height: 400px; overflow-y: auto;">
+                        <p class="text-muted">点击上方按钮开始测试...</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>系统设置页面预览：</h5>
+                    <div id="settings-preview" class="border rounded p-3" style="min-height: 300px; background: #f8f9fa;">
+                        <p class="text-muted">等待渲染...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: '#17a2b8',
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545'
+            };
+            
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML += `<div style="color: ${colors[type] || '#6c757d'}; margin-bottom: 5px;">[${timestamp}] ${message}</div>`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        let SystemSettings = null;
+        let settingsInstance = null;
+        let mockApp = null;
+
+        // 创建模拟的AdminApp
+        function createMockApp() {
+            return {
+                token: 'mock-token',
+                currentPage: 'settings',
+                isAuthenticated: true,
+                user: { username: 'test-admin' }
+            };
+        }
+
+        // 测试导入SystemSettings
+        document.getElementById('test-import').addEventListener('click', async function() {
+            log('🔍 开始导入SystemSettings模块...', 'info');
+            
+            try {
+                const module = await import('./src/pages/SystemSettings.js');
+                SystemSettings = module.default;
+                log('✅ SystemSettings导入成功！', 'success');
+                log(`- 类名: ${SystemSettings.name}`, 'info');
+                log(`- 类型: ${typeof SystemSettings}`, 'info');
+            } catch (error) {
+                log(`❌ 导入失败: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+        });
+
+        // 测试创建实例
+        document.getElementById('test-instance').addEventListener('click', function() {
+            log('🔨 创建SystemSettings实例...', 'info');
+            
+            if (!SystemSettings) {
+                log('❌ 请先导入SystemSettings类', 'error');
+                return;
+            }
+            
+            try {
+                mockApp = createMockApp();
+                settingsInstance = new SystemSettings(mockApp);
+                log('✅ 实例创建成功！', 'success');
+                log(`- 实例类型: ${settingsInstance.constructor.name}`, 'info');
+                log(`- app属性: ${settingsInstance.app ? '存在' : '不存在'}`, 'info');
+                log(`- versionInfo: ${settingsInstance.versionInfo}`, 'info');
+            } catch (error) {
+                log(`❌ 实例创建失败: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+        });
+
+        // 测试渲染
+        document.getElementById('test-render').addEventListener('click', async function() {
+            log('🎨 测试SystemSettings渲染...', 'info');
+            
+            if (!settingsInstance) {
+                log('❌ 请先创建SystemSettings实例', 'error');
+                return;
+            }
+            
+            try {
+                // 先加载版本信息
+                log('📋 加载版本信息...', 'info');
+                await settingsInstance.loadVersionInfo();
+                log('✅ 版本信息加载完成', 'success');
+                
+                // 渲染页面
+                log('🎨 开始渲染页面...', 'info');
+                const content = settingsInstance.render();
+                log('✅ 页面渲染成功！', 'success');
+                
+                // 显示预览
+                const previewDiv = document.getElementById('settings-preview');
+                previewDiv.innerHTML = content;
+                log('✅ 预览已更新', 'success');
+                
+            } catch (error) {
+                log(`❌ 渲染失败: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+        });
+
+        // 测试AdminApp
+        document.getElementById('test-admin-app').addEventListener('click', function() {
+            log('🔍 检查父页面AdminApp...', 'info');
+            
+            if (window.parent && window.parent.adminApp) {
+                const adminApp = window.parent.adminApp;
+                log('✅ 找到AdminApp实例', 'success');
+                log(`- 当前页面: ${adminApp.currentPage}`, 'info');
+                log(`- 认证状态: ${adminApp.isAuthenticated}`, 'info');
+                log(`- 用户信息: ${adminApp.user ? JSON.stringify(adminApp.user) : 'null'}`, 'info');
+                
+                if (adminApp.pages && adminApp.pages.settings) {
+                    log('✅ settings页面配置存在', 'success');
+                    const config = adminApp.pages.settings;
+                    log(`- Class: ${config.Class ? config.Class.name : 'undefined'}`, 'info');
+                    log(`- render函数: ${typeof config.render}`, 'info');
+                    log(`- afterRender函数: ${typeof config.afterRender}`, 'info');
+                    log(`- instance: ${config.instance ? '已创建' : '未创建'}`, 'info');
+                } else {
+                    log('❌ settings页面配置不存在', 'error');
+                }
+            } else {
+                log('❌ 未找到AdminApp实例', 'error');
+                log('💡 这个页面可能不在管理员后台中打开', 'warning');
+            }
+        });
+
+        // 模拟菜单点击
+        document.getElementById('simulate-click').addEventListener('click', function() {
+            log('🖱️ 模拟点击系统设置菜单...', 'info');
+            
+            if (window.parent && window.parent.document) {
+                const settingsLink = window.parent.document.querySelector('[data-page="settings"]');
+                if (settingsLink) {
+                    log('✅ 找到系统设置菜单项', 'success');
+                    log('🚀 模拟点击事件...', 'info');
+                    
+                    // 创建点击事件
+                    const clickEvent = new window.parent.MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window.parent
+                    });
+                    
+                    // 触发点击
+                    settingsLink.dispatchEvent(clickEvent);
+                    log('✅ 点击事件已触发', 'success');
+                    
+                    // 检查是否有变化
+                    setTimeout(() => {
+                        if (window.parent.adminApp) {
+                            log(`导航后页面: ${window.parent.adminApp.currentPage}`, 'info');
+                        }
+                    }, 1000);
+                } else {
+                    log('❌ 未找到系统设置菜单项', 'error');
+                }
+            } else {
+                log('❌ 无法访问父页面', 'error');
+            }
+        });
+
+        // 清除结果
+        document.getElementById('clear-results').addEventListener('click', function() {
+            document.getElementById('test-results').innerHTML = '<p class="text-muted">结果已清除...</p>';
+            document.getElementById('settings-preview').innerHTML = '<p class="text-muted">等待渲染...</p>';
+        });
+
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            log('🚀 SystemSettings直接测试工具已加载', 'success');
+            log('💡 这个工具会绕过AdminApp框架直接测试SystemSettings功能', 'info');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP保存问题调试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; }
+        .success { background: #e8f5e9; }
+        .warning { background: #fff3e0; }
+        button { padding: 10px 20px; margin: 5px; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 VIP等级保存问题调试</h1>
+    
+    <div>
+        <h3>步骤1：管理员登录</h3>
+        <input type="text" id="username" placeholder="用户�? value="superadmin">
+        <input type="password" id="password" placeholder="密码" value="Admin123!@#">
+        <button onclick="adminLogin()">登录</button>
+    </div>
+
+    <div>
+        <h3>步骤2：测试VIP更新</h3>
+        <input type="text" id="levelName" placeholder="等级名称" value="测试等级">
+        <input type="number" id="stepGoal" placeholder="步数目标" value="1000">
+        <button onclick="testVipUpdate()" disabled id="updateBtn">更新VIP等级1</button>
+    </div>
+
+    <div id="logs"></div>
+
+    <script>
+        let adminToken = null;
+
+        function log(message, type = 'log') {
+            const logs = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            logs.appendChild(logDiv);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(`[${type}] ${message}`);
+        }
+
+        async function adminLogin() {
+            try {
+                log('🔄 开始管理员登录...');
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                const loginData = {
+                    username: username,
+                    password: password
+                };
+
+                log(`📡 发送登录请�? ${JSON.stringify(loginData)}`);
+
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                log(`📥 登录响应状�? ${response.status} ${response.statusText}`);
+
+                const result = await response.json();
+                log(`📥 登录响应数据: ${JSON.stringify(result, null, 2)}`);
+
+                if (result.success) {
+                    adminToken = result.data.token;
+                    log(`�?登录成功！Token: ${adminToken.substring(0, 30)}...`, 'success');
+                    document.getElementById('updateBtn').disabled = false;
+                } else {
+                    log(`�?登录失败: ${result.message}`, 'error');
+                }
+
+            } catch (error) {
+                log(`�?登录异常: ${error.message}`, 'error');
+                console.error('登录错误:', error);
+            }
+        }
+
+        async function testVipUpdate() {
+            if (!adminToken) {
+                log('�?请先登录�?, 'error');
+                return;
+            }
+
+            try {
+                log('🔄 开始VIP等级更新测试...');
+
+                const updateData = {
+                    name: document.getElementById('levelName').value,
+                    step_goal: parseInt(document.getElementById('stepGoal').value),
+                    deposit: 100,
+                    reward: 120,
+                    challenge_times: 3,
+                    color: '#FFD700',
+                    is_active: true
+                };
+
+                log(`📡 发送更新请求数�? ${JSON.stringify(updateData, null, 2)}`);
+                log(`🔑 使用Token: Bearer ${adminToken.substring(0, 30)}...`);
+
+                const response = await fetch('http://localhost:3000/api/admin/vip-levels/1', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                log(`📥 更新响应状�? ${response.status} ${response.statusText}`);
+                log(`📥 响应头信�? ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`);
+
+                let result;
+                try {
+                    result = await response.json();
+                    log(`📥 更新响应数据: ${JSON.stringify(result, null, 2)}`);
+                } catch (e) {
+                    const text = await response.text();
+                    log(`📥 更新响应文本: ${text}`);
+                    result = { error: '响应不是JSON格式', text: text };
+                }
+
+                if (response.ok && result.success) {
+                    log(`�?VIP等级更新成功！`, 'success');
+                } else {
+                    log(`�?VIP等级更新失败: ${result.message || '未知错误'}`, 'error');
+                    
+                    if (response.status === 401) {
+                        log(`🚨 认证失败 - 这可能是导致自动登出的原因！`, 'error');
+                        log(`🔍 检查Token是否有效...`, 'warning');
+                        
+                        // 尝试验证Token
+                        try {
+                            const tokenParts = adminToken.split('.');
+                            if (tokenParts.length === 3) {
+                                const payload = JSON.parse(atob(tokenParts[1]));
+                                log(`🔍 Token解析: ${JSON.stringify(payload, null, 2)}`, 'warning');
+                                
+                                const now = Date.now() / 1000;
+                                if (payload.exp && payload.exp < now) {
+                                    log(`�?Token已过�? 过期时间: ${new Date(payload.exp * 1000).toLocaleString()}`, 'error');
+                                } else {
+                                    log(`�?Token未过�? 过期时间: ${new Date(payload.exp * 1000).toLocaleString()}`, 'success');
+                                }
+                            }
+                        } catch (e) {
+                            log(`�?Token解析失败: ${e.message}`, 'error');
+                        }
+                    }
+                }
+
+            } catch (error) {
+                log(`�?更新异常: ${error.message}`, 'error');
+                console.error('更新错误:', error);
+            }
+        }
+
+        // 页面加载时的说明
+        log('🎯 VIP等级保存问题调试工具已就�?);
+        log('📋 步骤�?) 先点击登录按�?2) 然后点击更新VIP等级按钮');
+        log('🔍 这个工具会详细记录所有网络请求和响应，帮助诊断自动登出问�?);
+    </script>
+</body>
+</html>

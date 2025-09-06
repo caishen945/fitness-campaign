@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户余额管理测试</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .table th { background-color: #f8f9fa; font-weight: 600; }
+        .btn { margin: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-users"></i> 用户余额管理测试</h2>
+            </div>
+            <div class="card-body">
+                <div id="loadingMessage" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin"></i> 加载�?..
+                </div>
+                
+                <div id="userList" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>用户ID</th>
+                                    <th>用户�?/th>
+                                    <th>邮箱</th>
+                                    <th>当前余额</th>
+                                    <th>状�?/th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 余额管理模态框 -->
+    <div class="modal fade" id="balanceModal" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="balanceModalLabel">余额管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="userInfo" class="mb-3 p-3 bg-light rounded">
+                        <!-- 用户信息将在这里显示 -->
+                    </div>
+                    
+                    <form id="balanceForm">
+                        <div class="mb-3">
+                            <label for="balanceOperation" class="form-label">操作类型</label>
+                            <select class="form-select" id="balanceOperation" required>
+                                <option value="add">余额调整(增加)</option>
+                                <option value="subtract">扣款</option>
+                                <option value="freeze">冻结</option>
+                                <option value="unfreeze">解冻</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="balanceAmount" class="form-label">金额</label>
+                            <input type="number" class="form-control" id="balanceAmount" step="0.01" min="0" placeholder="请输入金�? required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="balanceNote" class="form-label">备注</label>
+                            <textarea class="form-control" id="balanceNote" rows="3" placeholder="请输入操作备�?></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="executeBalanceBtn">执行</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class UserBalanceTest {
+            constructor() {
+                this.users = [];
+                this.currentUser = null;
+                this.init();
+            }
+
+            async init() {
+                console.log('🚀 用户余额管理测试初始�?..');
+                await this.loadUsers();
+                this.bindEvents();
+            }
+
+            async loadUsers() {
+                try {
+                    console.log('📡 开始加载用户数�?..');
+                    
+                    // 模拟用户数据（因为需要认证）
+                    this.users = [
+                        { id: 33, username: '161616', email: '161616@qq.com', balance: 100.50, status: 'active' },
+                        { id: 34, username: 'testuser', email: 'test@example.com', balance: 50.00, status: 'active' }
+                    ];
+                    
+                    console.log('�?用户数据加载成功:', this.users);
+                    this.renderUsers();
+                } catch (error) {
+                    console.error('�?加载用户数据失败:', error);
+                    this.showError('加载用户数据失败: ' + error.message);
+                }
+            }
+
+            renderUsers() {
+                const loadingMessage = document.getElementById('loadingMessage');
+                const userList = document.getElementById('userList');
+                const tbody = document.getElementById('userTableBody');
+
+                if (this.users.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem;">暂无用户数据</td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = this.users.map(user => `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td><span class="badge bg-success">${user.balance} USDT</span></td>
+                            <td>
+                                <span class="badge ${user.status === 'active' ? 'bg-success' : 'bg-secondary'}">
+                                    ${user.status === 'active' ? '活跃' : '非活�?}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline-primary btn-sm manage-balance" data-user-id="${user.id}">
+                                    <i class="fas fa-wallet"></i> 余额管理
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                loadingMessage.style.display = 'none';
+                userList.style.display = 'block';
+            }
+
+            bindEvents() {
+                // 余额管理按钮
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('.manage-balance')) {
+                        const userId = parseInt(e.target.closest('.manage-balance').getAttribute('data-user-id'));
+                        const user = this.users.find(u => u.id === userId);
+                        if (user) {
+                            this.showBalanceModal(user);
+                        }
+                    }
+                });
+
+                // 执行余额操作按钮
+                document.getElementById('executeBalanceBtn')?.addEventListener('click', () => {
+                    this.executeBalanceOperation();
+                });
+            }
+
+            showBalanceModal(user) {
+                this.currentUser = user;
+                const modal = new bootstrap.Modal(document.getElementById('balanceModal'));
+                const userInfo = document.getElementById('userInfo');
+                
+                userInfo.innerHTML = `
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>用户:</strong> ${user.username}
+                        </div>
+                        <div class="col-6">
+                            <strong>当前余额:</strong> <span class="text-success fw-bold">${user.balance} USDT</span>
+                        </div>
+                    </div>
+                `;
+                
+                // 重置表单
+                document.getElementById('balanceForm').reset();
+                document.getElementById('balanceOperation').value = 'add';
+                
+                modal.show();
+            }
+
+            async executeBalanceOperation() {
+                try {
+                    const operation = document.getElementById('balanceOperation').value;
+                    const amount = parseFloat(document.getElementById('balanceAmount').value);
+                    const note = document.getElementById('balanceNote').value.trim();
+                    
+                    if (!amount || amount <= 0) {
+                        this.showError('请输入有效金�?);
+                        return;
+                    }
+                    
+                    console.log('💰 开始执行余额操�?', {
+                        userId: this.currentUser.id,
+                        operation,
+                        amount,
+                        note
+                    });
+
+                    // 模拟API调用
+                    const success = await this.simulateBalanceOperation(this.currentUser.id, operation, amount, note);
+                    
+                    if (success) {
+                        // 关闭模态框
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('balanceModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+
+                        // 更新本地数据
+                        this.updateUserBalance(this.currentUser.id, operation, amount);
+                        
+                        // 重新渲染用户列表
+                        this.renderUsers();
+                        
+                        this.showSuccess('余额操作执行成功');
+                    } else {
+                        this.showError('余额操作失败');
+                    }
+                } catch (error) {
+                    console.error('�?余额操作失败:', error);
+                    this.showError('操作失败: ' + error.message);
+                }
+            }
+
+            async simulateBalanceOperation(userId, operation, amount, note) {
+                // 模拟API调用延迟
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // 模拟成功响应
+                console.log('�?模拟余额操作成功:', { userId, operation, amount, note });
+                return true;
+            }
+
+            updateUserBalance(userId, operation, amount) {
+                const user = this.users.find(u => u.id === userId);
+                if (user) {
+                    switch (operation) {
+                        case 'add':
+                            user.balance += amount;
+                            break;
+                        case 'subtract':
+                            user.balance = Math.max(0, user.balance - amount);
+                            break;
+                        case 'freeze':
+                            // 这里可以添加冻结逻辑
+                            break;
+                        case 'unfreeze':
+                            // 这里可以添加解冻逻辑
+                            break;
+                    }
+                    console.log('📊 用户余额已更�?', user);
+                }
+            }
+
+            showSuccess(message) {
+                alert('�?' + message);
+            }
+
+            showError(message) {
+                alert('�?' + message);
+            }
+        }
+
+        // 初始化应�?
+        document.addEventListener('DOMContentLoaded', () => {
+            window.userBalanceTest = new UserBalanceTest();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 FitChallenge 系统日志查看�?/title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            background: #2a2a2a;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #444;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            min-width: 60px;
+        }
+
+        select, input, button {
+            padding: 8px 12px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #333;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .stats {
+            background: #2a2a2a;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .stat-card {
+            background: #333;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .logs-container {
+            height: calc(100vh - 220px);
+            overflow-y: auto;
+            background: #1a1a1a;
+        }
+
+        .log-entry {
+            padding: 12px;
+            border-bottom: 1px solid #333;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            transition: background 0.2s ease;
+        }
+
+        .log-entry:hover {
+            background: #252525;
+        }
+
+        .log-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .log-timestamp {
+            color: #888;
+            font-weight: bold;
+        }
+
+        .log-level {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .log-level.INFO {
+            background: #2196F3;
+            color: white;
+        }
+
+        .log-level.WARN {
+            background: #FF9800;
+            color: white;
+        }
+
+        .log-level.ERROR {
+            background: #F44336;
+            color: white;
+        }
+
+        .log-level.SUCCESS {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .log-level.DEBUG {
+            background: #9C27B0;
+            color: white;
+        }
+
+        .log-category {
+            background: #555;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .log-message {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+
+        .log-data {
+            background: #2a2a2a;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            border-left: 3px solid #667eea;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-data pre {
+            color: #a5d6ff;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .error-stack {
+            background: #2d1b1b;
+            border-left: 3px solid #f44336;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+        }
+
+        .error-stack pre {
+            color: #ffcdd2;
+            font-size: 11px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-disconnected {
+            background: #F44336;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .auto-scroll {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .filter-active {
+            background: #4CAF50 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 FitChallenge 系统日志查看�?/h1>
+        <p>实时监控前端、后端、管理员操作日志</p>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <span class="status-indicator" id="connectionStatus"></span>
+            <span id="connectionText">连接�?..</span>
+        </div>
+
+        <div class="control-group">
+            <label>日志�?</label>
+            <select id="sourceFilter">
+                <option value="all">全部</option>
+                <option value="backend">后端</option>
+                <option value="frontend">前端</option>
+                <option value="admin">管理�?/option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>级别:</label>
+            <select id="levelFilter">
+                <option value="all">全部</option>
+                <option value="ERROR">错误</option>
+                <option value="WARN">警告</option>
+                <option value="INFO">信息</option>
+                <option value="SUCCESS">成功</option>
+                <option value="DEBUG">调试</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>分类:</label>
+            <select id="categoryFilter">
+                <option value="all">全部</option>
+                <option value="VIP-MANAGEMENT">VIP管理</option>
+                <option value="AUTH">认证</option>
+                <option value="API">API</option>
+                <option value="DATABASE">数据�?/option>
+                <option value="SYSTEM">系统</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <input type="text" id="searchInput" placeholder="搜索日志..." />
+        </div>
+
+                 <div class="control-group">
+             <button onclick="clearLogs()">清除显示</button>
+             <button onclick="exportLogs()">导出日志</button>
+             <button onclick="refreshLogs()">刷新</button>
+             <button onclick="initializeLogs()">初始化日�?/button>
+         </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-value" id="totalLogs">0</div>
+            <div class="stat-label">总日志数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="errorCount">0</div>
+            <div class="stat-label">错误�?/div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="warningCount">0</div>
+            <div class="stat-label">警告�?/div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="vipOperations">0</div>
+            <div class="stat-label">VIP操作</div>
+        </div>
+    </div>
+
+    <div class="logs-container" id="logsContainer">
+        <div class="loading">正在加载日志...</div>
+    </div>
+
+    <div class="auto-scroll">
+        <button id="autoScrollBtn" onclick="toggleAutoScroll()">自动滚动: 开</button>
+    </div>
+
+    <script>
+        class LogViewer {
+            constructor() {
+                this.logs = [];
+                this.filteredLogs = [];
+                this.autoScroll = true;
+                this.filters = {
+                    source: 'all',
+                    level: 'all', 
+                    category: 'all',
+                    search: ''
+                };
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadLogs();
+                this.startPolling();
+                this.updateConnectionStatus(true);
+            }
+
+            setupEventListeners() {
+                document.getElementById('sourceFilter').addEventListener('change', (e) => {
+                    this.filters.source = e.target.value;
+                    this.applyFilters();
+                });
+
+                document.getElementById('levelFilter').addEventListener('change', (e) => {
+                    this.filters.level = e.target.value;
+                    this.applyFilters();
+                });
+
+                document.getElementById('categoryFilter').addEventListener('change', (e) => {
+                    this.filters.category = e.target.value;
+                    this.applyFilters();
+                });
+
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.filters.search = e.target.value;
+                    this.applyFilters();
+                });
+            }
+
+                         async loadLogs() {
+                 try {
+                     // 从localStorage加载前端和管理员日志
+                     const frontendLogs = JSON.parse(localStorage.getItem('frontendLogs') || '[]');
+                     const adminLogs = JSON.parse(localStorage.getItem('adminLogs') || '[]');
+                     
+                     // 合并并排序日�?
+                     this.logs = [
+                         ...frontendLogs.map(log => ({ ...log, source: 'frontend' })),
+                         ...adminLogs.map(log => ({ ...log, source: 'admin' }))
+                     ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                     // 如果没有日志，显示提示信�?
+                     if (this.logs.length === 0) {
+                         console.log('没有找到日志数据，可能需要先访问管理员页面或前端页面来初始化日志系统');
+                     }
+
+                     this.applyFilters();
+                     this.updateStats();
+                 } catch (error) {
+                     console.error('加载日志失败:', error);
+                     // 显示错误信息
+                     const container = document.getElementById('logsContainer');
+                     container.innerHTML = `<div class="no-logs">加载日志失败: ${error.message}</div>`;
+                 }
+             }
+
+            startPolling() {
+                // �?秒刷新一次日�?
+                setInterval(() => {
+                    this.loadLogs();
+                }, 5000);
+            }
+
+            applyFilters() {
+                this.filteredLogs = this.logs.filter(log => {
+                    if (this.filters.source !== 'all' && log.source !== this.filters.source) {
+                        return false;
+                    }
+                    if (this.filters.level !== 'all' && log.level !== this.filters.level) {
+                        return false;
+                    }
+                    if (this.filters.category !== 'all' && log.category !== this.filters.category) {
+                        return false;
+                    }
+                    if (this.filters.search && !this.matchesSearch(log, this.filters.search)) {
+                        return false;
+                    }
+                    return true;
+                });
+
+                this.renderLogs();
+                this.updateStats();
+            }
+
+            matchesSearch(log, search) {
+                const searchLower = search.toLowerCase();
+                return (
+                    log.message.toLowerCase().includes(searchLower) ||
+                    log.category.toLowerCase().includes(searchLower) ||
+                    (log.data && JSON.stringify(log.data).toLowerCase().includes(searchLower))
+                );
+            }
+
+            renderLogs() {
+                const container = document.getElementById('logsContainer');
+                
+                if (this.filteredLogs.length === 0) {
+                    container.innerHTML = '<div class="no-logs">没有匹配的日志记�?/div>';
+                    return;
+                }
+
+                const logsHtml = this.filteredLogs.slice(-500).map(log => this.renderLogEntry(log)).join('');
+                container.innerHTML = logsHtml;
+
+                if (this.autoScroll) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+
+            renderLogEntry(log) {
+                return `
+                    <div class="log-entry">
+                        <div class="log-header">
+                            <span class="log-timestamp">${log.timestamp}</span>
+                            <span class="log-level ${log.level}">${log.level}</span>
+                            <span class="log-category">${log.category}</span>
+                            <span style="color: #888; font-size: 11px;">[${log.source}]</span>
+                        </div>
+                        <div class="log-message">${this.escapeHtml(log.message)}</div>
+                        ${log.data ? `<div class="log-data"><pre>${this.escapeHtml(JSON.stringify(log.data, null, 2))}</pre></div>` : ''}
+                        ${log.error ? `<div class="error-stack"><pre>${this.escapeHtml(log.error.stack || log.error.message)}</pre></div>` : ''}
+                    </div>
+                `;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            updateStats() {
+                document.getElementById('totalLogs').textContent = this.filteredLogs.length;
+                document.getElementById('errorCount').textContent = this.filteredLogs.filter(log => log.level === 'ERROR').length;
+                document.getElementById('warningCount').textContent = this.filteredLogs.filter(log => log.level === 'WARN').length;
+                document.getElementById('vipOperations').textContent = this.filteredLogs.filter(log => log.category === 'VIP-MANAGEMENT').length;
+            }
+
+            updateConnectionStatus(connected) {
+                const indicator = document.getElementById('connectionStatus');
+                const text = document.getElementById('connectionText');
+                
+                if (connected) {
+                    indicator.className = 'status-indicator status-connected';
+                    text.textContent = '已连�?;
+                } else {
+                    indicator.className = 'status-indicator status-disconnected'; 
+                    text.textContent = '连接断开';
+                }
+            }
+        }
+
+        // 全局函数
+        function clearLogs() {
+            if (confirm('确定要清除所有显示的日志吗？')) {
+                document.getElementById('logsContainer').innerHTML = '<div class="no-logs">日志已清�?/div>';
+            }
+        }
+
+        function exportLogs() {
+            const logs = logViewer.filteredLogs;
+            const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fitchallenge-logs-${new Date().toISOString().substring(0, 19)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function refreshLogs() {
+            logViewer.loadLogs();
+        }
+
+                 function toggleAutoScroll() {
+             logViewer.autoScroll = !logViewer.autoScroll;
+             const btn = document.getElementById('autoScrollBtn');
+             btn.textContent = `自动滚动: ${logViewer.autoScroll ? '开' : '�?}`;
+             
+             if (logViewer.autoScroll) {
+                 const container = document.getElementById('logsContainer');
+                 container.scrollTop = container.scrollHeight;
+             }
+         }
+
+         function initializeLogs() {
+             try {
+                 // 创建一些初始测试日�?
+                 const testLogs = [
+                     {
+                         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 23),
+                         level: 'INFO',
+                         category: 'SYSTEM',
+                         message: '日志系统初始�?,
+                         data: { action: 'manual_init', timestamp: Date.now() }
+                     },
+                     {
+                         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 23),
+                         level: 'SUCCESS',
+                         category: 'SYSTEM',
+                         message: '日志查看器启动成�?,
+                         data: { url: window.location.href }
+                     }
+                 ];
+
+                 // 保存到localStorage
+                 const existingLogs = JSON.parse(localStorage.getItem('adminLogs') || '[]');
+                 existingLogs.push(...testLogs);
+                 localStorage.setItem('adminLogs', JSON.stringify(existingLogs));
+
+                 // 刷新日志显示
+                 logViewer.loadLogs();
+                 alert('�?日志系统已初始化�?);
+             } catch (error) {
+                 alert('�?初始化日志失�? ' + error.message);
+             }
+         }
+
+        // 初始化日志查看器
+        const logViewer = new LogViewer();
+    </script>
+</body>
+</html>

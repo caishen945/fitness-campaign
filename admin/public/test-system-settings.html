@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置测试 - FitChallenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+        .warning { color: #f39c12; }
+        .info { color: #3498db; }
+        #console { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 系统设置功能测试</h1>
+        
+        <div class="test-section">
+            <div class="test-title">测试说明</div>
+            <p>本页面用于测试系统设置页面的功能：</p>
+            <ul>
+                <li>✅ 验证SystemSettings类是否正确加载</li>
+                <li>✅ 测试版本信息加载功能</li>
+                <li>✅ 测试页面渲染功能</li>
+                <li>✅ 检查导航菜单是否正确配置</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">1. 测试SystemSettings类加载</div>
+            <button id="test-class" class="btn btn-primary">测试类加载</button>
+            <div id="class-result" class="mt-2"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. 测试页面渲染</div>
+            <button id="test-render" class="btn btn-success">测试页面渲染</button>
+            <div id="render-result" class="mt-2"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. 检查导航配置</div>
+            <button id="test-navigation" class="btn btn-info">检查导航配置</button>
+            <div id="navigation-result" class="mt-2"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. 跳转到管理员系统</div>
+            <button id="go-to-admin" class="btn btn-primary">跳转到管理员系统</button>
+            <div class="mt-2">
+                <small class="text-muted">点击后将跳转到 http://127.0.0.1:8081，请先登录后点击系统设置</small>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">实时控制台日志</div>
+            <div id="console"></div>
+            <button id="clear-console" class="btn btn-sm btn-secondary mt-2">清除日志</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // 日志功能
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const console = document.getElementById('console');
+            const colorMap = {
+                'success': '#27ae60',
+                'error': '#e74c3c',
+                'warning': '#f39c12',
+                'info': '#3498db'
+            };
+            
+            console.innerHTML += `<div style="color: ${colorMap[type] || '#ecf0f1'};">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // 1. 测试SystemSettings类加载
+        document.getElementById('test-class').addEventListener('click', async () => {
+            const resultEl = document.getElementById('class-result');
+            log('开始测试SystemSettings类加载...', 'info');
+            
+            try {
+                // 尝试导入SystemSettings类
+                const SystemSettingsModule = await import('./src/pages/SystemSettings.js');
+                const SystemSettings = SystemSettingsModule.default;
+                
+                if (SystemSettings) {
+                    log('✅ SystemSettings类加载成功', 'success');
+                    
+                    // 创建实例测试
+                    const mockApp = { user: { username: 'test' } };
+                    const instance = new SystemSettings(mockApp);
+                    
+                    if (instance) {
+                        log('✅ SystemSettings实例创建成功', 'success');
+                        
+                        // 检查必要方法
+                        const methods = ['render', 'loadVersionInfo', 'setupEventListeners'];
+                        const methodResults = methods.map(method => ({
+                            method,
+                            exists: typeof instance[method] === 'function'
+                        }));
+                        
+                        log(`方法检查结果: ${JSON.stringify(methodResults)}`, 'info');
+                        
+                        resultEl.innerHTML = `
+                            <div class="alert alert-success">
+                                ✅ SystemSettings类加载成功<br>
+                                实例: ${instance.constructor.name}<br>
+                                方法: ${methodResults.filter(m => m.exists).map(m => m.method).join(', ')}
+                            </div>
+                        `;
+                    } else {
+                        throw new Error('实例创建失败');
+                    }
+                } else {
+                    throw new Error('SystemSettings类未找到');
+                }
+            } catch (error) {
+                log(`❌ SystemSettings类加载失败: ${error.message}`, 'error');
+                resultEl.innerHTML = `<div class="alert alert-danger">❌ 加载失败: ${error.message}</div>`;
+            }
+        });
+
+        // 2. 测试页面渲染
+        document.getElementById('test-render').addEventListener('click', async () => {
+            const resultEl = document.getElementById('render-result');
+            log('开始测试页面渲染...', 'info');
+            
+            try {
+                const SystemSettingsModule = await import('./src/pages/SystemSettings.js');
+                const SystemSettings = SystemSettingsModule.default;
+                
+                const mockApp = { 
+                    user: { username: 'testuser' },
+                    showToast: (msg, type) => log(`Toast: ${msg} (${type})`, 'info')
+                };
+                const instance = new SystemSettings(mockApp);
+                
+                // 加载版本信息
+                await instance.loadVersionInfo();
+                log('✅ 版本信息加载完成', 'success');
+                
+                // 渲染页面
+                const content = instance.render();
+                
+                if (content && content.includes('系统设置')) {
+                    log('✅ 页面渲染成功', 'success');
+                    resultEl.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ 页面渲染成功<br>
+                            内容长度: ${content.length} 字符<br>
+                            包含关键词: ${content.includes('版本控制') ? '版本控制 ✓' : ''} ${content.includes('系统状态') ? '系统状态 ✓' : ''}
+                        </div>
+                        <details class="mt-2">
+                            <summary>查看渲染内容预览</summary>
+                            <div style="max-height: 200px; overflow: auto; border: 1px solid #ddd; padding: 10px; margin-top: 10px;">
+                                ${content.substring(0, 500)}...
+                            </div>
+                        </details>
+                    `;
+                } else {
+                    throw new Error('渲染内容无效');
+                }
+            } catch (error) {
+                log(`❌ 页面渲染失败: ${error.message}`, 'error');
+                resultEl.innerHTML = `<div class="alert alert-danger">❌ 渲染失败: ${error.message}</div>`;
+            }
+        });
+
+        // 3. 检查导航配置
+        document.getElementById('test-navigation').addEventListener('click', async () => {
+            const resultEl = document.getElementById('navigation-result');
+            log('开始检查导航配置...', 'info');
+            
+            try {
+                // 尝试导入App-fixed.js
+                const AppModule = await import('./src/App-fixed.js');
+                const AdminApp = AppModule.default;
+                
+                if (AdminApp) {
+                    log('✅ AdminApp类加载成功', 'success');
+                    
+                    // 创建实例检查页面配置
+                    const app = new AdminApp();
+                    
+                    // 检查pages配置
+                    const hasSettings = app.pages && app.pages.settings;
+                    const settingsConfig = app.pages.settings;
+                    
+                    log(`页面配置检查: settings存在=${!!hasSettings}`, 'info');
+                    
+                    if (hasSettings) {
+                        log(`settings配置: ${JSON.stringify({
+                            hasClass: !!settingsConfig.Class,
+                            hasRender: typeof settingsConfig.render === 'function',
+                            hasAfterRender: typeof settingsConfig.afterRender === 'function'
+                        })}`, 'info');
+                        
+                        resultEl.innerHTML = `
+                            <div class="alert alert-success">
+                                ✅ 导航配置检查成功<br>
+                                settings页面: 已配置 ✓<br>
+                                Class: ${settingsConfig.Class ? settingsConfig.Class.name : '未配置'}<br>
+                                render方法: ${typeof settingsConfig.render === 'function' ? '✓' : '✗'}<br>
+                                afterRender方法: ${typeof settingsConfig.afterRender === 'function' ? '✓' : '✗'}
+                            </div>
+                        `;
+                    } else {
+                        throw new Error('settings页面配置未找到');
+                    }
+                } else {
+                    throw new Error('AdminApp类未找到');
+                }
+            } catch (error) {
+                log(`❌ 导航配置检查失败: ${error.message}`, 'error');
+                resultEl.innerHTML = `<div class="alert alert-danger">❌ 检查失败: ${error.message}</div>`;
+            }
+        });
+
+        // 4. 跳转到管理员系统
+        document.getElementById('go-to-admin').addEventListener('click', () => {
+            log('🔄 跳转到管理员系统', 'info');
+            window.location.href = 'http://127.0.0.1:8081';
+        });
+
+        // 清除控制台
+        document.getElementById('clear-console').addEventListener('click', () => {
+            document.getElementById('console').innerHTML = '';
+        });
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 系统设置测试页面已加载', 'success');
+            log('准备测试系统设置功能...', 'info');
+            
+            // 自动执行基础测试
+            setTimeout(() => {
+                document.getElementById('test-class').click();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

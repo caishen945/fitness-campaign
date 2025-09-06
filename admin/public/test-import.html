@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试动态导�?/title>
+</head>
+<body>
+    <h1>测试动态导�?/h1>
+    <button onclick="testImport()">测试导入UserManagement</button>
+    <div id="result"></div>
+
+    <script type="module">
+        async function testImport() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试导入...';
+            
+            try {
+                console.log('开始测试动态导�?..');
+                const module = await import('/src/pages/UserManagement.js');
+                console.log('导入成功:', module);
+                resultDiv.innerHTML = '�?导入成功！模�? ' + JSON.stringify(module, null, 2);
+            } catch (error) {
+                console.error('导入失败:', error);
+                resultDiv.innerHTML = '�?导入失败: ' + error.message;
+            }
+        }
+        
+        window.testImport = testImport;
+    </script>
+</body>
+</html>

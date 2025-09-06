@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram 环境检测</title>
+    <!-- Telegram WebApp 脚本 -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-box {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .status-success {
+            background: #e7ffe7;
+            border-left-color: #28a745;
+        }
+        .status-error {
+            background: #ffe7e7;
+            border-left-color: #dc3545;
+        }
+        .status-warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .status-info {
+            background: #e7f3ff;
+            border-left-color: #17a2b8;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            background: #007bff;
+            color: white;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-telegram {
+            background: #0088cc;
+        }
+        .btn-telegram:hover {
+            background: #006699;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Telegram 环境检测工具</h1>
+        
+        <div class="section">
+            <h3>📱 环境检测</h3>
+            <div id="environmentStatus"></div>
+            <button class="btn" onclick="checkEnvironment()">🔄 重新检测</button>
+        </div>
+
+        <div class="section">
+            <h3>🔧 手动测试</h3>
+            <button class="btn btn-telegram" onclick="testTelegramLogin()">📱 测试Telegram登录</button>
+            <button class="btn" onclick="testBotInfo()">🤖 测试Bot信息</button>
+            <button class="btn" onclick="showDebugInfo()">🐛 显示调试信息</button>
+        </div>
+
+        <div class="section">
+            <h3>📊 检测结果</h3>
+            <div id="testResults"></div>
+        </div>
+
+        <div class="section">
+            <h3>💡 使用说明</h3>
+            <div class="status-box status-info">
+                <h4>如何正确使用Telegram登录：</h4>
+                <ol>
+                    <li><strong>必须在Telegram应用中打开</strong> - 普通浏览器无法使用此功能</li>
+                    <li><strong>方法1：</strong> 在Telegram中搜索您的Bot，发送/start命令</li>
+                    <li><strong>方法2：</strong> 将网页链接分享到Telegram聊天，在Telegram中点击</li>
+                    <li><strong>方法3：</strong> 在Telegram中直接输入网页地址</li>
+                </ol>
+                <p><strong>注意：</strong> 如果您看到"无法获取Telegram用户信息"，说明页面不是在Telegram环境中打开的。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 环境检测函数
+        function checkEnvironment() {
+            const statusDiv = document.getElementById('environmentStatus');
+            let html = '';
+            
+            // 检查Telegram脚本
+            if (typeof window.Telegram === 'undefined') {
+                html += '<div class="status-box status-error">❌ Telegram脚本未加载</div>';
+            } else {
+                html += '<div class="status-box status-success">✅ Telegram脚本已加载</div>';
+            }
+            
+            // 检查Telegram WebApp
+            if (typeof window.Telegram?.WebApp === 'undefined') {
+                html += '<div class="status-box status-error">❌ Telegram WebApp未初始化</div>';
+            } else {
+                html += '<div class="status-box status-success">✅ Telegram WebApp已初始化</div>';
+                
+                const webApp = window.Telegram.WebApp;
+                
+                // 检查平台
+                if (webApp.platform === 'unknown') {
+                    html += '<div class="status-box status-warning">⚠️ 平台检测：未知（可能不在Telegram中）</div>';
+                } else {
+                    html += `<div class="status-box status-success">✅ 平台检测：${webApp.platform}</div>`;
+                }
+                
+                // 检查版本
+                html += `<div class="status-box status-info">📊 WebApp版本：${webApp.version || '未知'}</div>`;
+                
+                // 检查用户数据
+                if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
+                    html += '<div class="status-box status-success">✅ 用户数据可用</div>';
+                } else {
+                    html += '<div class="status-box status-error">❌ 用户数据不可用</div>';
+                }
+            }
+            
+            statusDiv.innerHTML = html;
+        }
+
+        // 测试Telegram登录
+        async function testTelegramLogin() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            try {
+                if (!window.Telegram || !window.Telegram.WebApp) {
+                    showResult('❌ Telegram环境不可用', 'error');
+                    return;
+                }
+
+                const webApp = window.Telegram.WebApp;
+                
+                // 显示详细的环境信息
+                showResult('🔍 环境信息检测中...', 'info');
+                showResult(`平台: ${webApp.platform}`, 'info');
+                showResult(`版本: ${webApp.version}`, 'info');
+                showResult(`initData: ${webApp.initData ? '可用' : '不可用'}`, 'info');
+                showResult(`initDataUnsafe: ${webApp.initDataUnsafe ? '可用' : '不可用'}`, 'info');
+                
+                if (webApp.initDataUnsafe) {
+                    showResult(`可用的数据键: ${Object.keys(webApp.initDataUnsafe).join(', ')}`, 'info');
+                }
+                
+                if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
+                    showResult('✅ 用户数据可用，可以尝试登录', 'success');
+                    
+                    // 尝试调用后端API
+                    showResult('🔄 正在测试后端API...', 'info');
+                    
+                    const response = await fetch('http://localhost:3000/api/auth/telegram', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(webApp.initDataUnsafe.user)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        showResult(`✅ API测试成功！用户ID: ${result.user.id}`, 'success');
+                    } else {
+                        showResult(`❌ API测试失败: ${result.error || '未知错误'}`, 'error');
+                    }
+                } else {
+                    showResult('❌ 无法获取用户数据，请确保在Telegram中打开', 'error');
+                }
+            } catch (error) {
+                showResult(`❌ 测试过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 测试Bot信息
+        async function testBotInfo() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            try {
+                showResult('🔄 正在获取Bot信息...', 'info');
+                
+                const response = await fetch('http://localhost:3000/api/auth/telegram/bot-info');
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    showResult(`✅ Bot信息获取成功！`, 'success');
+                    showResult(`Bot名称: ${result.data.result.first_name}`, 'info');
+                    showResult(`用户名: ${result.data.result.username}`, 'info');
+                } else {
+                    showResult(`❌ Bot信息获取失败: ${result.error || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ 测试过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 显示调试信息
+        function showDebugInfo() {
+            const resultsDiv = document.getElementById('testResults');
+            
+            if (!window.Telegram || !window.Telegram.WebApp) {
+                showResult('❌ 无法获取调试信息：Telegram环境不可用', 'error');
+                return;
+            }
+
+            const webApp = window.Telegram.WebApp;
+            
+            showResult('🐛 调试信息：', 'info');
+            showResult(`window.Telegram: ${typeof window.Telegram}`, 'info');
+            showResult(`window.Telegram.WebApp: ${typeof webApp}`, 'info');
+            showResult(`webApp.platform: ${webApp.platform}`, 'info');
+            showResult(`webApp.version: ${webApp.version}`, 'info');
+            showResult(`webApp.initData: ${webApp.initData}`, 'info');
+            showResult(`webApp.initDataUnsafe: ${JSON.stringify(webApp.initDataUnsafe, null, 2)}`, 'info');
+            
+            // 尝试调用ready和expand方法
+            try {
+                webApp.ready();
+                showResult('✅ webApp.ready() 调用成功', 'success');
+            } catch (error) {
+                showResult(`❌ webApp.ready() 调用失败: ${error.message}`, 'error');
+            }
+            
+            try {
+                webApp.expand();
+                showResult('✅ webApp.expand() 调用成功', 'success');
+            } catch (error) {
+                showResult(`❌ webApp.expand() 调用失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 显示结果
+        function showResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultElement = document.createElement('div');
+            resultElement.className = `status-box status-${type}`;
+            resultElement.innerHTML = message;
+            resultsDiv.appendChild(resultElement);
+            
+            // 自动滚动到底部
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        // 页面加载完成后自动检测环境
+        document.addEventListener('DOMContentLoaded', function() {
+            checkEnvironment();
+            
+            // 显示页面加载完成信息
+            showResult('📱 页面加载完成，请查看环境检测结果', 'info');
+        });
+    </script>
+</body>
+</html>

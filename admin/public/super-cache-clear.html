@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级缓存清理 - FitChallenge</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 超级缓存清理工具</h1>
+        <div class="info">
+            <strong>当前问题：</strong>浏览器缓存了旧版本构建文件 <code>index-jcS3Ci04.js</code><br>
+            <strong>解决方案：</strong>彻底清理所有缓存并强制重新加载
+        </div>
+        
+        <div id="status" class="status warning">
+            准备清理缓存...
+        </div>
+        
+        <button class="btn" onclick="superCacheClear()">🔥 执行超级缓存清理</button>
+        <button class="btn" onclick="forceReload()">🔄 强制重新加载</button>
+        <button class="btn" onclick="clearSpecificCache()">🎯 清理特定缓存</button>
+        <button class="btn" onclick="goToAdmin()">🏠 返回管理后台</button>
+        
+        <div class="info">
+            <strong>清理步骤：</strong><br>
+            1. 清理所有本地存储<br>
+            2. 清理Service Worker<br>
+            3. 清理HTTP缓存<br>
+            4. 添加随机参数强制刷新<br>
+            5. 重定向到最新版本
+        </div>
+    </div>
+
+    <script>
+        // 超级缓存清理函数
+        async function superCacheClear() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                statusDiv.className = 'status warning';
+                statusDiv.innerHTML = '🔄 正在执行超级缓存清理...';
+                
+                // 1. 清理所有本地存储
+                localStorage.clear();
+                sessionStorage.clear();
+                console.log('✅ 本地存储已清理');
+                
+                // 2. 清理IndexedDB
+                if ('indexedDB' in window) {
+                    const databases = await indexedDB.databases();
+                    for (const db of databases) {
+                        indexedDB.deleteDatabase(db.name);
+                    }
+                    console.log('✅ IndexedDB已清理');
+                }
+                
+                // 3. 清理Service Worker
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                    }
+                    console.log('✅ Service Worker已清理');
+                }
+                
+                // 4. 清理Cache API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                    }
+                    console.log('✅ Cache API已清理');
+                }
+                
+                // 5. 清理Cookies（管理后台相关）
+                const cookies = document.cookie.split(";");
+                for (let cookie of cookies) {
+                    const eqPos = cookie.indexOf("=");
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                }
+                console.log('✅ Cookies已清理');
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '🎉 超级缓存清理完成！即将强制重新加载...';
+                
+                // 6. 等待2秒后强制重新加载
+                setTimeout(() => {
+                    forceReload();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('缓存清理失败:', error);
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ 缓存清理失败: ' + error.message;
+            }
+        }
+        
+        // 强制重新加载
+        function forceReload() {
+            const timestamp = new Date().getTime();
+            const random = Math.random().toString(36).substring(2);
+            const cacheBuster = `?v=${timestamp}&r=${random}&force=true`;
+            
+            // 强制重新加载当前页面
+            window.location.href = window.location.pathname + cacheBuster;
+        }
+        
+        // 清理特定缓存
+        async function clearSpecificCache() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                statusDiv.className = 'status warning';
+                statusDiv.innerHTML = '🎯 正在清理特定缓存文件...';
+                
+                // 创建新的script标签，强制重新加载
+                const oldScripts = document.querySelectorAll('script[src*="index-"]');
+                oldScripts.forEach(script => script.remove());
+                
+                // 强制清理特定缓存条目
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        const cache = await caches.open(cacheName);
+                        const requests = await cache.keys();
+                        for (const request of requests) {
+                            if (request.url.includes('index-') || request.url.includes('.js')) {
+                                await cache.delete(request);
+                                console.log('删除缓存:', request.url);
+                            }
+                        }
+                    }
+                }
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '🎯 特定缓存清理完成！';
+                
+            } catch (error) {
+                console.error('特定缓存清理失败:', error);
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ 特定缓存清理失败: ' + error.message;
+            }
+        }
+        
+        // 返回管理后台
+        function goToAdmin() {
+            const timestamp = new Date().getTime();
+            const random = Math.random().toString(36).substring(2);
+            window.location.href = `./index.html?v=${timestamp}&r=${random}&cleared=true`;
+        }
+        
+        // 页面加载时显示当前状态
+        window.onload = function() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status warning';
+            statusDiv.innerHTML = `
+                🔍 检测到缓存问题<br>
+                <small>当前版本: 3.0.1 (缓存版本)</small><br>
+                <small>目标版本: 3.2.0 (最新版本)</small><br>
+                <small>问题文件: index-jcS3Ci04.js (已缓存)</small>
+            `;
+        };
+    </script>
+</body>
+</html>

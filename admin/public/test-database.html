@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库连接测试页�?/title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        .test-section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-content { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🗄�?数据库连接测试页�?/h1>
+    
+    <div class="test-section">
+        <div class="test-title">1. 测试数据库连�?/div>
+        <div class="test-content">
+            <button id="test-db-connection">测试数据库连�?/button>
+            <div id="db-result">点击按钮测试数据库连�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">2. 测试管理员用户查�?/div>
+        <div class="test-content">
+            <button id="test-admin-query">测试管理员查�?/button>
+            <div id="admin-query-result">点击按钮测试管理员查�?..</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">3. 测试简单API</div>
+        <div class="test-content">
+            <button id="test-simple-api">测试简单API</button>
+            <div id="simple-api-result">点击按钮测试简单API...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">4. 调试日志</div>
+        <pre id="debug-log" style="max-height: 300px; overflow-y: auto;"></pre>
+        <button id="clear-log">清除日志</button>
+    </div>
+
+    <script>
+        // 调试日志函数
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logEl.textContent += logEntry;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 测试数据库连�?
+        async function testDatabaseConnection() {
+            const resultEl = document.getElementById('db-result');
+            resultEl.innerHTML = '<div>�?正在测试数据库连�?..</div>';
+            
+            try {
+                log('开始测试数据库连接...', 'info');
+                
+                // 测试一个简单的数据库查询API
+                const response = await fetch('http://localhost:3000/api/admin/users', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer test-token'
+                    }
+                });
+                
+                const data = await response.text();
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (response.status === 401) {
+                    resultEl.innerHTML = '<div style="color: green;">�?数据库连接正�?/div>';
+                    resultEl.innerHTML += '<div>API返回401表示路由正常，只是需要有效token</div>';
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('数据库连接测试成�?, 'success');
+                } else if (response.status === 500) {
+                    resultEl.innerHTML = '<div style="color: red;">�?数据库连接失�?/div>';
+                    resultEl.innerHTML += '<div>服务器内部错误，可能是数据库问题</div>';
+                    resultEl.innerHTML += `<div>错误: ${data}</div>`;
+                    log('数据库连接测试失�?- 500错误', 'error');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 数据库连接状态未�?/div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log(`数据库连接测�?- 状�?{response.status}`, 'warning');
+                }
+                
+            } catch (error) {
+                log(`数据库连接测试失�? ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?数据库连接测试失�?/div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试管理员用户查�?
+        async function testAdminQuery() {
+            const resultEl = document.getElementById('admin-query-result');
+            resultEl.innerHTML = '<div>�?正在测试管理员查�?..</div>';
+            
+            try {
+                log('开始测试管理员查询...', 'info');
+                
+                // 测试登录API，但使用错误的凭�?
+                const response = await fetch('http://localhost:3000/api/admin/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: 'invalid', password: 'invalid' })
+                });
+                
+                const data = await response.text();
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data}`, 'info');
+                
+                if (response.status === 401) {
+                    resultEl.innerHTML = '<div style="color: green;">�?管理员查询正�?/div>';
+                    resultEl.innerHTML += '<div>API正确处理了无效凭�?/div>';
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log('管理员查询测试成�?, 'success');
+                } else if (response.status === 500) {
+                    resultEl.innerHTML = '<div style="color: red;">�?管理员查询失�?/div>';
+                    resultEl.innerHTML += '<div>服务器内部错误，可能是数据库查询问题</div>';
+                    resultEl.innerHTML += `<div>错误: ${data}</div>`;
+                    log('管理员查询测试失�?- 500错误', 'error');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 管理员查询状态未�?/div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                    resultEl.innerHTML += `<div>响应: ${data}</div>`;
+                    log(`管理员查询测�?- 状�?{response.status}`, 'warning');
+                }
+                
+            } catch (error) {
+                log(`管理员查询测试失�? ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?管理员查询测试失�?/div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 测试简单API
+        async function testSimpleAPI() {
+            const resultEl = document.getElementById('simple-api-result');
+            resultEl.innerHTML = '<div>�?正在测试简单API...</div>';
+            
+            try {
+                log('开始测试简单API...', 'info');
+                
+                // 测试根路径API
+                const response = await fetch('http://localhost:3000/');
+                const data = await response.text();
+                
+                log(`响应状�? ${response.status}`, 'info');
+                log(`响应内容: ${data.substring(0, 100)}...`, 'info');
+                
+                if (response.ok) {
+                    resultEl.innerHTML = '<div style="color: green;">�?简单API测试成功</div>';
+                    resultEl.innerHTML += '<div>根路径API响应正常</div>';
+                    resultEl.innerHTML += `<div>响应长度: ${data.length} 字符</div>`;
+                    log('简单API测试成功', 'success');
+                } else {
+                    resultEl.innerHTML = `<div style="color: orange;">⚠️ 简单API测试异常</div>`;
+                    resultEl.innerHTML += `<div>状�? ${response.status}</div>`;
+                    log('简单API测试异常', 'warning');
+                }
+                
+            } catch (error) {
+                log(`简单API测试失败: ${error.message}`, 'error');
+                resultEl.innerHTML = `<div style="color: red;">�?简单API测试失败</div>`;
+                resultEl.innerHTML += `<div>错误: ${error.message}</div>`;
+            }
+        }
+
+        // 事件绑定
+        document.getElementById('test-db-connection').addEventListener('click', testDatabaseConnection);
+        document.getElementById('test-admin-query').addEventListener('click', testAdminQuery);
+        document.getElementById('test-simple-api').addEventListener('click', testSimpleAPI);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-log').textContent = '';
+        });
+
+        // 页面加载时显示信�?
+        window.addEventListener('load', () => {
+            log('数据库连接测试页面已加载', 'info');
+        });
+    </script>
+</body>
+</html>

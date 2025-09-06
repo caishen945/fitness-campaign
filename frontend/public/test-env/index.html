@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitChallenge 本地测试环境</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="test-container">
+        <!-- 头部 -->
+        <header class="test-header">
+            <h1 class="test-title">🚀 FitChallenge 本地测试环境</h1>
+            <p class="test-subtitle">完整的本地测试环境，模拟真实手机和Telegram环境</p>
+        </header>
+
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <!-- 设备模拟器 -->
+            <div class="control-section">
+                <h3>📱 设备模拟器</h3>
+                <div class="device-controls">
+                    <select id="deviceSelect" class="control-select">
+                        <option value="desktop">桌面端 (1920x1080)</option>
+                        <option value="tablet">平板 (768x1024)</option>
+                        <option value="mobile">手机 (375x667)</option>
+                        <option value="android">安卓手机 (360x640)</option>
+                        <option value="smallMobile">小屏手机 (320x568)</option>
+                        <option value="largeMobile">大屏手机 (414x896)</option>
+                    </select>
+                    <button id="orientationBtn" class="control-btn">🔄 横屏/竖屏</button>
+                    <button id="customSizeBtn" class="control-btn">📐 自定义尺寸</button>
+                </div>
+            </div>
+
+            <!-- 语言切换器 -->
+            <div class="control-section">
+                <h3>🌍 语言切换器</h3>
+                <div class="language-controls">
+                    <select id="languageSelect" class="control-select">
+                        <option value="en-US">🇺🇸 English</option>
+                        <option value="zh-CN">🇨🇳 简体中文</option>
+                        <option value="ja-JP">🇯🇵 日本語</option>
+                        <option value="ko-KR">🇰🇷 한국어</option>
+                        <option value="ar-SA">🇸🇦 العربية</option>
+                    </select>
+                    <button id="testTranslationsBtn" class="control-btn">🧪 测试翻译</button>
+                </div>
+            </div>
+
+            <!-- Telegram模拟器 -->
+            <div class="control-section">
+                <h3>📱 Telegram模拟器</h3>
+                <div class="telegram-controls">
+                    <button id="simulateAuthBtn" class="control-btn primary">🔐 模拟授权</button>
+                    <button id="switchThemeBtn" class="control-btn">🎨 切换主题</button>
+                    <button id="resetTelegramBtn" class="control-btn">🔄 重置</button>
+                </div>
+            </div>
+
+            <!-- API模拟器 -->
+            <div class="control-section">
+                <h3>🌐 API模拟器</h3>
+                <div class="api-controls">
+                    <input type="number" id="apiDelayInput" class="control-input" placeholder="延迟(ms)" value="500">
+                    <button id="setDelayBtn" class="control-btn">⏱️ 设置延迟</button>
+                    <button id="resetApiBtn" class="control-btn">🔄 重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试区域 -->
+        <div class="test-area">
+            <!-- 设备框架 -->
+            <div id="deviceFrame" class="device-frame">
+                <div class="device-content">
+                    <h2>📱 设备内容区域</h2>
+                    <p>这里将显示模拟设备的内容</p>
+                    
+                    <!-- 测试按钮 -->
+                    <div class="test-buttons">
+                        <button class="test-btn" data-i18n="common.loading">Loading...</button>
+                        <button class="test-btn" data-i18n="common.success">Success</button>
+                        <button class="test-btn" data-i18n="navigation.home">Home</button>
+                        <button class="test-btn" data-i18n="user.username">Username</button>
+                    </div>
+                    
+                    <!-- 表单测试 -->
+                    <div class="form-test">
+                        <h3>表单测试</h3>
+                        <input type="text" placeholder="用户名" data-i18n-placeholder="user.username">
+                        <input type="email" placeholder="邮箱" data-i18n-placeholder="user.email">
+                        <input type="password" placeholder="密码" data-i18n-placeholder="user.password">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态监控 -->
+        <div class="status-monitor">
+            <h3>📊 状态监控</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h4>设备状态</h4>
+                    <div id="deviceStatus" class="status-content">加载中...</div>
+                </div>
+                <div class="status-item">
+                    <h4>语言状态</h4>
+                    <div id="languageStatus" class="status-content">加载中...</div>
+                </div>
+                <div class="status-item">
+                    <h4>Telegram状态</h4>
+                    <div id="telegramStatus" class="status-content">加载中...</div>
+                </div>
+                <div class="status-item">
+                    <h4>API状态</h4>
+                    <div id="apiStatus" class="status-content">加载中...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能测试 -->
+        <div class="function-tests">
+            <h3>🧪 功能测试</h3>
+            <div class="test-grid">
+                <div class="test-card">
+                    <h4>📱 Telegram功能测试</h4>
+                    <button id="testTelegramBtn" class="test-btn">测试Telegram</button>
+                    <button id="testWebAppBtn" class="test-btn">测试WebApp</button>
+                    <button id="testAuthBtn" class="test-btn">测试认证</button>
+                </div>
+                
+                <div class="test-card">
+                    <h4>🌐 API功能测试</h4>
+                    <button id="testLoginBtn" class="test-btn">测试登录</button>
+                    <button id="testRegisterBtn" class="test-btn">测试注册</button>
+                    <button id="testProfileBtn" class="test-btn">测试资料</button>
+                </div>
+                
+                <div class="test-card">
+                    <h4>🌍 多语言测试</h4>
+                    <button id="testLanguageBtn" class="test-btn">测试语言</button>
+                    <button id="testFormatBtn" class="test-btn">测试格式</button>
+                    <button id="testDirectionBtn" class="test-btn">测试方向</button>
+                </div>
+                
+                <div class="test-card">
+                    <h4>📐 响应式测试</h4>
+                    <button id="testResponsiveBtn" class="test-btn">测试响应式</button>
+                    <button id="testOrientationBtn" class="test-btn">测试方向</button>
+                    <button id="testTouchBtn" class="test-btn">测试触摸</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制台输出 -->
+        <div class="console-output">
+            <div class="console-header">
+                <h3>📝 控制台输出</h3>
+                <button id="clearConsoleBtn" class="console-btn">清空</button>
+                <button id="exportConsoleBtn" class="console-btn">导出</button>
+            </div>
+            <div id="consoleContent" class="console-content">
+                <div class="console-line">🚀 测试环境初始化中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义尺寸弹窗 -->
+    <div id="customSizeModal" class="modal">
+        <div class="modal-content">
+            <h3>自定义设备尺寸</h3>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="customWidth">宽度 (px):</label>
+                    <input type="number" id="customWidth" min="200" max="3000" value="375">
+                </div>
+                <div class="input-group">
+                    <label for="customHeight">高度 (px):</label>
+                    <input type="number" id="customHeight" min="200" max="3000" value="667">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="applyCustomSizeBtn" class="btn primary">应用</button>
+                <button id="cancelCustomSizeBtn" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 脚本加载 -->
+    <script src="telegram-mock.js"></script>
+    <script src="api-mock.js"></script>
+    <script src="device-simulator.js"></script>
+    <script src="language-tester.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速访问系统设置 - FitChallenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .main-card { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .action-btn {
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+            text-align: center;
+            min-width: 200px;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary-custom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-success-custom {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+        .btn-info-custom {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+        .btn-warning-custom {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online { background: #27ae60; }
+        .status-offline { background: #e74c3c; }
+        .hero-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <div class="hero-section">
+            <div class="hero-title">
+                <i class="fas fa-cogs"></i> 系统设置快速访问
+            </div>
+            <p class="lead text-muted">解决管理员系统中找不到系统设置的问题</p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-rocket"></i> 快速解决方案</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>直接访问系统设置功能：</p>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="direct-settings" class="action-btn btn-primary-custom">
+                                <i class="fas fa-cogs"></i> 直接打开系统设置
+                            </button>
+                            
+                            <button id="force-navigate" class="action-btn btn-success-custom">
+                                <i class="fas fa-route"></i> 强制导航到设置页面
+                            </button>
+                            
+                            <a href="http://127.0.0.1:8081" class="action-btn btn-info-custom">
+                                <i class="fas fa-external-link-alt"></i> 返回管理员系统
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> 问题诊断</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>检查系统状态和配置：</p>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>管理员系统:</span>
+                                <span><span class="status-indicator status-online"></span>在线</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>后端API:</span>
+                                <span id="api-status"><span class="status-indicator status-offline"></span>检查中...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button id="test-api" class="action-btn btn-warning-custom">
+                                <i class="fas fa-stethoscope"></i> 测试API连接
+                            </button>
+                            
+                            <button id="check-config" class="action-btn btn-info-custom">
+                                <i class="fas fa-search"></i> 检查配置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-terminal"></i> 操作日志</h5>
+            </div>
+            <div class="card-body">
+                <div id="console" style="background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+                    [系统] 快速访问工具已加载
+                </div>
+                <button id="clear-log" class="btn btn-sm btn-secondary mt-2">清除日志</button>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <h6><i class="fas fa-lightbulb"></i> 使用说明：</h6>
+            <ol>
+                <li><strong>直接打开系统设置</strong> - 在当前页面直接加载系统设置功能</li>
+                <li><strong>强制导航到设置页面</strong> - 通过JavaScript强制导航到设置页面</li>
+                <li><strong>返回管理员系统</strong> - 回到主系统，然后使用键盘快捷键 <kbd>Ctrl+9</kbd> 访问系统设置</li>
+            </ol>
+        </div>
+    </div>
+
+    <script type="module">
+        // 日志功能
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const console = document.getElementById('console');
+            const colorMap = {
+                'success': '#27ae60',
+                'error': '#e74c3c',
+                'warning': '#f39c12',
+                'info': '#3498db'
+            };
+            
+            console.innerHTML += `<div style="color: ${colorMap[type] || '#ecf0f1'};">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // 1. 直接打开系统设置
+        document.getElementById('direct-settings').addEventListener('click', async () => {
+            log('🚀 开始直接加载系统设置...', 'info');
+            
+            try {
+                // 导入SystemSettings类
+                const SystemSettingsModule = await import('./src/pages/SystemSettings.js');
+                const SystemSettings = SystemSettingsModule.default;
+                
+                // 创建模拟的app上下文
+                const mockApp = {
+                    user: { username: 'admin' },
+                    showToast: (msg, type) => log(`Toast: ${msg}`, type)
+                };
+                
+                const settings = new SystemSettings(mockApp);
+                await settings.loadVersionInfo();
+                
+                log('✅ SystemSettings实例创建成功', 'success');
+                
+                // 渲染设置页面
+                const content = settings.render();
+                
+                // 创建新窗口显示设置页面
+                const newWindow = window.open('', '_blank', 'width=1000,height=700,scrollbars=yes');
+                newWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="zh-CN">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>系统设置 - FitChallenge</title>
+                        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+                        <style>
+                            body { padding: 20px; font-family: Arial, sans-serif; }
+                            .container { max-width: 1200px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            ${content}
+                        </div>
+                        <script>
+                            // 设置事件监听器
+                            document.addEventListener('DOMContentLoaded', function() {
+                                console.log('系统设置页面已加载');
+                                
+                                // 模拟设置事件监听器
+                                const incrementBtn = document.getElementById('increment-version-btn');
+                                const updateBtn = document.getElementById('update-version-btn');
+                                const clearBtn = document.getElementById('clear-cache-btn');
+                                
+                                if (incrementBtn) {
+                                    incrementBtn.addEventListener('click', () => {
+                                        alert('版本递增功能需要在完整的管理员系统中使用');
+                                    });
+                                }
+                                
+                                if (updateBtn) {
+                                    updateBtn.addEventListener('click', () => {
+                                        const newVersion = prompt('请输入新版本号:');
+                                        if (newVersion) {
+                                            alert('版本更新功能需要在完整的管理员系统中使用');
+                                        }
+                                    });
+                                }
+                                
+                                if (clearBtn) {
+                                    clearBtn.addEventListener('click', () => {
+                                        if (confirm('确定要清除所有缓存吗？')) {
+                                            localStorage.clear();
+                                            sessionStorage.clear();
+                                            alert('缓存已清除');
+                                        }
+                                    });
+                                }
+                            });
+                        </script>
+                    </body>
+                    </html>
+                `);
+                newWindow.document.close();
+                
+                log('✅ 系统设置页面已在新窗口中打开', 'success');
+                
+            } catch (error) {
+                log(`❌ 直接加载失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+        });
+
+        // 2. 强制导航
+        document.getElementById('force-navigate').addEventListener('click', () => {
+            log('🔄 尝试强制导航到设置页面...', 'info');
+            
+            // 方法1: 直接修改URL
+            const newUrl = 'http://127.0.0.1:8081#settings';
+            log(`📍 尝试导航到: ${newUrl}`, 'info');
+            
+            // 方法2: 使用postMessage与父窗口通信
+            if (window.opener) {
+                window.opener.postMessage({ action: 'navigate', page: 'settings' }, '*');
+                log('📤 已发送导航消息到父窗口', 'info');
+            }
+            
+            // 方法3: 直接跳转
+            setTimeout(() => {
+                window.location.href = newUrl;
+            }, 1000);
+            
+            log('⏱️ 1秒后将跳转到管理员系统', 'warning');
+        });
+
+        // 3. 测试API连接
+        document.getElementById('test-api').addEventListener('click', async () => {
+            log('🔍 测试API连接状态...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/health');
+                if (response.ok) {
+                    log('✅ API连接正常', 'success');
+                    document.getElementById('api-status').innerHTML = '<span class="status-indicator status-online"></span>在线';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ API连接失败: ${error.message}`, 'error');
+                document.getElementById('api-status').innerHTML = '<span class="status-indicator status-offline"></span>离线';
+            }
+        });
+
+        // 4. 检查配置
+        document.getElementById('check-config').addEventListener('click', async () => {
+            log('🔍 检查系统配置...', 'info');
+            
+            try {
+                // 检查localStorage中的认证信息
+                const adminToken = localStorage.getItem('adminToken');
+                const adminUser = localStorage.getItem('adminUser');
+                
+                log(`认证令牌: ${adminToken ? '已设置' : '未设置'}`, adminToken ? 'success' : 'warning');
+                log(`用户信息: ${adminUser ? '已设置' : '未设置'}`, adminUser ? 'success' : 'warning');
+                
+                // 检查页面配置
+                const AppModule = await import('./src/App-fixed.js');
+                const AdminApp = AppModule.default;
+                const app = new AdminApp();
+                
+                const hasSettings = app.pages && app.pages.settings;
+                log(`系统设置页面配置: ${hasSettings ? '正常' : '缺失'}`, hasSettings ? 'success' : 'error');
+                
+                if (hasSettings) {
+                    log(`- 类: ${app.pages.settings.Class?.name || '未定义'}`, 'info');
+                    log(`- 渲染方法: ${typeof app.pages.settings.render}`, 'info');
+                    log(`- 初始化方法: ${typeof app.pages.settings.afterRender}`, 'info');
+                }
+                
+                log('✅ 配置检查完成', 'success');
+                
+            } catch (error) {
+                log(`❌ 配置检查失败: ${error.message}`, 'error');
+            }
+        });
+
+        // 清除日志
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('console').innerHTML = '[系统] 日志已清除';
+        });
+
+        // 监听来自管理员系统的消息
+        window.addEventListener('message', (event) => {
+            if (event.origin !== 'http://127.0.0.1:8081') return;
+            
+            log(`📨 收到消息: ${JSON.stringify(event.data)}`, 'info');
+        });
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 快速访问工具已准备就绪', 'success');
+            
+            // 自动测试API连接
+            setTimeout(() => {
+                document.getElementById('test-api').click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

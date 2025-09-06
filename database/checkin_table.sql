@@ -1,0 +1,12 @@
+-- 创建用户签到表
+CREATE TABLE IF NOT EXISTS user_checkins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    checkin_date DATETIME NOT NULL,
+    reward_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    consecutive_days INT NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY (user_id, checkin_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

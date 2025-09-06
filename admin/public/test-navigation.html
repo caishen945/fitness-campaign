@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导航测试 - 系统设置功能</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        
+        .test-button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        #console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1><i class="fas fa-route"></i> 管理员界面导航测�?/h1>
+        
+        <div class="test-section">
+            <h3>快速导航测�?/h3>
+            <p>点击下面的按钮测试各个页面的导航功能�?/p>
+            <button class="test-button" onclick="testNavigation('dashboard')">仪表�?/button>
+            <button class="test-button" onclick="testNavigation('users')">用户管理</button>
+            <button class="test-button" onclick="testNavigation('vip')">VIP管理</button>
+            <button class="test-button" onclick="testNavigation('wallet')">钱包管理</button>
+            <button class="test-button" onclick="testNavigation('settings')" style="background: #28a745;">系统设置</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>直接访问测试</h3>
+            <p>测试直接访问管理员界面的系统设置页面�?/p>
+            <button class="test-button" onclick="directAccess()">直接访问系统设置</button>
+            <button class="test-button" onclick="clearStorage()">清除本地存储</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>控制台输�?/h3>
+            <div id="console-output"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 控制台输出函�?
+        function logToConsole(message, type = 'info') {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '�? : type === 'success' ? '�? : 'ℹ️';
+            
+            output.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            
+            // 同时输出到浏览器控制�?
+            if (type === 'error') {
+                console.error(message);
+            } else {
+                console.log(message);
+            }
+        }
+
+        // 测试导航功能
+        function testNavigation(page) {
+            logToConsole(`测试导航到页�? ${page}`);
+            
+            // 构造管理员界面URL，包含页面参�?
+            const adminUrl = `http://127.0.0.1:8081/#${page}`;
+            logToConsole(`打开URL: ${adminUrl}`);
+            
+            // 在新标签页中打开
+            const newWindow = window.open(adminUrl, '_blank');
+            
+            if (newWindow) {
+                logToConsole('新标签页已打开', 'success');
+                
+                // 监听新窗口的加载状�?
+                setTimeout(() => {
+                    try {
+                        if (newWindow.closed) {
+                            logToConsole('窗口已被关闭', 'warning');
+                        } else {
+                            logToConsole('窗口仍在运行', 'success');
+                        }
+                    } catch (e) {
+                        logToConsole('无法访问新窗口状态（可能是跨域限制）', 'warning');
+                    }
+                }, 2000);
+            } else {
+                logToConsole('无法打开新标签页（可能被浏览器阻止）', 'error');
+            }
+        }
+
+        // 直接访问系统设置
+        function directAccess() {
+            logToConsole('测试直接访问系统设置页面');
+            
+            const adminUrl = 'http://127.0.0.1:8081/#settings';
+            logToConsole(`直接访问URL: ${adminUrl}`);
+            
+            // 在当前标签页中打开
+            window.location.href = adminUrl;
+        }
+
+        // 清除本地存储
+        function clearStorage() {
+            logToConsole('清除所有本地存�?);
+            
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                logToConsole('本地存储已清�?, 'success');
+                
+                // 清除缓存
+                if ('caches' in window) {
+                    caches.keys().then(cacheNames => {
+                        return Promise.all(
+                            cacheNames.map(cacheName => caches.delete(cacheName))
+                        );
+                    }).then(() => {
+                        logToConsole('浏览器缓存已清除', 'success');
+                    }).catch(error => {
+                        logToConsole('清除缓存失败: ' + error.message, 'error');
+                    });
+                }
+            } catch (error) {
+                logToConsole('清除存储失败: ' + error.message, 'error');
+            }
+        }
+
+        // 页面加载时的初始�?
+        document.addEventListener('DOMContentLoaded', function() {
+            logToConsole('导航测试页面已加�?);
+            logToConsole('管理员服务器地址: http://127.0.0.1:8081');
+            logToConsole('准备测试系统设置功能的导�?);
+            
+            // 检查管理员服务器状�?
+            fetch('http://127.0.0.1:8081/')
+                .then(response => {
+                    if (response.ok) {
+                        logToConsole('�?管理员服务器运行正常', 'success');
+                    } else {
+                        logToConsole(`⚠️ 管理员服务器响应异常: ${response.status}`, 'warning');
+                    }
+                })
+                .catch(error => {
+                    logToConsole(`�?无法连接管理员服务器: ${error.message}`, 'error');
+                });
+        });
+    </script>
+</body>
+</html>
