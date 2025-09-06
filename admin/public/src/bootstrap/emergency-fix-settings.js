@@ -155,7 +155,7 @@ function loadSystemSettingsPage() {
     `;
     
     // 动态加载系统设置模块
-    import('./src/pages/SystemSettings.js?' + 'v=' + Date.now())
+    import(/* @vite-ignore */ '../pages/SystemSettings.js?' + 'v=' + Date.now())
         .then(module => {
             console.log('✅ 系统设置模块加载成功');
             const systemSettings = new module.default();
@@ -236,3 +236,5 @@ setTimeout(() => {
 }, 1000);
 
 console.log('✅ 紧急修复脚本已加载');
+
+

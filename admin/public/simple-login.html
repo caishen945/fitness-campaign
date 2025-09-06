@@ -47,13 +47,13 @@
         
         <form id="loginForm">
             <div class="form-group mb-3">
-                <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户�?/label>
+                <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户名</label>
                 <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
             </div>
             
             <div class="form-group mb-4">
                 <label for="password" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">密码</label>
-                <input type="password" id="password" class="form-control" placeholder="请输入密�? required>
+                <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
             </div>
             
             <button type="submit" id="loginBtn" class="btn btn-primary w-100" style="padding: 0.75rem; font-size: 1rem;">
@@ -84,7 +84,7 @@
             const message = document.getElementById('message');
             
             if (loginForm) {
-                console.log('�?找到登录表单');
+                console.log('✅ 找到登录表单');
                 
                 loginForm.addEventListener('submit', async function(e) {
                     console.log('🚀 表单提交事件触发');
@@ -94,12 +94,12 @@
                     const username = document.getElementById('username').value.trim();
                     const password = document.getElementById('password').value.trim();
                     
-                    console.log('📝 用户�?', username);
+                    console.log('📝 用户名', username);
                     console.log('📝 密码:', password);
                     
-                    // 显示加载状�?
+                    // 显示加载状态
                     loginBtn.disabled = true;
-                    loginBtn.querySelector('.button-text').textContent = '登录�?..';
+                    loginBtn.querySelector('.button-text').textContent = '登录中...';
                     loginBtn.querySelector('.loading-spinner').style.display = 'inline-block';
                     message.style.display = 'none';
                     
@@ -114,20 +114,20 @@
                             body: JSON.stringify({ username, password })
                         });
                         
-                        console.log('📡 API响应状�?', response.status);
+                        console.log('📡 API响应状态', response.status);
                         
                         const result = await response.json();
                         console.log('📄 API响应数据:', result);
                         
                         if (result.success) {
-                            console.log('�?登录成功');
+                            console.log('✅ 登录成功');
                             
                             // 保存token
                             localStorage.setItem('adminToken', result.token);
                             localStorage.setItem('adminUser', JSON.stringify(result.user));
                             
                             // 显示成功消息
-                            message.textContent = '登录成功！正在跳�?..';
+                            message.textContent = '登录成功！正在跳转...';
                             message.className = 'alert alert-success';
                             message.style.display = 'block';
                             
@@ -137,14 +137,14 @@
                                 window.location.href = '/';
                             }, 1000);
                         } else {
-                            console.log('�?登录失败:', result.message);
+                            console.log('❌ 登录失败:', result.message);
                             message.textContent = result.message || '用户名或密码错误';
                             message.className = 'alert alert-danger';
                             message.style.display = 'block';
                         }
                     } catch (error) {
                         console.error('💥 登录错误:', error);
-                        message.textContent = '登录失败，请检查网络连�?;
+                        message.textContent = '登录失败，请检查网络连接';
                         message.className = 'alert alert-danger';
                         message.style.display = 'block';
                     } finally {
@@ -155,9 +155,9 @@
                     }
                 });
                 
-                console.log('�?事件绑定完成');
+                console.log('✅ 事件绑定完成');
             } else {
-                console.error('�?未找到登录表�?);
+                console.error('❌ 未找到登录表单');
             }
         });
     </script>

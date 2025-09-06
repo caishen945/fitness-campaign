@@ -30,43 +30,43 @@ class CheckinManagement {
                             <div class="col-md-3 mb-3">
                                 <div class="stat-card bg-primary">
                                     <h3>今日签到人数</h3>
-                                    <div class="stat-value" id="today-checkins">加载�?..</div>
+                                    <div class="stat-value" id="today-checkins">加载中...</div>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <div class="stat-card bg-success">
                                     <h3>昨日签到人数</h3>
-                                    <div class="stat-value" id="yesterday-checkins">加载�?..</div>
+                                    <div class="stat-value" id="yesterday-checkins">加载中...</div>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <div class="stat-card bg-info">
                                     <h3>本周签到人数</h3>
-                                    <div class="stat-value" id="week-checkins">加载�?..</div>
+                                    <div class="stat-value" id="week-checkins">加载中...</div>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <div class="stat-card bg-warning">
                                     <h3>本月签到人数</h3>
-                                    <div class="stat-value" id="month-checkins">加载�?..</div>
+                                    <div class="stat-value" id="month-checkins">加载中...</div>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <div class="stat-card bg-secondary">
-                                    <h3>总签到次�?/h3>
-                                    <div class="stat-value" id="total-checkins">加载�?..</div>
+                                    <h3>总签到次数</h3>
+                                    <div class="stat-value" id="total-checkins">加载中...</div>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <div class="stat-card bg-danger">
-                                    <h3>总奖励金�?/h3>
-                                    <div class="stat-value" id="total-rewards">加载�?..</div>
+                                    <h3>总奖励金额</h3>
+                                    <div class="stat-value" id="total-rewards">加载中...</div>
                                 </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <div class="stat-card bg-dark">
-                                    <h3>连续签到7天以上用�?/h3>
-                                    <div class="stat-value" id="consecutive-users">加载�?..</div>
+                                    <h3>连续签到7天以上用户</h3>
+                                    <div class="stat-value" id="consecutive-users">加载中...</div>
                                 </div>
                             </div>
                         </div>
@@ -89,13 +89,13 @@ class CheckinManagement {
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <div class="form-group">
-                                        <label for="consecutiveReward7">连续签到7天额外奖�?(USDT)</label>
+                                        <label for="consecutiveReward7">连续签到7天额外奖励 (USDT)</label>
                                         <input type="number" class="form-control" id="consecutiveReward7" step="0.01" min="0" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <div class="form-group">
-                                        <label for="consecutiveReward30">连续签到30天额外奖�?(USDT)</label>
+                                        <label for="consecutiveReward30">连续签到30天额外奖励 (USDT)</label>
                                         <input type="number" class="form-control" id="consecutiveReward30" step="0.01" min="0" required>
                                     </div>
                                 </div>
@@ -128,7 +128,7 @@ class CheckinManagement {
                                 <div class="col-md-4 mb-3">
                                     <div class="form-group">
                                         <label for="description">描述</label>
-                                        <input type="text" class="form-control" id="description" placeholder="管理员手动添加签�?>
+                                        <input type="text" class="form-control" id="description" placeholder="管理员手动添加签到">
                                     </div>
                                 </div>
                             </div>
@@ -148,18 +148,18 @@ class CheckinManagement {
                                 <thead>
                                     <tr>
                                         <th>用户ID</th>
-                                        <th>用户�?/th>
+                                        <th>用户名</th>
                                         <th>邮箱</th>
-                                        <th>总签到次�?/th>
-                                        <th>最大连续签�?/th>
-                                        <th>总奖�?/th>
-                                        <th>最后签到时�?/th>
+                                        <th>总签到次数</th>
+                                        <th>最大连续签到</th>
+                                        <th>总奖励</th>
+                                        <th>最后签到时间</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="checkin-stats-table">
                                     <tr>
-                                        <td colspan="8" class="text-center">加载�?..</td>
+                                        <td colspan="8" class="text-center">加载中...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -167,9 +167,9 @@ class CheckinManagement {
                         
                         <!-- 分页控件 -->
                         <div class="pagination-container">
-                            <button id="prev-page" class="btn btn-sm btn-outline-primary">上一�?/button>
-                            <span id="pagination-info">�?1 页，�?1 �?/span>
-                            <button id="next-page" class="btn btn-sm btn-outline-primary">下一�?/button>
+                            <button id="prev-page" class="btn btn-sm btn-outline-primary">上一页</button>
+                            <span id="pagination-info">第1 页，共1 页</span>
+                            <button id="next-page" class="btn btn-sm btn-outline-primary">下一页</button>
                         </div>
                     </div>
                 </div>
@@ -197,13 +197,13 @@ class CheckinManagement {
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="stat-card bg-primary">
-                                                <h5>总签到次�?/h5>
+                                                <h5>总签到次数</h5>
                                                 <div class="stat-value" id="detail-total-checkins"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="stat-card bg-success">
-                                                <h5>最大连续签�?/h5>
+                                                <h5>最大连续签到</h5>
                                                 <div class="stat-value" id="detail-max-consecutive"></div>
                                             </div>
                                         </div>
@@ -217,7 +217,7 @@ class CheckinManagement {
                                     <div class="row mt-3">
                                         <div class="col-md-4">
                                             <div class="stat-card bg-warning">
-                                                <h5>总奖励金�?/h5>
+                                                <h5>总奖励金额</h5>
                                                 <div class="stat-value" id="detail-total-rewards"></div>
                                             </div>
                                         </div>
@@ -239,7 +239,7 @@ class CheckinManagement {
                                             </thead>
                                             <tbody id="checkin-history-table">
                                                 <tr>
-                                                    <td colspan="5" class="text-center">加载�?..</td>
+                                                    <td colspan="5" class="text-center">加载中...</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -264,7 +264,7 @@ class CheckinManagement {
                                 </button>
                             </div>
                             <div class="modal-body">
-                                <p>确定要删除这条签到记录吗？此操作不可逆，并且会从用户钱包中扣除相应的奖励金额�?/p>
+                                <p>确定要删除这条签到记录吗？此操作不可逆，并且会从用户钱包中扣除相应的奖励金额。</p>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
@@ -291,7 +291,7 @@ class CheckinManagement {
             // 绑定事件
             this.bindEvents();
         } catch (error) {
-            console.error('初始化签到管理页面失�?', error);
+            console.error('初始化签到管理页面失败', error);
             this.app.showToast('加载签到管理数据失败', 'error');
         }
     }
@@ -357,7 +357,7 @@ class CheckinManagement {
             const response = await adminApi.getCheckinStats();
             
             if (response.success) {
-                // 确保checkinStats是数�?
+                // 确保checkinStats是数组
                 if (Array.isArray(response.data)) {
                     this.checkinStats = response.data;
                 } else if (response.data && Array.isArray(response.data.stats)) {
@@ -375,7 +375,7 @@ class CheckinManagement {
             }
         } catch (error) {
             console.error('获取签到统计失败:', error);
-            // 确保checkinStats是数�?
+            // 确保checkinStats是数组
             this.checkinStats = [];
             this.updateCheckinStatsUI();
         }
@@ -397,7 +397,7 @@ class CheckinManagement {
                 <td>${stat.total_checkins || 0}</td>
                 <td>${stat.max_consecutive_days || 0}</td>
                 <td>${parseFloat(stat.total_rewards || 0).toFixed(2)} USDT</td>
-                <td>${stat.last_checkin_date ? new Date(stat.last_checkin_date).toLocaleString() : '�?}</td>
+                <td>${stat.last_checkin_date ? new Date(stat.last_checkin_date).toLocaleString() : '未知'}</td>
                 <td>
                     <button class="btn btn-sm btn-info view-details" data-user-id="${stat.user_id}">查看详情</button>
                 </td>
@@ -415,7 +415,7 @@ class CheckinManagement {
     }
     
     updatePaginationUI() {
-        document.getElementById('pagination-info').textContent = `�?${this.currentPage} 页，�?${this.totalPages} 页`;
+        document.getElementById('pagination-info').textContent = `第${this.currentPage} 页，共${this.totalPages} 页`;
         
         const prevBtn = document.getElementById('prev-page');
         const nextBtn = document.getElementById('next-page');
@@ -437,7 +437,7 @@ class CheckinManagement {
             
             // 更新用户信息
             document.getElementById('detail-user-id').textContent = user.id;
-            document.getElementById('detail-user-email').textContent = user.email || '未设�?;
+            document.getElementById('detail-user-email').textContent = user.email || '未设置';
             document.getElementById('detail-email').textContent = user.email;
             
             // 更新统计信息
@@ -499,7 +499,7 @@ class CheckinManagement {
                 throw new Error(response.message || '删除签到记录失败');
             }
             
-            this.app.showToast('签到记录已删�?, 'success');
+            this.app.showToast('签到记录已删除', 'success');
             
             // 关闭确认模态框
             $('#deleteCheckinModal').modal('hide');
@@ -533,7 +533,7 @@ class CheckinManagement {
                 throw new Error(response.message || '更新签到配置失败');
             }
             
-            this.app.showToast('签到配置已更�?, 'success');
+            this.app.showToast('签到配置已更新', 'success');
             
             // 更新本地配置
             this.checkinConfig = {
@@ -552,7 +552,7 @@ class CheckinManagement {
             const token = localStorage.getItem('admin_token');
             const userId = parseInt(document.getElementById('userId').value);
             const rewardAmount = parseFloat(document.getElementById('rewardAmount').value);
-            const description = document.getElementById('description').value || '管理员手动添加签�?;
+            const description = document.getElementById('description').value || '管理员手动添加签到';
             
             const response = await adminApi.addManualCheckin(token, {
                 userId,
@@ -564,7 +564,7 @@ class CheckinManagement {
                 throw new Error(response.message || '手动添加签到失败');
             }
             
-            this.app.showToast('签到记录已添�?, 'success');
+            this.app.showToast('签到记录已添加', 'success');
             
             // 重置表单
             document.getElementById('manual-checkin-form').reset();

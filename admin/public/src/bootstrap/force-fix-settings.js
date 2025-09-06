@@ -47,8 +47,7 @@ function forceInjectSystemSettings() {
                     
                     // 检查是否已存在系统设置菜单
                     const existingSettings = navContainer.querySelector('[data-page="system-settings"]') ||
-                                            navContainer.querySelector('[href*="system"]') ||
-                                            navContainer.querySelector('a:contains("系统设置")');
+                                            navContainer.querySelector('[href*="system"]');
                     
                     if (!existingSettings) {
                         console.log('⚠️ 未找到系统设置菜单，开始注入...');
@@ -158,7 +157,7 @@ function forceLoadSystemSettings() {
         `;
         
         // 动态加载系统设置模块
-        import('./src/pages/SystemSettings.js?' + 'v=' + Date.now())
+        import(/* @vite-ignore */ '../pages/SystemSettings.js?' + 'v=' + Date.now())
             .then(module => {
                 console.log('✅ 系统设置模块加载成功');
                 const systemSettings = new module.default();
@@ -196,3 +195,5 @@ window.forceFixSettings = {
 };
 
 console.log('✅ 强制修复脚本已加载，可通过 window.forceFixSettings 调试');
+
+

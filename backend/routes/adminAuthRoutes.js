@@ -35,11 +35,13 @@ const express = require('express');
 const router = express.Router();
 const adminAuthMiddleware = require('../middleware/adminAuthMiddleware');
 const rateLimit = require('express-rate-limit');
+const bcrypt = require('bcryptjs');
+const { getConnection } = require('../config/database');
 
-// 閫熺巼闄愬埗锛氱櫥褰曞皾璇曢檺鍒?
+// 速率限制：登录尝试限制
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15分钟
-    max: 5, // 鏈€澶?娆″皾璇?
+    max: 5, // 最大5次尝试
     message: {
         success: false,
         message: '登录尝试次数过多，请15分钟后再试',
@@ -48,10 +50,10 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// 閫熺巼闄愬埗锛欰PI璇锋眰闄愬埗
+// 速率限制：通用API请求限制
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15分钟
-    max: 100, // 鏈€澶?00娆¤姹?
+    max: 100, // 最大100次请求
     message: {
         success: false,
         message: '请求频率过高，请稍后再试'
@@ -60,12 +62,12 @@ const apiLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-// 绠＄悊鍛樼櫥褰?
+// 管理员登录
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // 杈撳叆楠岃瘉
+        // 输入校验
         if (!username || !password) {
             return res.status(400).json({
                 success: false,
@@ -87,7 +89,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // 楠岃瘉绠＄悊鍛樺嚟鎹?
+        // 验证管理员账号
         const result = await adminAuthMiddleware.authenticateAdmin(username, password);
 
         // 记录登录审计日志
@@ -111,7 +113,7 @@ router.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('绠＄悊鍛樼櫥褰曞け璐?', error);
+        console.error('管理员登录失败:', error);
         res.status(401).json({
             success: false,
             message: error.message || '登录失败'
@@ -119,21 +121,21 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// 楠岃瘉Token
+// 验证Token
 router.get('/verify', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adminAuthMiddleware), (req, res) => {
     res.json({
         success: true,
-        message: 'Token鏈夋晥',
+        message: 'Token有效',
         data: {
             admin: req.admin
         }
     });
 });
 
-// 鍒锋柊Token
+// 刷新Token
 router.post('/refresh', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adminAuthMiddleware), async (req, res) => {
     try {
-        // 鐢熸垚鏂扮殑Token
+        // 生成新的Token
         const tokenPayload = {
             id: req.admin.id,
             username: req.admin.username,
@@ -143,7 +145,7 @@ router.post('/refresh', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(ad
 
         const newToken = adminAuthMiddleware.generateToken(tokenPayload);
 
-        // 璁板綍Token鍒锋柊瀹¤鏃ュ織
+        // 记录Token刷新审计日志
         await adminAuthMiddleware.logAuditAction(
             req.admin.id,
             'TOKEN_REFRESH',
@@ -156,25 +158,25 @@ router.post('/refresh', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(ad
 
         res.json({
             success: true,
-            message: 'Token鍒锋柊鎴愬姛',
+            message: 'Token刷新成功',
             data: {
                 token: newToken,
                 admin: req.admin
             }
         });
     } catch (error) {
-        console.error('Token鍒锋柊澶辫触:', error);
+        console.error('Token刷新失败:', error);
         res.status(500).json({
             success: false,
-            message: 'Token鍒锋柊澶辫触'
+            message: 'Token刷新失败'
         });
     }
 });
 
-// 绠＄悊鍛樼櫥鍑?
+// 管理员退出
 router.post('/logout', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adminAuthMiddleware), async (req, res) => {
     try {
-        // 璁板綍鐧诲嚭瀹¤鏃ュ織
+        // 记录退出审计日志
         await adminAuthMiddleware.logAuditAction(
             req.admin.id,
             'ADMIN_LOGOUT',
@@ -187,21 +189,21 @@ router.post('/logout', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adm
 
         res.json({
             success: true,
-            message: '鐧诲嚭鎴愬姛'
+            message: '退出成功'
         });
     } catch (error) {
-        console.error('绠＄悊鍛樼櫥鍑哄け璐?', error);
+        console.error('管理员退出失败:', error);
         res.status(500).json({
             success: false,
-            message: '鐧诲嚭澶辫触'
+            message: '退出失败'
         });
     }
 });
 
-// 鑾峰彇褰撳墠绠＄悊鍛樹俊鎭?
+// 获取当前管理员信息
 router.get('/profile', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adminAuthMiddleware), async (req, res) => {
     try {
-        const connection = await adminAuthMiddleware.pool.getConnection();
+        const connection = await getConnection();
         try {
             const [rows] = await connection.execute(
                 'SELECT id, username, role, permissions, email, created_at, last_login FROM admin_users WHERE id = ?',
@@ -211,7 +213,7 @@ router.get('/profile', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adm
             if (rows.length === 0) {
                 return res.status(404).json({
                     success: false,
-                    message: '绠＄悊鍛樹笉瀛樺湪'
+                    message: '管理员不存在'
                 });
             }
 
@@ -232,7 +234,7 @@ router.get('/profile', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adm
             connection.release();
         }
     } catch (error) {
-        console.error('鑾峰彇绠＄悊鍛樹俊鎭け璐?', error);
+        console.error('获取管理员信息失败:', error);
         res.status(500).json({
             success: false,
             message: '获取管理员信息失败'
@@ -240,16 +242,16 @@ router.get('/profile', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adm
     }
 });
 
-// 淇敼瀵嗙爜
+// 修改密码
 router.post('/change-password', apiLimiter, adminAuthMiddleware.verifyAdminToken.bind(adminAuthMiddleware), async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
 
-        // 杈撳叆楠岃瘉
+        // 输入校验
         if (!currentPassword || !newPassword) {
             return res.status(400).json({
                 success: false,
-                message: '褰撳墠瀵嗙爜鍜屾柊瀵嗙爜涓嶈兘涓虹┖'
+                message: '当前密码和新密码不能为空'
             });
         }
 
@@ -260,9 +262,9 @@ router.post('/change-password', apiLimiter, adminAuthMiddleware.verifyAdminToken
             });
         }
 
-        const connection = await adminAuthMiddleware.pool.getConnection();
+        const connection = await getConnection();
         try {
-            // 楠岃瘉褰撳墠瀵嗙爜
+            // 验证当前密码
             const [rows] = await connection.execute(
                 'SELECT password_hash FROM admin_users WHERE id = ?',
                 [req.admin.id]
@@ -271,7 +273,7 @@ router.post('/change-password', apiLimiter, adminAuthMiddleware.verifyAdminToken
             if (rows.length === 0) {
                 return res.status(404).json({
                     success: false,
-                    message: '绠＄悊鍛樹笉瀛樺湪'
+                    message: '管理员不存在'
                 });
             }
 
@@ -279,22 +281,21 @@ router.post('/change-password', apiLimiter, adminAuthMiddleware.verifyAdminToken
             if (!isValidPassword) {
                 return res.status(400).json({
                     success: false,
-                    message: '褰撳墠瀵嗙爜閿欒'
+                    message: '当前密码错误'
                 });
             }
 
-            // 鍔犲瘑鏂板瘑鐮?
-            const bcrypt = require('bcryptjs');
+            // 加密新密码
             const saltRounds = 12;
             const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
 
-            // 鏇存柊瀵嗙爜
+            // 更新密码
             await connection.execute(
                 'UPDATE admin_users SET password_hash = ?, updated_at = NOW() WHERE id = ?',
                 [newPasswordHash, req.admin.id]
             );
 
-            // 璁板綍瀵嗙爜淇敼瀹¤鏃ュ織
+            // 记录密码修改审计日志
             await adminAuthMiddleware.logAuditAction(
                 req.admin.id,
                 'PASSWORD_CHANGE',
@@ -307,16 +308,16 @@ router.post('/change-password', apiLimiter, adminAuthMiddleware.verifyAdminToken
 
             res.json({
                 success: true,
-                message: '瀵嗙爜淇敼鎴愬姛'
+                message: '密码修改成功'
             });
         } finally {
             connection.release();
         }
     } catch (error) {
-        console.error('瀵嗙爜淇敼澶辫触:', error);
+        console.error('密码修改失败:', error);
         res.status(500).json({
             success: false,
-            message: '瀵嗙爜淇敼澶辫触'
+            message: '密码修改失败'
         });
     }
 });

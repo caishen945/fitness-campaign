@@ -1,10 +1,10 @@
 import adminApi from '../services/adminApi.js';
 
 /**
- * 用户管理模块 - 管理员专用功�?
+ * 用户管理模块 - 管理员专用功能
  * 功能边界：管理员进行用户信息管理和余额调整（非用户充值）
  * 操作主体：管理员
- * 作用对象：用户账�?
+ * 作用对象：用户账户
  */
 class UserManagement {
     constructor(app) {
@@ -43,13 +43,13 @@ class UserManagement {
                         
                         <div class="search-box">
                             <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #555;">Telegram</label>
-                            <input type="text" id="telegramInput" placeholder="Telegram ID或姓�?.." 
+                            <input type="text" id="telegramInput" placeholder="Telegram ID或姓名..." 
                                    style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
                         </div>
                         
                         <div class="search-box">
-                            <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #555;">最小余�?/label>
-                            <input type="number" id="balanceInput" placeholder="输入最小余�?.." step="0.01" min="0"
+                            <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #555;">最小余额</label>
+                            <input type="number" id="balanceInput" placeholder="输入最小余额..." step="0.01" min="0"
                                    style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
                         </div>
                         
@@ -60,11 +60,11 @@ class UserManagement {
                         </div>
                         
                         <div class="search-box">
-                            <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #555;">状�?/label>
+                            <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #555;">状态</label>
                             <select id="statusFilter" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
-                                <option value="">所有状�?/option>
+                                <option value="">所有状态</option>
                                 <option value="active">活跃</option>
-                                <option value="inactive">非活�?/option>
+                                <option value="inactive">非活跃</option>
                             </select>
                         </div>
                     </div>
@@ -114,7 +114,7 @@ class UserManagement {
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">显示名称</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">邮箱</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">Telegram</th>
-                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">状�?/th>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">状态</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">钱包地址</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">余额</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">注册时间</th>
@@ -124,7 +124,7 @@ class UserManagement {
                             <tbody id="userTableBody">
                                 <tr>
                                     <td colspan="9" style="padding: 2rem; text-align: center; color: #6c757d;">
-                                        <div id="loadingMessage">加载�?..</div>
+                                        <div id="loadingMessage">加载中...</div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -134,16 +134,16 @@ class UserManagement {
                     <!-- 分页 -->
                     <div class="pagination" style="padding: 1rem; background: #f8f9fa; border-top: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
                         <div class="pagination-info">
-                            显示�?<span id="currentPageInfo">1</span> 页，�?<span id="totalPagesInfo">1</span> 页，
-                            总计 <span id="totalUsersInfo">0</span> 个用�?
+                            显示第 <span id="currentPageInfo">1</span> 页，共 <span id="totalPagesInfo">1</span> 页，
+                            总计 <span id="totalUsersInfo">0</span> 个用户
                         </div>
                         <div class="pagination-controls">
                             <button id="prevPage" class="btn btn-sm btn-outline-secondary" disabled>
-                                <i class="fas fa-chevron-left"></i> 上一�?
+                                <i class="fas fa-chevron-left"></i> 上一页
                             </button>
-                            <span style="margin: 0 1rem;">�?<span id="currentPage">1</span> �?/span>
+                            <span style="margin: 0 1rem;">第 <span id="currentPage">1</span> 页</span>
                             <button id="nextPage" class="btn btn-sm btn-outline-secondary">
-                                下一�?<i class="fas fa-chevron-right"></i>
+                                下一页<i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
                     </div>
@@ -153,26 +153,26 @@ class UserManagement {
     }
 
     afterRender() {
-        console.log('🚀 UserManagement afterRender 开�?..');
+        console.log('🚀 UserManagement afterRender 开始...');
         
         try {
             // 设置全局引用，供HTML中的onclick调用
             window.userManagement = this;
-            console.log('�?全局引用设置完成');
+            console.log('✅ 全局引用设置完成');
             
             this.bindEvents();
-            console.log('�?事件绑定完成');
+            console.log('✅ 事件绑定完成');
             
             // 延迟加载用户数据，确保DOM完全渲染
-            console.log('�?设置延迟加载用户数据...');
+            console.log('✅ 设置延迟加载用户数据...');
             setTimeout(() => {
                 console.log('🚀 延迟加载触发，开始调用loadUsers...');
                 this.loadUsers();
             }, 100);
             
         } catch (error) {
-            console.error('�?afterRender 执行失败:', error);
-            this.showError('页面初始化失�? ' + error.message);
+            console.error('afterRender 执行失败:', error);
+            this.showError('页面初始化失败 ' + error.message);
         }
     }
 
@@ -199,7 +199,7 @@ class UserManagement {
             nextPage.addEventListener('click', () => this.goToPage(this.currentPage + 1));
         }
 
-        // 搜索输入框回车事�?
+        // 搜索输入框回车事件
         const searchInputs = ['userIdInput', 'emailInput', 'telegramInput', 'balanceInput', 'walletInput'];
         searchInputs.forEach(inputId => {
             const input = document.getElementById(inputId);
@@ -218,7 +218,7 @@ class UserManagement {
             clearBtn.addEventListener('click', () => this.clearSearch());
         }
 
-        // 状态筛�?
+        // 状态筛选
         const statusFilter = document.getElementById('statusFilter');
         if (statusFilter) {
             statusFilter.addEventListener('change', () => this.handleSearch());
@@ -227,9 +227,9 @@ class UserManagement {
 
     async loadUsers() {
         try {
-            console.log('🔄 开始加载用户数�?..');
+            console.log('🔄 开始加载用户数据...');
             this.isLoading = true;
-            this.updateLoadingMessage('加载�?..');
+            this.updateLoadingMessage('加载中...');
             
             const params = {
                 page: this.currentPage,
@@ -261,7 +261,7 @@ class UserManagement {
                 this.totalUsers = response.data.pagination?.total_users || 0;
                 this.totalPages = response.data.pagination?.total_pages || 1;
                 
-                console.log('�?数据加载成功:', {
+                console.log('✅ 数据加载成功:', {
                     usersCount: this.users.length,
                     totalUsers: this.totalUsers,
                     totalPages: this.totalPages
@@ -271,16 +271,16 @@ class UserManagement {
                 this.updatePagination();
                 this.updateStats(response.data.stats);
             } else {
-                console.error('�?API返回失败:', response);
+                console.error('API返回失败:', response);
                 this.showError('加载用户列表失败: ' + (response.message || '未知错误'));
                 this.updateLoadingMessage('加载失败');
             }
         } catch (error) {
-            console.error('�?加载用户列表失败:', error);
+            console.error('加载用户列表失败:', error);
             
             // 检查是否是网络错误
             if (error.message === 'Failed to fetch') {
-                this.showError('网络连接失败，请检查后端服务是否启�?);
+                this.showError('网络连接失败，请检查后端服务是否启动');
                 this.updateLoadingMessage('网络错误');
                 
                 // 添加重试按钮
@@ -291,7 +291,7 @@ class UserManagement {
             }
         } finally {
             this.isLoading = false;
-            console.log('🔄 加载状态重置完�?);
+            console.log('🔄 加载状态重置完成');
         }
     }
 
@@ -320,10 +320,10 @@ class UserManagement {
     }
 
     renderUsers() {
-        console.log('🎨 开始渲染用户列�?..');
+        console.log('🎨 开始渲染用户列表...');
         const tbody = document.getElementById('userTableBody');
         if (!tbody) {
-            console.error('�?找不到userTableBody元素');
+            console.error('找不到userTableBody元素');
             return;
         }
 
@@ -333,7 +333,7 @@ class UserManagement {
         });
 
         if (!this.users || this.users.length === 0) {
-            console.log('📭 用户数据为空，显示空状�?);
+            console.log('📭 用户数据为空，显示空状态');
             tbody.innerHTML = `
                 <tr>
                     <td colspan="9" style="padding: 2rem; text-align: center; color: #6c757d;">
@@ -344,7 +344,7 @@ class UserManagement {
             return;
         }
 
-        console.log('�?开始渲染用户行...');
+        console.log('✅ 开始渲染用户行...');
         tbody.innerHTML = this.users.map(user => `
             <tr style="border-bottom: 1px solid #dee2e6;">
                 <td style="padding: 1rem;">${user.id}</td>
@@ -364,7 +364,7 @@ class UserManagement {
                 <td style="padding: 1rem;">
                     <span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-secondary'}" 
                           style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; background: ${user.status === 'active' ? '#28a745' : '#6c757d'}; color: white;">
-                        ${user.status === 'active' ? '活跃' : '非活�?}
+                        ${user.status === 'active' ? '活跃' : '非活跃'}
                     </span>
                 </td>
                 <td style="padding: 1rem;">
@@ -409,7 +409,7 @@ class UserManagement {
             </tr>
         `).join('');
         
-        console.log('�?用户列表渲染完成');
+        console.log('✅ 用户列表渲染完成');
     }
 
     updatePagination() {
@@ -435,12 +435,12 @@ class UserManagement {
         const newUsersCount = document.getElementById('newUsersCount');
 
         if (stats) {
-            // 使用API返回的统计数�?
+            // 使用API返回的统计数据
             if (totalUsersCount) totalUsersCount.textContent = stats.total_users || 0;
             if (activeUsersCount) activeUsersCount.textContent = stats.active_users || 0;
             if (newUsersCount) newUsersCount.textContent = stats.new_users_this_month || 0;
         } else {
-            // 使用本地计算的统计数�?
+            // 使用本地计算的统计数据
             if (totalUsersCount) totalUsersCount.textContent = this.totalUsers;
             
             const activeUsers = this.users.filter(user => user.status === 'active').length;
@@ -478,14 +478,14 @@ class UserManagement {
             }
         });
 
-        // 重置状态筛�?
+        // 重置状态筛选
         const statusFilter = document.getElementById('statusFilter');
         if (statusFilter) {
             statusFilter.value = '';
             this.statusFilter = '';
         }
 
-        // 重置页码并重新加�?
+        // 重置页码并重新加载
         this.currentPage = 1;
         this.loadUsers();
     }
@@ -558,13 +558,13 @@ class UserManagement {
                                     <strong>用户ID:</strong> <span style="color: #6c757d;">${user.id}</span>
                                 </div>
                                 <div style="margin-bottom: 1rem;">
-                                    <strong>邮箱:</strong> <span style="color: #495057; font-weight: 500;">${user.email || '未设�?}</span>
+                                    <strong>邮箱:</strong> <span style="color: #495057; font-weight: 500;">${user.email || '未设置'}</span>
                                 </div>
                                 <div style="margin-bottom: 1rem;">
-                                    <strong>状�?</strong> 
+                                    <strong>状态</strong> 
                                     <span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-secondary'}" 
                                           style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; background: ${user.status === 'active' ? '#28a745' : '#6c757d'}; color: white;">
-                                        ${user.status === 'active' ? '活跃' : '非活�?}
+                                        ${user.status === 'active' ? '活跃' : '非活跃'}
                                     </span>
                                 </div>
                                 <div style="margin-bottom: 1rem;">
@@ -579,7 +579,7 @@ class UserManagement {
                                 <div style="margin-bottom: 1rem;">
                                     <strong>钱包地址:</strong> 
                                     <div style="font-family: monospace; font-size: 0.9rem; color: #6c757d; margin-top: 0.5rem; word-break: break-all;">
-                                        ${user.trc20Wallet || '未设�?}
+                                        ${user.trc20Wallet || '未设置'}
                                     </div>
                                 </div>
                                 <div style="margin-bottom: 1rem;">
@@ -616,7 +616,7 @@ class UserManagement {
             </div>
         `;
         
-        // 添加弹窗到页�?
+        // 添加弹窗到页面
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
         // 绑定弹窗事件
@@ -675,10 +675,10 @@ class UserManagement {
                             <input type="text" id="editWallet" value="${user.trc20Wallet || ''}" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                         </div>
                         <div style="margin-bottom: 1.5rem;">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">状�?/label>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">状态</label>
                             <select id="editStatus" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                                 <option value="active" ${user.status === 'active' ? 'selected' : ''}>活跃</option>
-                                <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>非活�?/option>
+                                <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>非活跃</option>
                             </select>
                         </div>
                         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
@@ -690,7 +690,7 @@ class UserManagement {
             </div>
         `;
         
-        // 添加弹窗到页�?
+        // 添加弹窗到页面
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
         // 绑定弹窗事件
@@ -770,7 +770,7 @@ class UserManagement {
         const user = this.users.find(u => u.id === userId);
         if (!user) return;
         
-        if (!confirm(`确定要删除用�?"ID ${user.id}" 吗？此操作不可恢复。`)) {
+        if (!confirm(`确定要删除用户 "ID ${user.id}" 吗？此操作不可恢复。`)) {
             return;
         }
         
@@ -814,7 +814,7 @@ class UserManagement {
                     </div>
                     
                     <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
-                        <div style="margin-bottom: 0.5rem;"><strong>用户:</strong> ID ${user.id} (${user.email || '未设置邮�?})</div>
+                        <div style="margin-bottom: 0.5rem;"><strong>用户:</strong> ID ${user.id} (${user.email || '未设置邮箱'})</div>
                         <div style="margin-bottom: 0.5rem;"><strong>当前余额:</strong> <span style="color: #28a745; font-weight: bold;">${parseFloat(user.balance || 0).toFixed(2)} USDT</span></div>
                     </div>
                     
@@ -822,7 +822,7 @@ class UserManagement {
                         <div style="margin-bottom: 1rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">操作类型</label>
                             <select id="balanceOperation" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                <option value="add">充�?/option>
+                                <option value="add">充值</option>
                                 <option value="subtract">扣款</option>
                                 <option value="freeze">冻结</option>
                                 <option value="unfreeze">解冻</option>
@@ -830,11 +830,11 @@ class UserManagement {
                         </div>
                         <div style="margin-bottom: 1rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">金额</label>
-                            <input type="number" id="balanceAmount" step="0.01" min="0" placeholder="请输入金�? style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <input type="number" id="balanceAmount" step="0.01" min="0" placeholder="请输入金额" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                         </div>
                         <div style="margin-bottom: 1.5rem;">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">备注</label>
-                            <textarea id="balanceNote" rows="3" placeholder="请输入操作备�? style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                            <textarea id="balanceNote" rows="3" placeholder="请输入操作备注" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
                         </div>
                         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                             <button type="button" id="cancelBalance" class="btn btn-secondary">取消</button>
@@ -845,7 +845,7 @@ class UserManagement {
             </div>
         `;
         
-        // 添加弹窗到页�?
+        // 添加弹窗到页面
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
         // 绑定弹窗事件
@@ -899,7 +899,7 @@ class UserManagement {
             const note = document.getElementById('balanceNote').value.trim();
             
             if (!amount || amount <= 0) {
-                this.showError('请输入有效金�?);
+                this.showError('请输入有效金额');
                 return;
             }
             
@@ -907,21 +907,21 @@ class UserManagement {
             const operationData = {
                 operation: operation,
                 amount: amount,
-                note: note || '管理员操�?,
+                note: note || '管理员操作',
                 userId: userId
             };
             
-            console.log('💰 开始执行余额操�?', operationData);
+            console.log('💰 开始执行余额操作', operationData);
             
             // 调用余额操作API
             const response = await this.performBalanceOperation(operationData);
             
             if (response.success) {
                 this.showSuccess('余额操作执行成功');
-                console.log('�?余额操作成功，开始刷新用户列�?..');
-                // 刷新用户列表以显示最新余�?
+                console.log('✅ 余额操作成功，开始刷新用户列表...');
+                // 刷新用户列表以显示最新余额
                 await this.loadUsers();
-                console.log('�?用户列表刷新完成');
+                console.log('✅ 用户列表刷新完成');
             } else {
                 this.showError('余额操作失败: ' + (response.message || '未知错误'));
             }
@@ -985,13 +985,13 @@ class UserManagement {
                     </div>
                     
                     <div id="transactionList" style="margin-bottom: 1rem;">
-                        <div style="text-align: center; padding: 2rem; color: #666;">加载�?..</div>
+                        <div style="text-align: center; padding: 2rem; color: #666;">加载中...</div>
                     </div>
                 </div>
             </div>
         `;
         
-        // 添加弹窗到页�?
+        // 添加弹窗到页面
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
         // 绑定弹窗事件
@@ -1056,7 +1056,7 @@ class UserManagement {
 
     translateTransactionType(type) {
         const typeMap = {
-            'deposit': '充�?,
+            'deposit': '充值',
             'withdrawal': '提现',
             'reward': '奖励'
         };
@@ -1110,7 +1110,7 @@ class UserManagement {
 
     getTransactionTypeColor(type) {
         const colorMap = {
-            '充�?: '#28a745',
+            '充值': '#28a745',
             '提现': '#dc3545',
             '奖励': '#ffc107',
             '扣款': '#dc3545',
@@ -1127,7 +1127,7 @@ class UserManagement {
         const newStatus = user.status === 'active' ? 'inactive' : 'active';
         const action = newStatus === 'active' ? '启用' : '禁用';
         
-        if (!confirm(`确定�?{action}用户 "ID ${user.id}" 吗？`)) {
+        if (!confirm(`确定${action}用户 "ID ${user.id}" 吗？`)) {
             return;
         }
         

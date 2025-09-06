@@ -1,5 +1,5 @@
 import api from '../src/services/api.js';
-import { getBadgeClassForStatus } from '../../admin/public/src/shared/mappings/badgeStyles.js';
+import { getBadgeClassForStatus } from '../src/shared/mappings/badgeStyles.js';
 
 class Team {
     constructor(app) {

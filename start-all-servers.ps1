@@ -82,7 +82,7 @@ if (-not (Test-Path "node_modules")) {
     npm install
 }
 Write-Host "🚀 启动后端服务器 (端口: 3000)..." -ForegroundColor Green
-Start-Process -FilePath "cmd" -ArgumentList "/k", "node start-server-simple.js" -WindowStyle Normal -WindowTitle "FitChallenge Backend"
+Start-Process -FilePath "cmd" -ArgumentList "/k", "node start-server-simple.js" -WindowStyle Normal
 Start-Sleep -Seconds 5
 Set-Location ".."
 
@@ -95,7 +95,7 @@ if (-not (Test-Path "node_modules")) {
     npm install
 }
 Write-Host "🚀 启动前端服务器 (端口: 8080)..." -ForegroundColor Green
-Start-Process -FilePath "cmd" -ArgumentList "/k", "npm run dev" -WindowStyle Normal -WindowTitle "FitChallenge Frontend"
+Start-Process -FilePath "cmd" -ArgumentList "/k", "npm run dev" -WindowStyle Normal
 Start-Sleep -Seconds 3
 Set-Location ".."
 
@@ -110,7 +110,7 @@ if (-not (Test-Path "node_modules")) {
 Write-Host "📦 构建管理后台项目..." -ForegroundColor Blue
 npm run build
 Write-Host "🚀 启动管理后台 (端口: 8081)..." -ForegroundColor Green
-Start-Process -FilePath "cmd" -ArgumentList "/k", "npm run serve" -WindowStyle Normal -WindowTitle "FitChallenge Admin"
+Start-Process -FilePath "cmd" -ArgumentList "/k", "npm run serve" -WindowStyle Normal
 Start-Sleep -Seconds 3
 Set-Location ".."
 

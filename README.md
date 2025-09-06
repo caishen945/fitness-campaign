@@ -305,6 +305,47 @@ npm run pre-deploy
 - **异步处理**: 非阻塞操作
 - **连接池**: 数据库连接优化
 
+## 🧩 编码与控制台设置
+
+### Windows CMD（.bat）
+- 在脚本开头设置 UTF-8 代码页：
+
+```bat
+@echo off
+chcp 65001 >nul
+```
+
+现有脚本已包含该设置：`start-all-servers*.bat`、`stop-all-servers.bat`、`quick-start.bat`、`frontend/start-frontend-backup.bat`、`check-database.bat`。
+
+### PowerShell（.ps1）
+- 在脚本开头设置控制台输出编码为 UTF-8：
+
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+```
+
+现有脚本已包含该设置：`start-all-servers.ps1`、`stop-all-servers.ps1`。
+
+### HTML/前端
+- 页面 `<head>` 中保证：
+
+```html
+<meta charset="UTF-8">
+```
+
+### Node/后端
+- 源文件统一保存为 UTF-8，无 BOM。
+- 控制台输出、日志默认 UTF-8；避免使用本地代码页依赖的字符串常量。
+
+### MySQL/数据库
+- 统一使用 `utf8mb4` 字符集与 `utf8mb4_unicode_ci` 排序规则：
+
+```sql
+ALTER DATABASE fitchallenge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+后端数据库配置已开启 `charset: 'utf8mb4'` 与连接池。
+
 ## 🚀 部署指南
 
 ### 开发环境 (Windows + WSL)

@@ -209,6 +209,18 @@ class AdminApp {
         this.setupEventListeners();
         this.checkAuthStatus();
         this.render();
+        // 确保首次渲染后的页面事件已绑定（例如登录页表单提交监听）
+        if (this.pages[this.currentPage] && typeof this.pages[this.currentPage].afterRender === 'function') {
+            setTimeout(() => {
+                try {
+                    this.pages[this.currentPage].afterRender();
+                    window.adminLogger?.success('APP', '初始页面 afterRender 完成', { page: this.currentPage });
+                } catch (error) {
+                    console.error('初始 afterRender 执行失败', error);
+                    window.adminLogger?.error('APP', '初始 afterRender 执行失败', { page: this.currentPage }, error);
+                }
+            }, 0);
+        }
         this.preloadCommonPages();
         window.adminLogger?.success('APP', 'AdminApp.init 完成', { isAuthenticated: this.isAuthenticated, currentPage: this.currentPage });
     }

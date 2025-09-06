@@ -30,11 +30,11 @@ class AchievementManagement {
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="total-rewards">-</div>
-                        <div class="stat-label">总奖励金�?/div>
+                        <div class="stat-label">总奖励金额</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="completed-users">-</div>
-                        <div class="stat-label">完成用户�?/div>
+                        <div class="stat-label">完成用户数</div>
                     </div>
                 </div>
 
@@ -47,9 +47,9 @@ class AchievementManagement {
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>状�?</label>
+                        <label>状态</label>
                         <select id="status-filter">
-                            <option value="all">全部状�?/option>
+                            <option value="all">全部状态</option>
                             <option value="active">启用</option>
                             <option value="inactive">禁用</option>
                         </select>
@@ -71,17 +71,17 @@ class AchievementManagement {
                                 <th>类型</th>
                                 <th>名称</th>
                                 <th>描述</th>
-                                <th>目标�?/th>
+                                <th>目标值</th>
                                 <th>奖励金额</th>
                                 <th>图标</th>
-                                <th>状�?/th>
+                                <th>状态</th>
                                 <th>排序</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody id="achievements-tbody">
                             <tr>
-                                <td colspan="10" class="loading">加载�?..</td>
+                                <td colspan="10" class="loading">加载中...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -116,18 +116,18 @@ class AchievementManagement {
                             
                             <div class="form-group">
                                 <label for="achievement-description">成就描述</label>
-                                <textarea id="achievement-description" placeholder="例如：团队成员达到指定人�?></textarea>
+                                <textarea id="achievement-description" placeholder="例如：团队成员达到指定人数"></textarea>
                             </div>
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="achievement-target">目标�?*</label>
-                                    <input type="number" id="achievement-target" required min="1" placeholder="例如�?0">
+                                    <label for="achievement-target">目标值 *</label>
+                                    <input type="number" id="achievement-target" required min="1" placeholder="例如：10">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="achievement-reward">奖励金额(USDT) *</label>
-                                    <input type="number" id="achievement-reward" required min="0" step="0.01" placeholder="例如�?.00">
+                                    <input type="number" id="achievement-reward" required min="0" step="0.01" placeholder="例如：5.00">
                                 </div>
                             </div>
                             
@@ -171,8 +171,8 @@ class AchievementManagement {
                         <button class="close-btn" id="close-delete-modal">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <p>确定要删除成�?"<span id="delete-achievement-name"></span>" 吗？</p>
-                        <p class="warning">⚠️ 删除后无法恢复，如果已有用户获得此成就，将无法删除�?/p>
+                        <p>确定要删除成就 "<span id="delete-achievement-name"></span>" 吗？</p>
+                        <p class="warning">⚠️ 删除后无法恢复，如果已有用户获得此成就，将无法删除。</p>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" id="cancel-delete-btn">取消</button>
@@ -268,7 +268,7 @@ class AchievementManagement {
             const result = await adminApi.getAchievementTypes();
             
             if (result.success) {
-                // 确保achievementTypes是数�?
+                // 确保achievementTypes是数组
                 this.achievementTypes = result.data || [];
                 console.log('📊 加载成就类型数据:', this.achievementTypes);
                 this.populateTypeFilters();
@@ -280,12 +280,12 @@ class AchievementManagement {
             }
         } catch (error) {
             console.error('加载成就类型失败:', error);
-            // 确保achievementTypes是数�?
+            // 确保achievementTypes是数组
             this.achievementTypes = [];
             if (this.app.showToast) {
                 this.app.showToast('加载成就类型失败: ' + error.message, 'error');
             } else {
-                console.error('showToast方法不存�?);
+                console.error('showToast方法不存在');
             }
         }
     }
@@ -298,7 +298,7 @@ class AchievementManagement {
             const result = await adminApi.getAchievements();
             
             if (result.success) {
-                // 确保achievements是数�?
+                // 确保achievements是数组
                 this.achievements = result.data.achievements || result.data || [];
                 console.log('📊 加载成就数据:', this.achievements);
                 this.renderAchievements();
@@ -306,12 +306,12 @@ class AchievementManagement {
             }
         } catch (error) {
             console.error('加载成就失败:', error);
-            // 确保achievements是数�?
+            // 确保achievements是数组
             this.achievements = [];
             if (this.app.showToast) {
                 this.app.showToast('加载成就失败: ' + error.message, 'error');
             } else {
-                console.error('showToast方法不存�?);
+                console.error('showToast方法不存在');
             }
         }
     }
@@ -331,7 +331,7 @@ class AchievementManagement {
     }
 
     /**
-     * 填充类型选择�?
+     * 填充类型选择
      */
     populateTypeSelect() {
         const typeSelect = document.getElementById('achievement-type');
@@ -364,7 +364,7 @@ class AchievementManagement {
     }
 
     /**
-     * 渲染成就�?
+     * 渲染成就行
      */
     renderAchievementRow(achievement) {
         const statusClass = achievement.is_active ? 'status-active' : 'status-inactive';
@@ -415,7 +415,7 @@ class AchievementManagement {
             });
         });
 
-        // 切换状态按�?
+        // 切换状态按钮
         const toggleBtns = document.querySelectorAll('.toggle-btn');
         toggleBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -443,12 +443,12 @@ class AchievementManagement {
         const searchTerm = document.getElementById('search-input')?.value || '';
 
         const filteredAchievements = this.achievements.filter(achievement => {
-            // 类型筛�?
+            // 类型筛选
             if (typeFilter !== 'all' && achievement.type_code !== typeFilter) {
                 return false;
             }
 
-            // 状态筛�?
+            // 状态筛选
             if (statusFilter !== 'all') {
                 const isActive = statusFilter === 'active';
                 if (achievement.is_active !== isActive) {
@@ -456,7 +456,7 @@ class AchievementManagement {
                 }
             }
 
-            // 搜索筛�?
+            // 搜索筛选
             if (searchTerm) {
                 const searchLower = searchTerm.toLowerCase();
                 return achievement.name.toLowerCase().includes(searchLower) ||
@@ -470,14 +470,14 @@ class AchievementManagement {
     }
 
     /**
-     * 渲染筛选后的成�?
+     * 渲染筛选后的成就
      */
     renderFilteredAchievements(filteredAchievements) {
         const tbody = document.getElementById('achievements-tbody');
         if (!tbody) return;
 
         if (filteredAchievements.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="no-data">没有找到匹配的成�?/td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="no-data">没有找到匹配的成就</td></tr>';
             return;
         }
 
@@ -602,7 +602,7 @@ class AchievementManagement {
                 // 更新现有成就
                 result = await adminApi.updateAchievement(this.currentAchievementId, formData);
             } else {
-                // 创建新成�?
+                // 创建新成就
                 result = await adminApi.createAchievement(formData);
             }
             
@@ -620,21 +620,21 @@ class AchievementManagement {
     }
 
     /**
-     * 切换成就状�?
+     * 切换成就状态
      */
     async toggleAchievement(achievementId) {
         try {
             const result = await adminApi.toggleAchievement(achievementId);
             
             if (result.success) {
-                this.app.showToast('成就状态切换成�?, 'success');
+                this.app.showToast('成就状态切换成功', 'success');
                 this.loadAchievements();
             } else {
-                throw new Error(result.error || '切换成就状态失�?);
+                throw new Error(result.error || '切换成就状态失败');
             }
         } catch (error) {
-            console.error('切换成就状态失�?', error);
-            this.app.showToast('切换成就状态失�? ' + error.message, 'error');
+            console.error('切换成就状态失败', error);
+            this.app.showToast('切换成就状态失败 ' + error.message, 'error');
         }
     }
 

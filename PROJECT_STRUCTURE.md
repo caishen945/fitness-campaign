@@ -134,3 +134,25 @@ node update-version.cjs
 ---
 
 **提示**: 项目已优化为清晰的结构，核心功能集中在主要文件中，避免混淆。
+
+## 🧩 编码与控制台指南（统一UTF-8）
+
+### 批处理脚本（CMD）
+- 在所有 `.bat` 文件开头加入：`chcp 65001 >nul`
+- 已覆盖：`start-all-servers*.bat`、`stop-all-servers.bat`、`quick-start.bat`、`frontend/start-frontend-backup.bat`、`check-database.bat`
+
+### PowerShell 脚本
+- 在所有 `.ps1` 文件开头加入：`[Console]::OutputEncoding = [System.Text.Encoding]::UTF8`
+- 已覆盖：`start-all-servers.ps1`、`stop-all-servers.ps1`
+
+### 前端/HTML
+- 在 `<head>` 中包含：`<meta charset="UTF-8">`
+- 管理端关键页面已校验并修复：`admin/public/*.html`
+
+### Node/后端
+- 源码统一保存为 UTF-8（无 BOM）
+- 后端路由与中间件的中文提示已统一修复为可读中文
+
+### 数据库
+- 推荐在库/表/连接层统一使用 `utf8mb4` + `utf8mb4_unicode_ci`
+- 后端 `backend/config/database.js` 已设置 `charset: 'utf8mb4'`

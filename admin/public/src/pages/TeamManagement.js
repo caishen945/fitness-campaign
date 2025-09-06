@@ -118,7 +118,7 @@ class TeamManagement {
                             </div>
                         </div>
 
-                        <!-- 邀请奖�?-->
+                        <!-- 邀请奖励 -->
                         <div class="tab-pane fade" id="rewards" role="tabpanel">
                             <div class="card">
                                 <div class="card-header">
@@ -166,7 +166,7 @@ class TeamManagement {
     }
 
     bindEvents() {
-        // 标签页切换事�?
+        // 标签页切换事件
         const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
         tabButtons.forEach(button => {
             button.addEventListener('click', (e) => {
@@ -176,7 +176,7 @@ class TeamManagement {
             });
         });
 
-        // 搜索输入框回车事�?
+        // 搜索输入框回车事件
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
@@ -506,10 +506,10 @@ class TeamManagement {
                             <tr>
                                 <th>时间</th>
                                 <th>获得奖励用户</th>
-                                <th>被邀请用�?/th>
-                                <th>充值金�?/th>
+                                <th>被邀请用户</th>
+                                <th>充值金额</th>
                                 <th>奖励金额</th>
-                                <th>状�?/th>
+                                <th>状态</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -532,7 +532,7 @@ class TeamManagement {
                 </div>
             `;
         } else {
-            container.innerHTML = '<div class="text-center text-muted">暂无邀请奖励记�?/div>';
+            container.innerHTML = '<div class="text-center text-muted">暂无邀请奖励记录</div>';
         }
     }
 
@@ -565,17 +565,17 @@ class TeamManagement {
                                 <div class="col-md-6">
                                     <h6>用户信息</h6>
                                     <p><strong>用户ID:</strong> ${data.user.id}</p>
-                                    <p><strong>邮箱:</strong> ${data.user.email || '未设�?}</p>
+                                    <p><strong>邮箱:</strong> ${data.user.email || '未设置'}</p>
                                     <p><strong>邮箱:</strong> ${data.user.email}</p>
                                     <p><strong>注册时间:</strong> ${new Date(data.user.created_at).toLocaleString()}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <h6>团队统计</h6>
-                                    <p><strong>1级成�?</strong> <span class="badge bg-primary">${data.statistics.level1_count}</span></p>
-                                    <p><strong>2级成�?</strong> <span class="badge bg-info">${data.statistics.level2_count}</span></p>
-                                    <p><strong>3级成�?</strong> <span class="badge bg-secondary">${data.statistics.level3_count}</span></p>
+                                    <p><strong>1级成员</strong> <span class="badge bg-primary">${data.statistics.level1_count}</span></p>
+                                    <p><strong>2级成员</strong> <span class="badge bg-info">${data.statistics.level2_count}</span></p>
+                                    <p><strong>3级成员</strong> <span class="badge bg-secondary">${data.statistics.level3_count}</span></p>
                                     <p><strong>累计返佣:</strong> <span class="text-success">${parseFloat(data.statistics.total_commission).toFixed(2)} USDT</span></p>
-                                    <p><strong>邀请奖�?</strong> <span class="text-info">${parseFloat(data.statistics.total_invitation_rewards).toFixed(2)} USDT</span></p>
+                                    <p><strong>邀请奖励</strong> <span class="text-info">${parseFloat(data.statistics.total_invitation_rewards).toFixed(2)} USDT</span></p>
                                 </div>
                             </div>
                             
@@ -584,13 +584,13 @@ class TeamManagement {
                             <h6>团队成员</h6>
                             <ul class="nav nav-tabs" id="memberTab" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#level1Members">1级成�?(${data.members.level1.length})</button>
+                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#level1Members">1级成员(${data.members.level1.length})</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level2Members">2级成�?(${data.members.level2.length})</button>
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level2Members">2级成员(${data.members.level2.length})</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level3Members">3级成�?(${data.members.level3.length})</button>
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#level3Members">3级成员(${data.members.level3.length})</button>
                                 </li>
                             </ul>
                             

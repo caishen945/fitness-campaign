@@ -152,18 +152,18 @@
     </style>
 </head>
 <body>
-    <!-- 加载指示�?-->
+    <!-- 加载指示器 -->
     <div id="loading-indicator" class="loading-indicator">
         <div style="text-align: center;">
             <div class="spinner"></div>
-            <div>加载�?..</div>
+            <div>加载中...</div>
         </div>
     </div>
     
     <!-- Toast容器 -->
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- 主应用容�?-->
+    <!-- 主应用容器 -->
     <div id="admin-root">
         <!-- 登录页面 -->
         <div id="login-page" class="login-container">
@@ -178,13 +178,13 @@
                 
                 <form id="loginForm">
                     <div class="form-group mb-3">
-                        <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户�?/label>
+                        <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户名</label>
                         <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
                     </div>
                     
                     <div class="form-group mb-4">
                         <label for="password" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">密码</label>
-                        <input type="password" id="password" class="form-control" placeholder="请输入密�? required>
+                        <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
                     </div>
                     
                     <button type="submit" id="loginBtn" class="btn btn-primary w-100" style="padding: 0.75rem; font-size: 1rem;">
@@ -205,9 +205,9 @@
             </div>
         </div>
         
-        <!-- 主界�?-->
+        <!-- 主界面 -->
         <div id="main-interface" class="admin-app" style="display: none;">
-            <!-- 左侧导航�?-->
+            <!-- 左侧导航栏 -->
             <div class="sidebar">
                 <div style="font-size: 1.5rem; font-weight: bold; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
                     <i class="fas fa-cogs"></i> FitChallenge
@@ -215,18 +215,18 @@
                 <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
                     <div style="color: #ecf0f1; font-size: 0.9rem;">
                         <i class="fas fa-user" style="margin-right: 8px;"></i>
-                        <span id="current-user">管理�?/span>
+                        <span id="current-user">管理员</span>
                     </div>
                     <button id="logoutBtn" class="btn btn-sm btn-outline-light mt-2" style="width: 100%; font-size: 0.8rem;">
                         <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>
-                        退出登�?
+                        退出登录
                     </button>
                 </div>
                 <nav style="padding: 1rem 0;">
                     <ul class="nav-links" style="list-style: none; padding: 0; margin: 0;">
                         <li style="margin-bottom: 0.5rem;">
                             <a href="#" data-page="dashboard" class="active">
-                                <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表�?
+                                <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表盘
                                 <small style="float: right; opacity: 0.7;">Ctrl+1</small>
                             </a>
                         </li>
@@ -275,12 +275,12 @@
                 </nav>
             </div>
             
-            <!-- 主内容区�?-->
+            <!-- 主内容区域 -->
             <div class="main-content">
                 <div id="page-content">
-                    <!-- 仪表盘页�?-->
+                    <!-- 仪表盘页面 -->
                     <div id="dashboard-page" class="page-content">
-                        <h1 style="margin-bottom: 1.5rem; color: #2c3e50;">仪表�?/h1>
+                        <h1 style="margin-bottom: 1.5rem; color: #2c3e50;">仪表盘</h1>
                         <div class="dashboard-stats">
                             <div class="stat-card" style="background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white;">
                                 <div style="font-size: 2rem; margin-bottom: 1rem;">👥</div>
@@ -290,12 +290,12 @@
                             <div class="stat-card" style="background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white;">
                                 <div style="font-size: 2rem; margin-bottom: 1rem;">🏆</div>
                                 <div style="font-size: 2rem; font-weight: bold;">8,742,105</div>
-                                <div style="font-size: 1.1rem;">总步�?/div>
+                                <div style="font-size: 1.1rem;">总步数</div>
                             </div>
                             <div class="stat-card" style="background: linear-gradient(135deg, #f8961e, #f3722c); color: white;">
                                 <div style="font-size: 2rem; margin-bottom: 1rem;">💰</div>
                                 <div style="font-size: 2rem; font-weight: bold;">24,580</div>
-                                <div style="font-size: 1.1rem;">总奖励发�?/div>
+                                <div style="font-size: 1.1rem;">总奖励发放</div>
                             </div>
                             <div class="stat-card" style="background: linear-gradient(135deg, #f94144, #f9844a); color: white;">
                                 <div style="font-size: 2rem; margin-bottom: 1rem;">🚩</div>
@@ -305,7 +305,7 @@
                         </div>
                     </div>
                     
-                    <!-- 其他页面占位�?-->
+                    <!-- 其他页面占位 -->
                     <div id="users-page" class="page-content" style="display: none;">
                         <h1>用户管理</h1>
                         <p>用户管理功能开发中...</p>

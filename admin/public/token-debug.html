@@ -86,8 +86,8 @@
     <h1>🔍 Token调试工具</h1>
     
     <div class="debug-section">
-        <h2>1. 当前Token状�?/h2>
-        <button onclick="checkTokenStatus()">检查Token状�?/button>
+        <h2>1. 当前Token状态</h2>
+        <button onclick="checkTokenStatus()">检查Token状态</button>
         <button onclick="clearTokens()" class="danger">清除所有Token</button>
         <div id="tokenStatus"></div>
     </div>
@@ -95,7 +95,7 @@
     <div class="debug-section">
         <h2>2. 模拟登录</h2>
         <div class="form-group">
-            <label>用户�?</label>
+            <label>用户名</label>
             <input type="text" id="testUsername" value="superadmin">
         </div>
         <div class="form-group">
@@ -108,7 +108,7 @@
 
     <div class="debug-section">
         <h2>3. Token监控</h2>
-        <button onclick="startTokenMonitoring()">开始监�?/button>
+        <button onclick="startTokenMonitoring()">开始监控</button>
         <button onclick="stopTokenMonitoring()">停止监控</button>
         <div id="tokenMonitor" class="log-output"></div>
     </div>
@@ -116,12 +116,12 @@
     <div class="debug-section">
         <h2>4. 页面刷新测试</h2>
         <button onclick="testPageRefresh()">测试页面刷新</button>
-        <button onclick="simulateAppInit()">模拟App初始�?/button>
+        <button onclick="simulateAppInit()">模拟App初始化</button>
         <div id="refreshTest" class="log-output"></div>
     </div>
 
     <div class="debug-section">
-        <h2>5. 实时状�?/h2>
+        <h2>5. 实时状态</h2>
         <div id="realTimeStatus"></div>
     </div>
 
@@ -129,10 +129,10 @@
         let tokenMonitoring = false;
         let monitoringInterval = null;
 
-        // 检查Token状�?
+        // 检查Token状态
         function checkTokenStatus() {
             const output = document.getElementById('tokenStatus');
-            let status = '<h3>Token状态检查结�?</h3>';
+            let status = '<h3>Token状态检查结果</h3>';
             
             try {
                 const adminToken = localStorage.getItem('adminToken');
@@ -140,7 +140,7 @@
                 
                 if (adminToken) {
                     status += '<div><span class="status-indicator status-success"></span>adminToken存在</div>';
-                    status += `<div class="token-info">Token�? ${adminToken.substring(0, 50)}...</div>`;
+                    status += `<div class="token-info">Token：${adminToken.substring(0, 50)}...</div>`;
                     
                     // 解析JWT Token
                     if (adminToken.includes('.')) {
@@ -151,14 +151,14 @@
                                 status += '<div><span class="status-indicator status-info"></span>JWT Token解析成功</div>';
                                 status += `<div class="token-info">Payload: ${JSON.stringify(payload, null, 2)}</div>`;
                                 
-                                // 检查过期时�?
+                                // 检查过期时间
                                 if (payload.exp) {
                                     const expDate = new Date(payload.exp * 1000);
                                     const now = new Date();
                                     if (expDate > now) {
-                                        status += `<div><span class="status-indicator status-success"></span>Token未过�?(过期时间: ${expDate.toLocaleString()})</div>`;
+                                        status += `<div><span class="status-indicator status-success"></span>Token未过期(过期时间: ${expDate.toLocaleString()})</div>`;
                                     } else {
-                                        status += `<div><span class="status-indicator status-error"></span>Token已过�?(过期时间: ${expDate.toLocaleString()})</div>`;
+                                        status += `<div><span class="status-indicator status-error"></span>Token已过期(过期时间: ${expDate.toLocaleString()})</div>`;
                                     }
                                 }
                             }
@@ -169,7 +169,7 @@
                         status += '<div><span class="status-indicator status-warning"></span>非JWT格式Token</div>';
                     }
                 } else {
-                    status += '<div><span class="status-indicator status-error"></span>adminToken不存�?/div>';
+                    status += '<div><span class="status-indicator status-error"></span>adminToken不存在</div>';
                 }
                 
                 if (adminUser) {
@@ -181,16 +181,16 @@
                         status += `<div><span class="status-indicator status-error"></span>用户信息解析失败: ${e.message}</div>`;
                     }
                 } else {
-                    status += '<div><span class="status-indicator status-error"></span>adminUser不存�?/div>';
+                    status += '<div><span class="status-indicator status-error"></span>adminUser不存在</div>';
                 }
                 
-                // 检查其他相关存�?
+                // 检查其他相关存储
                 const allKeys = Object.keys(localStorage);
                 const adminKeys = allKeys.filter(key => key.includes('admin'));
-                status += `<div><span class="status-indicator status-info"></span>所有admin相关�? ${adminKeys.join(', ')}</div>`;
+                status += `<div><span class="status-indicator status-info"></span>所有admin相关键: ${adminKeys.join(', ')}</div>`;
                 
             } catch (error) {
-                status += `<div><span class="status-indicator status-error"></span>检查失�? ${error.message}</div>`;
+                status += `<div><span class="status-indicator status-error"></span>检查失败: ${error.message}</div>`;
             }
             
             output.innerHTML = status;
@@ -220,13 +220,13 @@
                     localStorage.setItem('adminToken', adminToken);
                     localStorage.setItem('adminUser', JSON.stringify(adminUser));
                     
-                    alert('�?测试登录成功！Token已保�?);
+                    alert('✅测试登录成功！Token已保存');
                     checkTokenStatus();
                 } else {
-                    alert(`�?测试登录失败: ${result.message}`);
+                    alert(`❌测试登录失败: ${result.message}`);
                 }
             } catch (error) {
-                alert(`�?网络错误: ${error.message}`);
+                alert(`网络错误: ${error.message}`);
             }
         }
 
@@ -234,7 +234,7 @@
         function testLogout() {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminUser');
-            alert('�?测试登出完成！Token已清�?);
+            alert('✅测试登出完成！Token已清除');
             checkTokenStatus();
         }
 
@@ -247,7 +247,7 @@
                         localStorage.removeItem(key);
                     }
                 });
-                alert('�?所有Token已清�?);
+                alert('✅所有Token已清除');
                 checkTokenStatus();
             }
         }
@@ -280,21 +280,21 @@
                 originalRemoveItem.apply(this, arguments);
             };
             
-            // 定期检查Token状�?
+            // 定期检查Token状态
             monitoringInterval = setInterval(() => {
                 const adminToken = localStorage.getItem('adminToken');
                 const adminUser = localStorage.getItem('adminUser');
                 const timestamp = new Date().toLocaleTimeString();
                 
                 if (adminToken && adminUser) {
-                    output.textContent += `[${timestamp}] �?Token状态正常\n`;
+                    output.textContent += `[${timestamp}] ✅ Token状态正常\n`;
                 } else {
-                    output.textContent += `[${timestamp}] �?Token状态异常\n`;
+                    output.textContent += `[${timestamp}] ❌ Token状态异常\n`;
                 }
                 output.scrollTop = output.scrollHeight;
             }, 5000);
             
-            alert('�?Token监控已开�?);
+            alert('✅ Token监控已开启');
         }
 
         // 停止Token监控
@@ -304,52 +304,52 @@
                 clearInterval(monitoringInterval);
                 monitoringInterval = null;
             }
-            alert('⏹️ Token监控已停�?);
+            alert('⏹️ Token监控已停止');
         }
 
         // 测试页面刷新
         function testPageRefresh() {
             const output = document.getElementById('refreshTest');
-            output.textContent = '开始页面刷新测�?..\n';
+            output.textContent = '开始页面刷新测试..\n';
             
-            // 模拟页面刷新前的状�?
+            // 模拟页面刷新前的状态
             const adminToken = localStorage.getItem('adminToken');
             const adminUser = localStorage.getItem('adminUser');
             
-            output.textContent += `刷新�?- adminToken: ${adminToken ? '存在' : '不存�?}\n`;
-            output.textContent += `刷新�?- adminUser: ${adminUser ? '存在' : '不存�?}\n`;
+            output.textContent += `刷新前 - adminToken: ${adminToken ? '存在' : '不存在'}\n`;
+            output.textContent += `刷新前 - adminUser: ${adminUser ? '存在' : '不存在'}\n`;
             
             // 模拟页面刷新
             setTimeout(() => {
                 output.textContent += '模拟页面刷新...\n';
                 
-                // 检查刷新后的状�?
+                // 检查刷新后的状态
                 const newAdminToken = localStorage.getItem('adminToken');
                 const newAdminUser = localStorage.getItem('adminUser');
                 
-                output.textContent += `刷新�?- adminToken: ${newAdminToken ? '存在' : '不存�?}\n`;
-                output.textContent += `刷新�?- adminUser: ${newAdminUser ? '存在' : '不存�?}\n`;
+                output.textContent += `刷新后 - adminToken: ${newAdminToken ? '存在' : '不存在'}\n`;
+                output.textContent += `刷新后 - adminUser: ${newAdminUser ? '存在' : '不存在'}\n`;
                 
                 if (newAdminToken && newAdminUser) {
-                    output.textContent += '�?页面刷新后Token状态正常\n';
+                    output.textContent += '✅页面刷新后Token状态正常\n';
                 } else {
-                    output.textContent += '�?页面刷新后Token状态异常\n';
+                    output.textContent += '❌页面刷新后Token状态异常\n';
                 }
             }, 1000);
         }
 
-        // 模拟App初始�?
+        // 模拟App初始化
         function simulateAppInit() {
             const output = document.getElementById('refreshTest');
-            output.textContent = '模拟App初始�?..\n';
+            output.textContent = '模拟App初始化..\n';
             
             // 模拟checkAuthStatus方法
             const adminToken = localStorage.getItem('adminToken');
             const adminUser = localStorage.getItem('adminUser');
             
-            output.textContent += `检查认证状�?..\n`;
-            output.textContent += `adminToken: ${adminToken ? '存在' : '不存�?}\n`;
-            output.textContent += `adminUser: ${adminUser ? '存在' : '不存�?}\n`;
+            output.textContent += `检查认证状态..\n`;
+            output.textContent += `adminToken: ${adminToken ? '存在' : '不存在'}\n`;
+            output.textContent += `adminUser: ${adminUser ? '存在' : '不存在'}\n`;
             
             if (adminToken && adminUser) {
                 try {
@@ -364,50 +364,50 @@
                                 tokenData = JSON.parse(atob(parts[1]));
                                 output.textContent += 'JWT Token解析成功\n';
                                 
-                                                                 if (tokenData.exp) {
-                                     const expTime = tokenData.exp * 1000; // 转换为毫�?
-                                     const now = Date.now();
-                                     output.textContent += `Token过期时间: ${new Date(expTime).toLocaleString()}\n`;
-                                     output.textContent += `当前时间: ${new Date(now).toLocaleString()}\n`;
-                                     output.textContent += `时间�? ${Math.floor((expTime - now) / 1000)} 秒\n`;
-                                     
-                                     if (expTime > now) {
-                                         output.textContent += '�?Token未过期，认证成功\n';
-                                     } else {
-                                         output.textContent += '�?Token已过期，认证失败\n';
-                                     }
-                                 } else {
-                                     output.textContent += '⚠️ Token没有过期时间字段\n';
-                                 }
+                                if (tokenData.exp) {
+                                    const expTime = tokenData.exp * 1000; // 转换为毫秒
+                                    const now = Date.now();
+                                    output.textContent += `Token过期时间: ${new Date(expTime).toLocaleString()}\n`;
+                                    output.textContent += `当前时间: ${new Date(now).toLocaleString()}\n`;
+                                    output.textContent += `剩余时间: ${Math.floor((expTime - now) / 1000)} 秒\n`;
+                                    
+                                    if (expTime > now) {
+                                        output.textContent += '✅Token未过期，认证成功\n';
+                                    } else {
+                                        output.textContent += '❌Token已过期，认证失败\n';
+                                    }
+                                } else {
+                                    output.textContent += '⚠️ Token没有过期时间字段\n';
+                                }
                             } catch (e) {
-                                output.textContent += `�?JWT解析失败: ${e.message}\n`;
+                                output.textContent += `❌JWT解析失败: ${e.message}\n`;
                             }
                         }
                     } else {
                         output.textContent += '非JWT格式Token\n';
                     }
                 } catch (error) {
-                    output.textContent += `�?用户信息解析失败: ${error.message}\n`;
+                    output.textContent += `❌用户信息解析失败: ${error.message}\n`;
                 }
             } else {
-                output.textContent += '�?认证信息不完整\n';
+                output.textContent += '❌认证信息不完整\n';
             }
         }
 
-        // 实时状态更�?
+        // 实时状态更新
         function updateRealTimeStatus() {
             const output = document.getElementById('realTimeStatus');
             const adminToken = localStorage.getItem('adminToken');
             const adminUser = localStorage.getItem('adminUser');
             
-            let status = '<h3>实时状�?</h3>';
-            status += `<div>adminToken: <span style="color: ${adminToken ? 'green' : 'red'}">${adminToken ? '存在' : '不存�?}</span></div>`;
-            status += `<div>adminUser: <span style="color: ${adminUser ? 'green' : 'red'}">${adminUser ? '存在' : '不存�?}</span></div>`;
+            let status = '<h3>实时状态</h3>';
+            status += `<div>adminToken: <span style="color: ${adminToken ? 'green' : 'red'}">${adminToken ? '存在' : '不存在'}</span></div>`;
+            status += `<div>adminUser: <span style="color: ${adminUser ? 'green' : 'red'}">${adminUser ? '存在' : '不存在'}</span></div>`;
             
             if (adminToken && adminUser) {
                 try {
                     const user = JSON.parse(adminUser);
-                    status += `<div>用户�? ${user.username || '未知'}</div>`;
+                    status += `<div>用户名: ${user.username || '未知'}</div>`;
                 } catch (e) {
                     status += `<div>用户信息解析失败</div>`;
                 }
@@ -423,9 +423,25 @@
             checkTokenStatus();
             updateRealTimeStatus();
             
-            // 每秒更新实时状�?
+            // 每秒更新实时状态
             setInterval(updateRealTimeStatus, 1000);
         });
+
+        // 编码/内容损坏自检与保护
+        (function encodingGuard() {
+            try {
+                const html = document.documentElement ? document.documentElement.innerHTML : '';
+                const hasBroken = /状�\?|初始�\?|监�\?|不存�\?|毫�\?|时间�\?|测�\?/u.test(html);
+                if (hasBroken) {
+                    const banner = document.createElement('div');
+                    banner.setAttribute('style', 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc3545;color:#fff;padding:10px 16px;font-weight:bold;');
+                    banner.textContent = '警告：页面包含疑似编码或内容损坏（已禁用交互按钮），请以 UTF-8 重新保存后刷新。';
+                    document.body.prepend(banner);
+                    const buttons = document.querySelectorAll('button');
+                    buttons.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'not-allowed'; });
+                }
+            } catch (_) { /* ignore */ }
+        })();
     </script>
 </body>
 </html>

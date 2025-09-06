@@ -626,7 +626,7 @@ class VIPManagement {
             });
         }
 
-        // 搜索输入框回车事�?
+        // 搜索输入框回车事件
         const searchInputs = ['challengeUserIdInput', 'challengeEmailInput', 'challengeTelegramInput'];
         searchInputs.forEach(inputId => {
             const input = document.getElementById(inputId);
@@ -639,7 +639,7 @@ class VIPManagement {
             }
         });
 
-        // 下拉框变化事�?
+        // 下拉框变化事件
         const selectInputs = ['challengeVipLevelInput', 'challengeStatusInput'];
         selectInputs.forEach(selectId => {
             const select = document.getElementById(selectId);
@@ -735,7 +735,7 @@ class VIPManagement {
                 this.currentLevel ? 'UPDATE' : 'CREATE',
                 this.currentLevel?.id || 'NEW',
                 formData,
-                false, // 暂时设为false，成功后会更�?
+                false, // 暂时设为false，成功后会更新
                 null
             );
 
@@ -744,7 +744,7 @@ class VIPManagement {
                 await adminApi.updateVipLevel(this.currentLevel.id, formData);
                 adminLogger.vipManagement('UPDATE', this.currentLevel.id, formData, true, null);
             } else {
-                // 添加新等�?
+                // 添加新等级
                 const result = await adminApi.createVipLevel(formData);
                 adminLogger.vipManagement('CREATE', result.data?.id || 'UNKNOWN', formData, true, null);
             }
@@ -1229,7 +1229,7 @@ class VIPManagement {
             }
         });
 
-        // 重置下拉�?
+        // 重置下拉框
         const selectInputs = ['challengeVipLevelInput', 'challengeStatusInput'];
         selectInputs.forEach(selectId => {
             const select = document.getElementById(selectId);
@@ -1238,7 +1238,7 @@ class VIPManagement {
             }
         });
 
-        // 重新加载所有数�?
+        // 重新加载所有数据
         this.loadVipChallenges();
     }
 }

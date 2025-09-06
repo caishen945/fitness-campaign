@@ -159,22 +159,8 @@
         });
     </script>
     
-    <!-- API 配置脚本 -->
-    <script type="module">
-        import('./config/api-config.js?' + 'v=' + window.APP_VERSION.timestamp);
-    </script>
-    <!-- 模块化应用入口 -->
-    <script type="module">
-        import('./src/index.js?' + 'v=' + window.APP_VERSION.timestamp);
-    </script>
-    <!-- 系统设置强制修复脚本 -->
-    <script type="module">
-        import('./force-fix-settings.js?' + 'v=' + window.APP_VERSION.timestamp);
-    </script>
-    <!-- 紧急修复脚本 -->
-    <script type="module">
-        import('./emergency-fix-settings.js?' + 'v=' + window.APP_VERSION.timestamp);
-    </script>
+    <!-- 模块入口：由 Vite 进行打包与哈希管理 -->
+    <script type="module" src="/src/index.js"></script>
     
     <!-- 立即生效的导航栏注入脚本 -->
     <script>

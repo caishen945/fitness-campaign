@@ -32,7 +32,7 @@
     <div id="loading-indicator" class="loading-indicator">
         <div style="text-align: center;">
             <div class="spinner"></div>
-            <div>加载�?..</div>
+            <div>加载中...</div>
         </div>
     </div>
     
@@ -51,13 +51,13 @@
                 
                 <form id="loginForm">
                     <div class="form-group mb-3">
-                        <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户�?/label>
+                        <label for="username" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">用户名</label>
                         <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
                     </div>
                     
                     <div class="form-group mb-4">
                         <label for="password" style="display: block; margin-bottom: 0.5rem; color: #2c3e50; font-weight: 500;">密码</label>
-                        <input type="password" id="password" class="form-control" placeholder="请输入密�? required>
+                        <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
                     </div>
                     
                     <button type="submit" id="loginBtn" class="btn btn-primary w-100" style="padding: 0.75rem; font-size: 1rem;">
@@ -84,17 +84,17 @@
                 <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
                     <div style="color: #ecf0f1; font-size: 0.9rem;">
                         <i class="fas fa-user" style="margin-right: 8px;"></i>
-                        <span id="current-user">管理�?/span>
+                        <span id="current-user">管理员</span>
                     </div>
                     <button id="logoutBtn" class="btn btn-sm btn-outline-light mt-2" style="width: 100%; font-size: 0.8rem;">
-                        <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>退出登�?
+                        <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>退出登录
                     </button>
                 </div>
                 <nav style="padding: 1rem 0;">
                     <ul class="nav-links" style="list-style: none; padding: 0; margin: 0;">
                         <li style="margin-bottom: 0.5rem;">
                             <a href="#" data-page="dashboard" class="active">
-                                <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表�?
+                                <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表盘
                                 <small style="float: right; opacity: 0.7;">Ctrl+1</small>
                             </a>
                         </li>
@@ -151,7 +151,7 @@
             
             <div class="main-content">
                 <div id="page-content">
-                    <!-- 页面内容将通过JavaScript动态加�?-->
+                    <!-- 页面内容将通过JavaScript动态加载 -->
                 </div>
             </div>
         </div>
@@ -160,7 +160,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="module">
-        // 管理后台应用 - 模块化版�?
+        // 管理后台应用 - 模块化版本
         class AdminApp {
             constructor() {
                 this.currentPage = 'dashboard';
@@ -171,7 +171,7 @@
             }
             
             async init() {
-                console.log('🚀 管理后台初始�?..');
+                console.log('🚀 管理后台初始化...');
                 this.checkAuthStatus();
                 this.setupEventListeners();
                 this.render();
@@ -206,12 +206,12 @@
                             this.isAuthenticated = true;
                             this.token = adminToken;
                             this.user = user;
-                            console.log('�?管理员已登录:', user.username);
+                            console.log('✅ 管理员已登录:', user.username);
                         } else {
                             this.clearAuth();
                         }
                     } catch (error) {
-                        console.error('�?解析认证信息失败:', error);
+                        console.error('❌ 解析认证信息失败:', error);
                         this.clearAuth();
                     }
                 } else {
@@ -240,7 +240,7 @@
                         const message = document.getElementById('login-message');
                         
                         loginBtn.disabled = true;
-                        loginBtn.querySelector('.button-text').textContent = '登录�?..';
+                        loginBtn.querySelector('.button-text').textContent = '登录中...';
                         loginBtn.querySelector('.loading-spinner').style.display = 'inline-block';
                         message.style.display = 'none';
                         
@@ -261,7 +261,7 @@
                                 this.token = result.token;
                                 this.user = result.user;
                                 
-                                this.showToast('登录成功�?, 'success');
+                                this.showToast('登录成功', 'success');
                                 this.render();
                             } else {
                                 message.textContent = result.message || '用户名或密码错误';
@@ -270,7 +270,7 @@
                             }
                         } catch (error) {
                             console.error('登录错误:', error);
-                            message.textContent = '登录失败，请检查网络连�?;
+                            message.textContent = '登录失败，请检查网络连接';
                             message.className = 'alert alert-danger';
                             message.style.display = 'block';
                         } finally {
@@ -607,9 +607,9 @@
             }
         }
         
-        // 初始化应�?
+        // 初始化应用
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🔍 页面加载完成，初始化模块化管理后�?..');
+            console.log('🔍 页面加载完成，初始化模块化管理后台...');
             const app = new AdminApp();
             window.adminApp = app;
             await app.init();

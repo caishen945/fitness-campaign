@@ -87,13 +87,13 @@
         
         <form id="loginForm">
             <div class="form-group">
-                <label for="username">用户�?/label>
+                <label for="username">用户名</label>
                 <input type="text" id="username" placeholder="请输入用户名" required>
             </div>
             
             <div class="form-group">
                 <label for="password">密码</label>
-                <input type="password" id="password" placeholder="请输入密�? required>
+                <input type="password" id="password" placeholder="请输入密码" required>
             </div>
             
             <button type="submit" id="loginBtn">登录</button>
@@ -103,8 +103,8 @@
         
         <div class="debug-info">
             <strong>调试信息:</strong><br>
-            <span id="debugStatus">页面加载�?..</span><br>
-            <span id="debugForm">表单状�? 检查中...</span><br>
+            <span id="debugStatus">页面加载中...</span><br>
+            <span id="debugForm">表单状态: 检查中...</span><br>
             <span id="debugEvent">事件绑定: 检查中...</span>
         </div>
         
@@ -116,6 +116,21 @@
     </div>
 
     <script>
+        // 编码/内容损坏自检与保护
+        (function encodingGuard() {
+            try {
+                const html = document.documentElement ? document.documentElement.innerHTML : '';
+                const hasBroken = /页面加载�?|表单状�?|请输入密�?|未找到表单元�?|未找到登录按�?/u.test(html);
+                if (hasBroken) {
+                    const banner = document.createElement('div');
+                    banner.setAttribute('style', 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#dc3545;color:#fff;padding:10px 16px;font-weight:bold;');
+                    banner.textContent = '警告：页面包含疑似编码或内容损坏（已禁用交互按钮），请以 UTF-8 重新保存后刷新。';
+                    document.body.prepend(banner);
+                    const buttons = document.querySelectorAll('button');
+                    buttons.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.6'; btn.style.cursor = 'not-allowed'; });
+                }
+            } catch (_) { /* ignore */ }
+        })();
         // 调试信息更新
         function updateDebugInfo(elementId, message) {
             const element = document.getElementById(elementId);
@@ -124,26 +139,26 @@
             }
         }
 
-        // 页面加载完成后检�?
+        // 页面加载完成后检查
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔍 页面加载完成，开始调�?..');
+            console.log('🔍 页面加载完成，开始调试..');
             updateDebugInfo('debugStatus', '页面加载完成');
             
             const loginForm = document.getElementById('loginForm');
             const loginBtn = document.getElementById('loginBtn');
             
             if (loginForm) {
-                updateDebugInfo('debugForm', '表单状�? 找到表单元素');
-                console.log('�?找到登录表单:', loginForm);
+                updateDebugInfo('debugForm', '表单状态: 找到表单元素');
+                console.log('✅ 找到登录表单:', loginForm);
             } else {
-                updateDebugInfo('debugForm', '表单状�? 未找到表单元�?);
-                console.error('�?未找到登录表�?);
+                updateDebugInfo('debugForm', '表单状态: 未找到表单元素');
+                console.error('❌ 未找到登录表单');
             }
             
             if (loginBtn) {
-                console.log('�?找到登录按钮:', loginBtn);
+                console.log('✅ 找到登录按钮:', loginBtn);
             } else {
-                console.error('�?未找到登录按�?);
+                console.error('❌ 未找到登录按钮');
             }
         });
 
@@ -153,7 +168,7 @@
             e.preventDefault(); // 阻止默认提交行为
             e.stopPropagation(); // 阻止事件冒泡
             
-            updateDebugInfo('debugEvent', '事件绑定: 表单提交事件已触�?);
+            updateDebugInfo('debugEvent', '事件绑定: 表单提交事件已触发');
             
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -161,10 +176,10 @@
             const message = document.getElementById('message');
             
             console.log('📝 输入的用户名:', username);
-            console.log('📝 输入的密�?', password);
+            console.log('📝 输入的密码', password);
             
-            // 显示加载状�?
-            loginBtn.textContent = '登录�?..';
+            // 显示加载状态
+            loginBtn.textContent = '登录中...';
             loginBtn.disabled = true;
             message.style.display = 'none';
             
@@ -180,14 +195,14 @@
                     body: JSON.stringify({ username, password })
                 });
                 
-                console.log('📡 API响应状�?', response.status);
+                console.log('📡 API响应状态', response.status);
                 updateDebugInfo('debugStatus', `API响应: ${response.status}`);
                 
                 const result = await response.json();
                 console.log('📄 API响应数据:', result);
                 
                 if (result.success) {
-                    message.textContent = '登录成功！正在跳�?..';
+                    message.textContent = '登录成功！正在跳转..';
                     message.className = 'message success';
                     message.style.display = 'block';
                     
@@ -197,8 +212,8 @@
                     localStorage.setItem('adminToken', result.token);
                     localStorage.setItem('adminUser', JSON.stringify(result.user));
                     
-                    console.log('💾 Token已保�?', result.token);
-                    console.log('💾 用户信息已保�?', result.user);
+                    console.log('💾 Token已保存', result.token);
+                    console.log('💾 用户信息已保存', result.user);
                     
                     // 延迟跳转
                     setTimeout(() => {
@@ -213,7 +228,7 @@
                 }
             } catch (error) {
                 console.error('💥 登录错误:', error);
-                message.textContent = '登录失败，请检查网络连�?;
+                message.textContent = '登录失败，请检查网络连接';
                 message.className = 'message error';
                 message.style.display = 'block';
                 updateDebugInfo('debugStatus', '网络错误: ' + error.message);
@@ -223,7 +238,7 @@
             }
         });
         
-        updateDebugInfo('debugEvent', '事件绑定: 已完�?);
+        updateDebugInfo('debugEvent', '事件绑定: 已完成');
     </script>
 </body>
 </html>
