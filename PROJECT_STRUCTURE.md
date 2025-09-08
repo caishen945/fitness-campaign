@@ -90,6 +90,9 @@ node update-version.cjs
 - `start-admin-mongodb.bat`
 - `start-fast.bat`
 
+### 测试脚本
+- 建议使用根目录 `complete-system-test.js` 运行完整系统测试（原 `test-complete-system.js` 作为过渡入口，后续将移除）
+
 ## 🔧 开发工具
 
 ### 版本管理

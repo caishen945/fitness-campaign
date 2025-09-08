@@ -7,6 +7,9 @@ export default defineConfig({
     host: true,
     cors: true
   },
+  optimizeDeps: {
+    entries: ['index.html']
+  },
   build: {
     outDir: '../dist',
     emptyOutDir: true

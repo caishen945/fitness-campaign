@@ -1,0 +1,8 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "rootExists": true,
+  "rootHasContent": true,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "requestFailures": 0
+}

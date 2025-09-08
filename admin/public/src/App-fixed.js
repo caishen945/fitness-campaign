@@ -8,6 +8,9 @@ import UserManagement from './pages/UserManagement.js'; // Added import for User
 import AchievementManagement from './pages/AchievementManagement.js';
 import TeamManagement from './pages/TeamManagement.js';
 import SystemSettings from './pages/SystemSettings.js';
+import TelegramManagement from './pages/TelegramManagement.js';
+import NotificationManagement from './pages/NotificationManagement.js';
+import TemplateManagement from './pages/TemplateManagement.js';
 
 class AdminApp {
     constructor() {
@@ -132,6 +135,38 @@ class AdminApp {
                 }
             },
             
+            // 模板管理页面
+            templates: {
+                instance: null,
+                render: function() {
+                    if (!this.instance) {
+                        this.instance = new TemplateManagement(window.adminApp);
+                    }
+                    return this.instance.render();
+                },
+                afterRender: function() {
+                    if (this.instance) {
+                        return this.instance.afterRender();
+                    }
+                }
+            },
+            
+            // 通知管理页面
+            notifications: {
+                instance: null,
+                render: function() {
+                    if (!this.instance) {
+                        this.instance = new NotificationManagement(window.adminApp);
+                    }
+                    return this.instance.render();
+                },
+                afterRender: function() {
+                    if (this.instance) {
+                        return this.instance.afterRender();
+                    }
+                }
+            },
+            
             // 团队管理页面
             team: {
                 instance: null,
@@ -186,6 +221,22 @@ class AdminApp {
                 render: function() {
                     if (!this.instance) {
                         this.instance = new PKChallengeManagement(window.adminApp);
+                    }
+                    return this.instance.render();
+                },
+                afterRender: function() {
+                    if (this.instance) {
+                        return this.instance.afterRender();
+                    }
+                }
+            },
+            
+            // Telegram管理页面
+            telegram: {
+                instance: null,
+                render: function() {
+                    if (!this.instance) {
+                        this.instance = new TelegramManagement(window.adminApp);
                     }
                     return this.instance.render();
                 },
@@ -422,6 +473,14 @@ class AdminApp {
                         e.preventDefault();
                         this.navigate('team');
                         break;
+                    case '8':
+                        e.preventDefault();
+                        this.navigate('telegram');
+                        break;
+                    case '9':
+                        e.preventDefault();
+                        this.navigate('system-settings');
+                        break;
                 }
             }
         });
@@ -447,11 +506,10 @@ class AdminApp {
             return;
         }
         
-        // 临时守卫：仅开放 dashboard 与 wallet 页面
-        const allowedPages = new Set(['dashboard', 'wallet', 'login']);
-        if (!allowedPages.has(page)) {
+        // 允许所有已注册页面访问
+        if (!this.pages[page]) {
             if (this.showToast) {
-                this.showToast('该页面维护中，暂不可用', 'warn');
+                this.showToast('页面不存在', 'error');
             }
             return;
         }
@@ -480,6 +538,104 @@ class AdminApp {
             this.hideLoadingState();
             window.adminLogger?.success('NAVIGATION', '页面渲染完成（无afterRender）', { page: this.currentPage });
         }
+    }
+    
+    // 导航到系统设置并清理缓存
+    navigateToSettingsWithCacheClear() {
+        this.showToast('正在清理缓存并加载系统设置...', 'info');
+        
+        // 清理缓存
+        this.clearAllCaches().then(() => {
+            // 确保系统设置页面已加载
+            if (!this.pages['system-settings']) {
+                this.loadSystemSettingsPage().then(() => {
+                    this.navigate('system-settings');
+                });
+            } else {
+                this.navigate('system-settings');
+            }
+        });
+    }
+    
+    // 增强缓存清理方法
+    async clearAllCaches() {
+        try {
+            // 清理Service Worker
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(reg => reg.unregister()));
+            }
+            
+            // 清理所有存储
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // 清理Cache API
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+            
+            // 清理模块缓存（通过版本参数）
+            this.cacheVersion = Date.now();
+            
+            console.log('✅ 所有缓存已清理');
+            return true;
+        } catch (error) {
+            console.error('❌ 缓存清理失败:', error);
+            return false;
+        }
+    }
+    
+    // 动态加载系统设置页面
+    async loadSystemSettingsPage() {
+        try {
+            const SystemSettingsModule = await import('./pages/SystemSettings.js');
+            this.pages['system-settings'] = {
+                instance: null,
+                render: function() {
+                    if (!this.instance) {
+                        this.instance = new SystemSettingsModule.default(window.adminApp);
+                    }
+                    return this.instance.render();
+                },
+                afterRender: function() {
+                    if (this.instance && typeof this.instance.afterRender === 'function') {
+                        return this.instance.afterRender();
+                    }
+                }
+            };
+            console.log('✅ 系统设置页面已动态加载');
+        } catch (error) {
+            console.error('❌ 系统设置页面加载失败:', error);
+            this.createFallbackSystemSettings();
+        }
+    }
+    
+    // 创建回退系统设置页面
+    createFallbackSystemSettings() {
+        this.pages['system-settings'] = {
+            render: () => `
+                <div class="container-fluid mt-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                <h4>系统设置页面加载失败</h4>
+                                <p>正在尝试重新加载...</p>
+                                <button class="btn btn-primary" onclick="location.reload()">刷新页面</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            bindEvents: () => {},
+            afterRender: () => {
+                // 尝试重新加载
+                setTimeout(() => {
+                    this.loadSystemSettingsPage();
+                }, 2000);
+            }
+        };
     }
     
     // 显示加载状态
@@ -583,10 +739,36 @@ class AdminApp {
                                 </a>
                             </li>
                             <li style="margin-bottom: 0.5rem;">
+                                <a href="#" data-page="templates" class="${this.currentPage === 'templates' ? 'active' : ''}" 
+                                   style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'templates' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'templates' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
+                                    <i class="fas fa-file-alt" style="margin-right: 10px;"></i> 模板管理
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.5rem;">
+                                <a href="#" data-page="notifications" class="${this.currentPage === 'notifications' ? 'active' : ''}" 
+                                   style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'notifications' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'notifications' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
+                                    <i class="fas fa-bell" style="margin-right: 10px;"></i> 通知管理
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.5rem;">
                                 <a href="#" data-page="team" class="${this.currentPage === 'team' ? 'active' : ''}" 
                                    style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'team' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'team' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
                                     <i class="fas fa-users" style="margin-right: 10px;"></i> 团队管理
                                     <small style="float: right; opacity: 0.7;">Ctrl+7</small>
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.5rem;">
+                                <a href="#" data-page="telegram" class="${this.currentPage === 'telegram' ? 'active' : ''}" 
+                                   style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'telegram' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'telegram' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
+                                    <i class="fab fa-telegram" style="margin-right: 10px;"></i> Telegram管理
+                                    <small style="float: right; opacity: 0.7;">Ctrl+8</small>
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.5rem;">
+                                <a href="#" data-page="system-settings" class="${this.currentPage === 'system-settings' ? 'active' : ''}" 
+                                   style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'system-settings' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'system-settings' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
+                                    <i class="fas fa-cog" style="margin-right: 10px;"></i> 系统设置
+                                    <small style="float: right; opacity: 0.7;">Ctrl+9</small>
                                 </a>
                             </li>
                         </ul>

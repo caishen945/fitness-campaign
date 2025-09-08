@@ -48,12 +48,6 @@ if not errorlevel 1 (
     for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3000"') do taskkill /f /pid %%a >nul 2>&1
 )
 
-netstat -an | findstr ":3002" >nul
-if not errorlevel 1 (
-    echo ⚠️  端口3002已被占用，正在终止进程...
-    for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3002"') do taskkill /f /pid %%a >nul 2>&1
-)
-
 netstat -an | findstr ":8080" >nul
 if not errorlevel 1 (
     echo ⚠️  端口8080已被占用，正在终止进程...
@@ -76,7 +70,7 @@ if not exist "node_modules" (
     npm install
 )
 echo 🚀 启动后端服务器 (端口: 3000)...
-start "FitChallenge Backend" cmd /k "node start-server-simple.js"
+start "FitChallenge Backend" cmd /k "node server.js"
 timeout /t 5 /nobreak >nul
 cd ..
 

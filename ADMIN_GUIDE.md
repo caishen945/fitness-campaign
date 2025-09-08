@@ -1,23 +1,21 @@
 # FitChallenge 管理后台使用指南
 
-## 🚀 快速启动
+## 🚀 快速启动（Vite）
 
-### 一键启动
+### 开发模式
 ```bash
-# 运行完整版启动脚本
-start-admin-complete.bat
+cd admin
+npm run dev
 ```
 
-### 手动启动
+### 预览构建（本地端口 8081）
 ```bash
-# 1. 启动后端API服务器
-cd backend
-node admin-api-server.js
-
-# 2. 启动前端服务器
-cd admin/public
-python -m http.server 8081
+cd admin
+npm run build
+npm run serve
 ```
+
+> 迁移说明：原 `start-admin-complete.bat` 与 `admin-api-server.js` 已废弃，现统一使用 Vite 开发与预览命令。
 
 ## 🔐 登录信息
 
@@ -175,7 +173,7 @@ python -m http.server 8081
 - **浏览器开发者工具**: F12 打开
 - **网络面板**: 查看API请求状态
 - **控制台**: 查看错误日志
-- **功能测试脚本**: 运行 `test-admin-features.bat`
+- **完整系统测试**: 在仓库根目录执行 `node ./complete-system-test.js`（或 `--strict` 严格模式）
 
 ## 📈 性能优化
 
@@ -217,3 +215,50 @@ python -m http.server 8081
 ---
 
 **FitChallenge 管理后台** - 专业的健身挑战平台管理工具 🏃‍♂️💪
+
+## Backend startup (Windows PowerShell)
+
+1. Create `backend/.env` with:
+
+```text
+PORT=3000
+```
+
+2. Start server:
+
+```powershell
+cd backend; npm start
+```
+
+3. Health check:
+
+```powershell
+Invoke-RestMethod -Uri 'http://127.0.0.1:3000/api/health' -Method GET | ConvertTo-Json -Depth 5
+```
+
+### 挑战超时检查服务（运维）
+
+该服务负责定期扫描已到期的 `vip_challenges` 并根据规则发放奖励或进行押金扣减。默认关闭，可通过环境变量和管理接口控制。
+
+- 环境变量
+  - `CHALLENGE_TIMEOUT_ENABLED`：是否启用（默认 `false`）
+  - `CHALLENGE_TIMEOUT_INTERVAL_MS`：扫描间隔（毫秒，默认 `300000` 即 5 分钟）
+
+- 健康检查
+  - `GET /api/health` 返回 `services.challengeTimeout` 字段，包含：
+    - `isRunning`、`checkInterval`、`lastRunAt`、`lastSuccessAt`、`lastErrorAt`、`lastRunError`
+
+- 管理接口（需管理员权限）
+  - `GET  /api/admin/challenge-timeout/status` 查看状态
+  - `POST /api/admin/challenge-timeout/start` 启动服务（若 `CHALLENGE_TIMEOUT_ENABLED=false`，会记录提示并保持不启动）
+  - `POST /api/admin/challenge-timeout/stop` 停止服务
+  - `POST /api/admin/challenge-timeout/run-once` 手动执行一次检查
+  - `POST /api/admin/challenge-timeout/config` 调整间隔，示例：`{ "intervalMs": 60000 }`
+
+注意：上述接口均需携带有效管理员令牌。
+
+4. If port 3000 is busy:
+
+```powershell
+Get-NetTCPConnection -LocalPort 3000 | Select-Object -First 1 | ForEach-Object { Get-Process -Id $_.OwningProcess }
+```

@@ -177,9 +177,16 @@ class SystemSettings {
     }
 
     getNextVersion() {
-        const parts = this.versionInfo.version.split('.');
-        const patch = parseInt(parts[2]) + 1;
-        return `${parts[0]}.${parts[1]}.${patch}`;
+        try {
+            const safeVersion = this?.versionInfo?.version || '3.0.2';
+            const parts = String(safeVersion).split('.');
+            const major = parseInt(parts[0] || '0') || 0;
+            const minor = parseInt(parts[1] || '0') || 0;
+            const patch = (parseInt(parts[2] || '0') || 0) + 1;
+            return `${major}.${minor}.${patch}`;
+        } catch (_) {
+            return '0.0.1';
+        }
     }
 
     updateVersionDisplay() {
@@ -230,109 +237,103 @@ class SystemSettings {
     }
     
     // 带重试机制的事件绑定
-    async bindEventsWithRetry(maxRetries = 3, delay = 100) {
+    async bindEventsWithRetry(maxRetries = 5, delay = 100) {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 console.log(`🔄 系统设置事件绑定尝试 ${attempt}/${maxRetries}`);
                 
-                // 等待DOM元素就绪
-                await this.waitForDOMElements();
+                // 等待DOM完全就绪
+                await this.waitForDOMReady();
                 
-                // 版本更新按钮
-                const updateBtn = document.getElementById('update-version-btn');
-                if (updateBtn) {
-                    updateBtn.addEventListener('click', () => this.updateSystemVersion());
-                    console.log('✅ 版本更新按钮事件已绑定');
-                }
-
-                // 版本递增按钮
-                const incrementBtn = document.getElementById('increment-version-btn');
-                if (incrementBtn) {
-                    incrementBtn.addEventListener('click', () => this.incrementVersion());
-                    console.log('✅ 版本递增按钮事件已绑定');
-                }
-
-                // 清除缓存按钮
-                const clearCacheBtn = document.getElementById('clear-cache-btn');
-                if (clearCacheBtn) {
-                    clearCacheBtn.addEventListener('click', () => this.clearAllCaches());
-                    console.log('✅ 清除缓存按钮事件已绑定');
-                }
-
-                // 邮箱配置相关按钮
-                const emailConfigBtn = document.getElementById('email-config-btn');
-                if (emailConfigBtn) {
-                    emailConfigBtn.addEventListener('click', () => this.openEmailConfigWizard());
-                    console.log('✅ 邮箱配置按钮事件已绑定');
-                }
-
-                const emailTestBtn = document.getElementById('email-test-btn');
-                if (emailTestBtn) {
-                    emailTestBtn.addEventListener('click', () => this.testEmailConfig());
-                    console.log('✅ 邮箱测试按钮事件已绑定');
-                }
-
-                const emailStatusBtn = document.getElementById('email-status-btn');
-                if (emailStatusBtn) {
-                    emailStatusBtn.addEventListener('click', () => this.refreshEmailStatus());
-                    console.log('✅ 邮箱状态按钮事件已绑定');
+                // 检查关键元素是否存在
+                const criticalElements = [
+                    'update-version-btn',
+                    'increment-version-btn', 
+                    'clear-cache-btn',
+                    'email-config-btn',
+                    'email-test-btn',
+                    'email-status-btn'
+                ];
+                
+                const missingElements = criticalElements.filter(id => !document.getElementById(id));
+                if (missingElements.length > 0) {
+                    console.warn(`缺少关键元素: ${missingElements.join(', ')}`);
+                    throw new Error(`缺少关键元素: ${missingElements.join(', ')}`);
                 }
                 
-                // 如果所有关键元素都找到，则成功
-                const emailButtons = [emailConfigBtn, emailTestBtn, emailStatusBtn];
-                if (updateBtn && incrementBtn && clearCacheBtn) {
-                    console.log('✅ 所有系统设置事件绑定完成');
-                    return true;
-                }
+                // 绑定所有事件
+                this.bindVersionEvents();
+                this.bindCacheEvents();
+                this.bindEmailEvents();
+                
+                console.log('✅ 所有事件绑定成功');
+                return true;
                 
             } catch (error) {
-                console.warn(`⚠️ 事件绑定尝试 ${attempt} 失败:`, error);
-            }
-            
-            // 如果不是最后一次尝试，等待后重试
-            if (attempt < maxRetries) {
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2; // 指数退避
+                console.warn(`事件绑定尝试 ${attempt} 失败:`, error);
+                
+                if (attempt < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 1.5; // 渐进式退避
+                }
             }
         }
         
-        console.error('❌ 系统设置事件绑定最终失败');
+        console.error('❌ 事件绑定最终失败');
         return false;
     }
     
-    // 等待关键DOM元素就绪
-    async waitForDOMElements(timeout = 5000) {
-        const startTime = Date.now();
-        const requiredElements = [
-            'update-version-btn',
-            'increment-version-btn', 
-            'clear-cache-btn',
-            'email-config-btn',
-            'email-test-btn',
-            'email-status-btn'
-        ];
-        
-        return new Promise((resolve, reject) => {
-            const checkElements = () => {
-                const foundElements = requiredElements.filter(id => 
-                    document.getElementById(id) !== null
-                );
-                
-                if (foundElements.length === requiredElements.length) {
-                    console.log('✅ 所有必需的DOM元素已就绪');
-                    resolve(true);
-                } else if (Date.now() - startTime > timeout) {
-                    console.warn('⚠️ DOM元素等待超时，部分元素未找到:', 
-                        requiredElements.filter(id => !document.getElementById(id))
-                    );
-                    resolve(false);
-                } else {
-                    setTimeout(checkElements, 50);
-                }
-            };
-            
-            checkElements();
+    // 添加DOM就绪检测
+    waitForDOMReady() {
+        return new Promise((resolve) => {
+            if (document.readyState === 'complete') {
+                resolve();
+            } else {
+                window.addEventListener('load', resolve);
+            }
         });
+    }
+    
+    // 分离事件绑定逻辑
+    bindVersionEvents() {
+        const updateBtn = document.getElementById('update-version-btn');
+        const incrementBtn = document.getElementById('increment-version-btn');
+        
+        if (updateBtn) {
+            updateBtn.addEventListener('click', () => this.updateSystemVersion());
+            console.log('✅ 版本更新按钮事件已绑定');
+        }
+        if (incrementBtn) {
+            incrementBtn.addEventListener('click', () => this.incrementVersion());
+            console.log('✅ 版本递增按钮事件已绑定');
+        }
+    }
+    
+    bindCacheEvents() {
+        const clearCacheBtn = document.getElementById('clear-cache-btn');
+        if (clearCacheBtn) {
+            clearCacheBtn.addEventListener('click', () => this.clearAllCaches());
+            console.log('✅ 清除缓存按钮事件已绑定');
+        }
+    }
+    
+    bindEmailEvents() {
+        const emailConfigBtn = document.getElementById('email-config-btn');
+        const emailTestBtn = document.getElementById('email-test-btn');
+        const emailStatusBtn = document.getElementById('email-status-btn');
+        
+        if (emailConfigBtn) {
+            emailConfigBtn.addEventListener('click', () => this.openEmailConfigWizard());
+            console.log('✅ 邮箱配置按钮事件已绑定');
+        }
+        if (emailTestBtn) {
+            emailTestBtn.addEventListener('click', () => this.testEmailConfig());
+            console.log('✅ 邮箱测试按钮事件已绑定');
+        }
+        if (emailStatusBtn) {
+            emailStatusBtn.addEventListener('click', () => this.refreshEmailStatus());
+            console.log('✅ 邮箱状态按钮事件已绑定');
+        }
     }
 
     // 打开邮箱配置向导

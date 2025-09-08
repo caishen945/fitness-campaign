@@ -244,5 +244,8 @@ module.exports = {
     requirePermission: adminAuthMiddleware.requirePermission.bind(adminAuthMiddleware),
     requireRole: adminAuthMiddleware.requireRole.bind(adminAuthMiddleware),
     logAuditAction: adminAuthMiddleware.logAuditAction.bind(adminAuthMiddleware),
-    auditAction: adminAuthMiddleware.auditAction.bind(adminAuthMiddleware)
+    auditAction: adminAuthMiddleware.auditAction.bind(adminAuthMiddleware),
+    // 额外导出令牌工具以便单测直接调用
+    generateToken: adminAuthMiddleware.generateToken.bind(adminAuthMiddleware),
+    verifyToken: adminAuthMiddleware.verifyToken.bind(adminAuthMiddleware)
 };

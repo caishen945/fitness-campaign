@@ -1,0 +1,89 @@
+{
+  "basic": {
+    "pageLoad": {
+      "status": "success",
+      "statusCode": 200,
+      "title": "found"
+    },
+    "fileAccess": {
+      "/src/index.js": "success",
+      "/src/App.js": "success",
+      "/pages/Home.js": "success",
+      "/pages/Login.js": "success",
+      "/style.css": "success"
+    }
+  },
+  "navigation": {
+    "error": "page.waitForTimeout is not a function"
+  },
+  "auth": {
+    "error": "page.waitForTimeout is not a function"
+  },
+  "userProfile": {},
+  "challenge": {},
+  "wallet": {},
+  "checkin": {},
+  "achievements": {},
+  "pkChallenge": {},
+  "team": {},
+  "notifications": {},
+  "leaderboard": {},
+  "apiIntegration": {
+    "connectivity": "error",
+    "endpoints": {
+      "认证验证": {
+        "status": "error",
+        "error": 401
+      },
+      "VIP等级": {
+        "status": "reachable",
+        "statusCode": 200
+      },
+      "排行榜": {
+        "status": "error",
+        "error": 404
+      }
+    }
+  },
+  "responsive": {
+    "viewports": {
+      "手机竖屏": {
+        "rendered": "error",
+        "error": "page.waitForTimeout is not a function"
+      },
+      "平板竖屏": {
+        "rendered": "error",
+        "error": "page.waitForTimeout is not a function"
+      },
+      "桌面": {
+        "rendered": "error",
+        "error": "page.waitForTimeout is not a function"
+      },
+      "大屏桌面": {
+        "rendered": "error",
+        "error": "page.waitForTimeout is not a function"
+      }
+    }
+  },
+  "errorHandling": {
+    "invalidEndpoint": {
+      "status": "expected_error",
+      "statusCode": 404
+    },
+    "timeout": {
+      "status": "expected_error",
+      "type": "other"
+    }
+  },
+  "issues": [
+    "导航功能测试失败",
+    "认证系统测试失败"
+  ],
+  "summary": {
+    "total": 15,
+    "passed": 5,
+    "failed": 10,
+    "issues": 2,
+    "timestamp": "2025-09-07T04:46:02.380Z"
+  }
+}

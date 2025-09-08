@@ -28,7 +28,7 @@
 
 ### 保留的核心文件
 ✅ **README.md** - 项目主文档
-✅ **backend/start-server-simple.js** - 主要服务器文件
+✅ **backend/server.js** - 主要服务器文件
 ✅ **backend/test-complete-system.js** - 完整系统测试
 ✅ **backend/env.template** - 环境变量模板
 ✅ **package.json** - 项目配置
@@ -57,7 +57,7 @@ FitChallenge/
 ├── VERSION_MANAGEMENT.md    # 版本管理
 ├── 数据库连接指南.md        # 数据库指南
 ├── backend/                 # 后端代码
-│   ├── start-server-simple.js    # 主要服务器
+│   ├── server.js                  # 主要服务器
 │   ├── test-complete-system.js   # 完整系统测试
 │   ├── server.js                  # 主服务器
 │   ├── env.template              # 环境变量模板

@@ -1,0 +1,205 @@
+{
+  "timestamp": "2025-09-07T17:00:30.259Z",
+  "url": "http://127.0.0.1:8080/",
+  "navigationMs": 1747,
+  "root": {
+    "exists": true,
+    "innerHTMLLength": 6546,
+    "innerTextLength": 182,
+    "sample": "<div class=\"app\">\n                    \n            <header>\n                <div class=\"container\">\n                    <nav style=\"justify-content: center; padding: 16px 0;\">\n                        "
+  },
+  "console": [
+    {
+      "type": "log",
+      "text": "[Telegram.WebView] > postEvent web_app_set_header_color JSHandle@object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "[Telegram.WebView] > postEvent web_app_set_bottom_bar_color JSHandle@object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "[Telegram.WebView] > postEvent web_app_request_theme ",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "[Telegram.WebView] > postEvent web_app_request_viewport ",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "[Telegram.WebView] > postEvent web_app_request_safe_area ",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "[Telegram.WebView] > postEvent web_app_request_content_safe_area ",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "主应用开始初始化...",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "导入的App实例: JSHandle@function",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "App实例类型: function",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "App实例构造函数: Function",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "📡 注册事件监听器: telegramAuthAlternative",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "✅ 核心页面初始化完成",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "使用的app实例: JSHandle@object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "app实例类型: object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "app实例构造函数: App",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "App实例已暴露到全局: window.globalAppInstance",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "验证全局实例: JSHandle@object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "全局实例类型: object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "全局实例构造函数: App",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "全局实例setToken方法: function",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "全局实例setUser方法: function",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "全局实例navigate方法: function",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "🚀 FitChallenge App 开始初始化...",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "🎯 模态框初始状态: JSHandle@object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "🎯 强制隐藏模态框",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "📋 步骤1: 恢复认证状态",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "🔍 开始恢复认证状态...",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "localStorage中的token: 不存在",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "localStorage中的user: 不存在",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "❌ localStorage中没有认证信息",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "恢复后的App状态 - user:  token: 不存在",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "📋 步骤2: 加载通知",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "📋 步骤3: 设置事件监听器",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "📋 步骤4: 渲染应用",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "Home 页面渲染: JSHandle@object",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "✅ FitChallenge App 初始化完成",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "最终App状态 - user:  token: 不存在",
+      "location": null
+    },
+    {
+      "type": "log",
+      "text": "🎯 初始化完成后模态框状态: JSHandle@object",
+      "location": null
+    }
+  ],
+  "pageErrors": [],
+  "requestFailures": []
+}

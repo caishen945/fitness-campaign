@@ -6,9 +6,9 @@ class UserService {
         // 不再使用内存存储，直接使用数据库
     }
 
-    // 创建用户（实际在UserMySQL模型中实现）
-    async createUser(email, password) {
-        return await UserMySQL.create(email, password);
+    // 创建用户（转发到模型，签名：username, email, password）
+    async createUser(username, email, password) {
+        return await UserMySQL.create(username, email, password);
     }
 
     // 根据邮箱查找用户
@@ -97,12 +97,12 @@ class UserService {
         }
     }
 
-    // 搜索用户
+    // 搜索用户（用户名或邮箱）
     async searchUsers(searchQuery, limit = 20, offset = 0) {
         try {
             const [rows] = await pool.execute(
-                'SELECT * FROM users WHERE email LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
-                [`%${searchQuery}%`, limit, offset]
+                'SELECT * FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?',
+                [`%${searchQuery}%`, `%${searchQuery}%`, limit, offset]
             );
             return rows;
         } catch (error) {

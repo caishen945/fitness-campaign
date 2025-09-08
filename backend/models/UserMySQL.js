@@ -3,6 +3,23 @@ const bcrypt = require('bcryptjs');
 const { pool } = require('../config/database');
 
 class UserMySQL {
+    // 创建邮箱+用户名用户
+    static async create(username, email, password) {
+        try {
+            const saltRounds = 10;
+            const passwordHash = await bcrypt.hash(password, saltRounds);
+
+            const [result] = await pool.execute(
+                'INSERT INTO users (username, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
+                [username, email, passwordHash]
+            );
+
+            return await this.findById(result.insertId);
+        } catch (error) {
+            console.error('创建用户失败:', error);
+            throw error;
+        }
+    }
     static async findByEmail(email) {
         try {
             console.log('UserMySQL.findByEmail 被调用，email:', email);
@@ -136,6 +153,7 @@ class UserMySQL {
     static mapUserData(row) {
         const user = {
             id: row.id,
+            username: row.username,
             email: row.email,
             password_hash: row.password_hash,
             trc20Wallet: row.trc20_wallet,
@@ -177,6 +195,7 @@ class UserMySQL {
             toJSON: function() {
                 return {
                     id: this.id,
+                    username: this.username,
                     email: this.email,
                     trc20Wallet: this.trc20Wallet,
                     isActive: this.isActive,

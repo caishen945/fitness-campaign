@@ -111,7 +111,6 @@ class UserManagement {
                             <thead style="background: #f8f9fa;">
                                 <tr>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">用户ID</th>
-                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">显示名称</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">邮箱</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">Telegram</th>
                                     <th style="padding: 1rem; text-align: left; border-bottom: 1px solid #dee2e6;">状态</th>
@@ -123,7 +122,7 @@ class UserManagement {
                             </thead>
                             <tbody id="userTableBody">
                                 <tr>
-                                    <td colspan="9" style="padding: 2rem; text-align: center; color: #6c757d;">
+                                    <td colspan="8" style="padding: 2rem; text-align: center; color: #6c757d;">
                                         <div id="loadingMessage">加载中...</div>
                                     </td>
                                 </tr>
@@ -300,7 +299,7 @@ class UserManagement {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="padding: 2rem; text-align: center; color: #6c757d;">
+                    <td colspan="8" style="padding: 2rem; text-align: center; color: #6c757d;">
                         <div style="margin-bottom: 1rem;">网络连接失败</div>
                         <button id="retryLoadUsers" class="btn btn-primary">
                             <i class="fas fa-sync-alt"></i> 重试
@@ -336,7 +335,7 @@ class UserManagement {
             console.log('📭 用户数据为空，显示空状态');
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="padding: 2rem; text-align: center; color: #6c757d;">
+                    <td colspan="8" style="padding: 2rem; text-align: center; color: #6c757d;">
                         暂无用户数据
                     </td>
                 </tr>
@@ -348,10 +347,6 @@ class UserManagement {
         tbody.innerHTML = this.users.map(user => `
             <tr style="border-bottom: 1px solid #dee2e6;">
                 <td style="padding: 1rem;">${user.id}</td>
-                <td style="padding: 1rem;">
-                    <div style="font-weight: 500;">${this.getDisplayName(user)}</div>
-                    ${user.first_name || user.last_name ? `<div style="font-size: 0.8rem; color: #6c757d;">${user.first_name || ''} ${user.last_name || ''}`.trim() + '</div>' : ''}
-                </td>
                 <td style="padding: 1rem;">${user.email || '-'}</td>
                 <td style="padding: 1rem;">
                     ${user.telegram_id ? `

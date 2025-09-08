@@ -81,6 +81,8 @@ class AdminLogin {
                     const resp = await fetch(`${base}/api/admin/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        mode: 'cors',
+                        credentials: 'include',
                         body: JSON.stringify({ username, password })
                     });
                     const result = await resp.json();

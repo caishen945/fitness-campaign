@@ -204,24 +204,31 @@ function loadSystemSettingsPage() {
 
 // 添加紧急刷新按钮
 function addEmergencyRefreshButton() {
-    const refreshButton = document.createElement('div');
-    refreshButton.id = 'emergency-refresh-btn';
-    refreshButton.innerHTML = `
-        <button class="btn btn-danger" style="
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            border-radius: 50px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        " onclick="window.emergencyRefresh()">
-            <i class="fas fa-sync-alt me-2"></i>
-            紧急刷新
+    // 注入所需样式（幂等）
+    ensureEmergencyRefreshStyles();
+
+    // 移除旧版按钮容器（如存在）
+    const legacy = document.getElementById('emergency-refresh-btn');
+    if (legacy && legacy.parentNode) {
+        legacy.parentNode.removeChild(legacy);
+    }
+
+    // 幂等：若已存在新容器则不重复创建
+    if (document.getElementById('emergency-refresh-container')) {
+        console.log('ℹ️ 紧急刷新按钮已存在，跳过创建');
+        return;
+    }
+
+    const container = document.createElement('div');
+    container.id = 'emergency-refresh-container';
+    container.innerHTML = `
+        <button id="emergency-refresh-button" class="btn btn-danger" aria-label="紧急刷新" title="紧急刷新" onclick="window.emergencyRefresh()">
+            <i class="fas fa-bolt icon"></i>
+            <span>紧急刷新</span>
         </button>
     `;
-    
-    document.body.appendChild(refreshButton);
+
+    document.body.appendChild(container);
     console.log('✅ 紧急刷新按钮已添加');
 }
 
@@ -237,4 +244,49 @@ setTimeout(() => {
 
 console.log('✅ 紧急修复脚本已加载');
 
+
+// 注入紧急刷新按钮CSS样式（仅注入一次）
+function ensureEmergencyRefreshStyles() {
+    if (document.getElementById('emergency-refresh-style')) {
+        return;
+    }
+    const style = document.createElement('style');
+    style.id = 'emergency-refresh-style';
+    style.textContent = `
+        #emergency-refresh-container {
+            position: fixed;
+            right: 0;
+            bottom: 20px;
+            z-index: 1050;
+            transform: translateX(calc(100% - 12px));
+            transition: transform 0.25s ease;
+        }
+
+        #emergency-refresh-container:hover,
+        #emergency-refresh-container:focus-within {
+            transform: translateX(0);
+        }
+
+        #emergency-refresh-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 160px;
+            max-width: 220px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 24px 0 0 24px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        #emergency-refresh-button .icon {
+            font-size: 18px;
+        }
+    `;
+    document.head.appendChild(style);
+}
 

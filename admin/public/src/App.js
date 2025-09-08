@@ -7,13 +7,14 @@ import AdminLogin from './pages/Login.js';
 import UserManagement from './pages/UserManagement.js'; // Added import for UserManagement
 import AchievementManagement from './pages/AchievementManagement.js';
 import TeamManagement from './pages/TeamManagement.js';
+import NotificationManagement from './pages/NotificationManagement.js';
 
 class AdminApp {
     constructor() {
         this.currentPage = 'login'; // 默认显示登录页面
-        this.isAuthenticated = false; // 认证状�?        this.isLoading = false; // 加载状�?        this.pageCache = new Map(); // 页面缓存
+        this.isAuthenticated = false; // 认证状�?        this.isLoading = false; // 加载状�?        this.pageCache = new Map(); // 页面缓存
         
-        // 页面对象 - 所有管理页面都在这里定�?        this.pages = {
+        // 页面对象 - 所有管理页面都在这里定�?        this.pages = {
             // 登录页面
             login: {
                 instance: null,
@@ -30,10 +31,10 @@ class AdminApp {
                 }
             },
             
-            // 仪表盘页�?            dashboard: {
+            // 仪表盘页�?            dashboard: {
                 render: () => `
                     <div class="dashboard-page">
-                        <h1 style="margin-bottom: 1.5rem; color: #2c3e50;">仪表�?/h1>
+                        <h1 style="margin-bottom: 1.5rem; color: #2c3e50;">仪表�?/h1>
                         <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                             <div class="stat-card" style="background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                                 <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">👥</div>
@@ -43,12 +44,12 @@ class AdminApp {
                             <div class="stat-card" style="background: linear-gradient(135deg, #4cc9f0, #4895ef); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                                 <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">🏆</div>
                                 <div class="stat-value" style="font-size: 2rem; font-weight: bold;">8,742,105</div>
-                                <div class="stat-label" style="font-size: 1.1rem;">总步�?/div>
+                                <div class="stat-label" style="font-size: 1.1rem;">总步�?/div>
                             </div>
                             <div class="stat-card" style="background: linear-gradient(135deg, #f8961e, #f3722c); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                                 <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">💰</div>
                                 <div class="stat-value" style="font-size: 2rem; font-weight: bold;">24,580</div>
-                                <div class="stat-label" style="font-size: 1.1rem;">总奖励发�?/div>
+                                <div class="stat-label" style="font-size: 1.1rem;">总奖励发�?/div>
                             </div>
                             <div class="stat-card" style="background: linear-gradient(135deg, #f94144, #f9844a); color: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                                 <div class="stat-icon" style="font-size: 2rem; margin-bottom: 1rem;">🚩</div>
@@ -164,7 +165,22 @@ class AdminApp {
                 instance: null,
                 render: function() {
                     if (!this.instance) {
-                        // 修复：传递AdminApp实例而不是页面对�?                        this.instance = new PKChallengeManagement(window.adminApp);
+                        // 修复：传递AdminApp实例而不是页面对�?                        this.instance = new PKChallengeManagement(window.adminApp);
+                    }
+                    return this.instance.render();
+                },
+                afterRender: function() {
+                    if (this.instance) {
+                        return this.instance.afterRender();
+                    }
+                }
+            },
+            // 通知管理页面
+            notifications: {
+                instance: null,
+                render: function() {
+                    if (!this.instance) {
+                        this.instance = new NotificationManagement(window.adminApp);
                     }
                     return this.instance.render();
                 },
@@ -179,7 +195,7 @@ class AdminApp {
         this.user = null;
         this.token = null;
         
-        // 性能优化：防抖搜�?        this.searchDebounceTimer = null;
+        // 性能优化：防抖搜�?        this.searchDebounceTimer = null;
         this.lastSearchTime = 0;
     }
     
@@ -193,23 +209,23 @@ class AdminApp {
         this.preloadCommonPages();
     }
     
-    // 预加载常用页�?    preloadCommonPages() {
+    // 预加载常用页�?    preloadCommonPages() {
         setTimeout(() => {
             if (this.isAuthenticated) {
-                console.log('🚀 预加载常用页�?..');
-                // 预加载仪表盘和用户管理页�?                this.preloadPage('dashboard');
+                console.log('🚀 预加载常用页�?..');
+                // 预加载仪表盘和用户管理页�?                this.preloadPage('dashboard');
                 this.preloadPage('users');
             }
         }, 1000);
     }
     
-    // 预加载页�?    preloadPage(pageName) {
+    // 预加载页�?    preloadPage(pageName) {
         if (this.pages[pageName] && !this.pages[pageName].instance) {
             try {
                 this.pages[pageName].render();
-                console.log(`�?页面预加载完�? ${pageName}`);
+                console.log(`�?页面预加载完�? ${pageName}`);
         } catch (error) {
-                console.log(`⚠️ 页面预加载失�? ${pageName}`, error);
+                console.log(`⚠️ 页面预加载失�? ${pageName}`, error);
             }
         }
     }
@@ -238,7 +254,7 @@ class AdminApp {
                 } else {
                     // 普通字符串格式，创建简单的token数据
                     tokenData = {
-                        exp: Date.now() + (24 * 60 * 60 * 1000), // 24小时后过�?                        username: user.username || 'admin'
+                        exp: Date.now() + (24 * 60 * 60 * 1000), // 24小时后过�?                        username: user.username || 'admin'
                     };
                 }
                 
@@ -253,7 +269,7 @@ class AdminApp {
                         this.user = user;
                         console.log('管理员已登录:', user.username);
                     } else {
-                        console.log('Token已过期，清除登录状�?);
+                        console.log('Token已过期，清除登录状�?);
                         this.clearAuth();
                     }
                 } else {
@@ -304,7 +320,7 @@ class AdminApp {
                 this.navigate(e.target.getAttribute('data-page'));
             }
             
-            // 退出登录按�?            if (e.target.matches('#logoutBtn') || e.target.closest('#logoutBtn')) {
+            // 退出登录按�?            if (e.target.matches('#logoutBtn') || e.target.closest('#logoutBtn')) {
                 e.preventDefault();
                 this.logout();
             }
@@ -340,10 +356,10 @@ class AdminApp {
     }
     
     logout() {
-        // 清除认证状�?        this.clearAuth();
+        // 清除认证状�?        this.clearAuth();
         
-        // 显示退出成功消�?        if (this.showToast) {
-            this.showToast('已成功退出登�?, 'success');
+        // 显示退出成功消�?        if (this.showToast) {
+            this.showToast('已成功退出登�?, 'success');
         }
         
         // 重新渲染页面
@@ -351,24 +367,24 @@ class AdminApp {
     }
 
     navigate(page) {
-        console.log('导航到页�?', page, '当前认证状�?', this.isAuthenticated);
+        console.log('导航到页�?', page, '当前认证状�?', this.isAuthenticated);
         
-        // 检查认证状�?        if (!this.isAuthenticated && page !== 'login') {
+        // 检查认证状�?        if (!this.isAuthenticated && page !== 'login') {
             console.log('未登录，重定向到登录页面');
             this.currentPage = 'login';
             this.render();
             return;
         }
         
-        // 性能优化：显示加载状�?        if (page !== this.currentPage) {
+        // 性能优化：显示加载状�?        if (page !== this.currentPage) {
             this.showLoadingState();
         }
         
         this.currentPage = page;
-        console.log('设置当前页面�?', this.currentPage);
+        console.log('设置当前页面�?', this.currentPage);
         this.render();
         
-        // 如果当前页面有afterRender方法，则执行�?        if (this.pages[this.currentPage] && typeof this.pages[this.currentPage].afterRender === 'function') {
+        // 如果当前页面有afterRender方法，则执行�?        if (this.pages[this.currentPage] && typeof this.pages[this.currentPage].afterRender === 'function') {
             setTimeout(() => {
                 this.pages[this.currentPage].afterRender();
                 this.hideLoadingState();
@@ -378,7 +394,7 @@ class AdminApp {
         }
     }
     
-    // 显示加载状�?    showLoadingState() {
+    // 显示加载状�?    showLoadingState() {
         this.isLoading = true;
         const loadingEl = document.getElementById('loading-indicator');
         if (loadingEl) {
@@ -386,7 +402,7 @@ class AdminApp {
         }
     }
     
-    // 隐藏加载状�?    hideLoadingState() {
+    // 隐藏加载状�?    hideLoadingState() {
         this.isLoading = false;
         const loadingEl = document.getElementById('loading-indicator');
         if (loadingEl) {
@@ -400,16 +416,16 @@ class AdminApp {
 
         appElement.innerHTML = `
             <div class="admin-app" style="display: flex; min-height: 100vh;">
-                <!-- 加载指示�?-->
+                <!-- 加载指示�?-->
                 <div id="loading-indicator" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 10px;">
                     <div style="text-align: center;">
                         <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-                        <div>加载�?..</div>
+                        <div>加载�?..</div>
                     </div>
                 </div>
                 
                 ${this.isAuthenticated ? `
-                <!-- 左侧导航�?-->
+                <!-- 左侧导航�?-->
                 <div class="sidebar" style="width: 240px; background: #2c3e50; color: white; box-shadow: 2px 0 5px rgba(0,0,0,0.1); position: fixed; height: 100vh; overflow-y: auto;">
                     <div class="logo" style="font-size: 1.5rem; font-weight: bold; padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <i class="fas fa-cogs"></i> FitChallenge
@@ -417,18 +433,18 @@ class AdminApp {
                     <div class="user-info" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <div style="color: #ecf0f1; font-size: 0.9rem;">
                             <i class="fas fa-user" style="margin-right: 8px;"></i>
-                            ${this.user ? this.user.username : '管理�?}
+                            ${this.user ? this.user.username : '管理�?}
                     </div>
                         <button id="logoutBtn" class="btn btn-sm btn-outline-light mt-2" style="width: 100%; font-size: 0.8rem;">
                             <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>
-                            退出登�?                        </button>
+                            退出登�?                        </button>
                 </div>
                     <nav style="padding: 1rem 0;">
                         <ul class="nav-links" style="list-style: none; padding: 0; margin: 0;">
                             <li style="margin-bottom: 0.5rem;">
                                 <a href="#" data-page="dashboard" class="${this.currentPage === 'dashboard' ? 'active' : ''}" 
                                    style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'dashboard' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'dashboard' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
-                                   <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表�?                                   <small style="float: right; opacity: 0.7;">Ctrl+1</small>
+                                   <i class="fas fa-tachometer-alt" style="margin-right: 10px;"></i> 仪表�?                                   <small style="float: right; opacity: 0.7;">Ctrl+1</small>
                                 </a>
                             </li>
                             <li style="margin-bottom: 0.5rem;">
@@ -473,6 +489,12 @@ class AdminApp {
                                 </a>
                             </li>
                             <li style="margin-bottom: 0.5rem;">
+                                <a href="#" data-page="notifications" class="${this.currentPage === 'notifications' ? 'active' : ''}" 
+                                   style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'notifications' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'notifications' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
+                                   <i class="fas fa-bell" style="margin-right: 10px;"></i> 通知管理
+                                </a>
+                            </li>
+                            <li style="margin-bottom: 0.5rem;">
                                 <a href="#" data-page="team" class="${this.currentPage === 'team' ? 'active' : ''}" 
                                    style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; display: block; border-left: 4px solid ${this.currentPage === 'team' ? '#4cc9f0' : 'transparent'}; background: ${this.currentPage === 'team' ? 'rgba(255,255,255,0.1)' : 'transparent'};">
                                    <i class="fas fa-users" style="margin-right: 10px;"></i> 团队管理
@@ -484,9 +506,9 @@ class AdminApp {
             </div>
                 ` : ''}
                 
-                <!-- 主内容区�?-->
+                <!-- 主内容区�?-->
                 <div class="main-content" style="flex: 1; margin-left: ${this.isAuthenticated ? '240px' : '0'}; padding: 2rem; background: #f8f9fa; min-height: 100vh;">
-                    ${this.pages[this.currentPage] ? this.pages[this.currentPage].render() : '<div>页面不存�?/div>'}
+                    ${this.pages[this.currentPage] ? this.pages[this.currentPage].render() : '<div>页面不存�?/div>'}
                 </div>
             </div>
             

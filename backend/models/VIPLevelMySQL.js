@@ -15,13 +15,13 @@ class VIPLevelMySQL {
         this.name = data.name || '';
         this.description = data.description || '';
         this.depositAmount = parseFloat(data.depositAmount || data.deposit_amount || 0);
-        this.stepTarget = parseInt(data.stepTarget || data.step_target || 0);
+        this.stepTarget = parseFloat(data.stepTarget || data.step_target || 0);
         this.rewardAmount = parseFloat(data.rewardAmount || data.reward_amount || 0);
         this.maxChallenges = parseInt(data.maxChallenges || data.max_challenges || 1);
         this.duration = parseInt(data.duration || 30); // 默认30天
         this.icon = data.icon || 'crown';
         this.color = data.color || '#FFD700';
-        this.cancelDeductRatio = parseFloat(data.cancelDeductRatio || data.cancel_deduct_ratio || 0.1);
+        this.cancelDeductRatio = parseFloat(data.cancelDeductRatio || data.cancel_deduct_ratio || 1.0);
         this.cancelRewardRatio = parseFloat(data.cancelRewardRatio || data.cancel_reward_ratio || 0);
         this.isActive = data.isActive !== undefined ? data.isActive : (data.is_active !== undefined ? data.is_active : true);
         this.createdAt = data.createdAt || data.created_at || new Date();
@@ -50,7 +50,7 @@ class VIPLevelMySQL {
             name: row.name,
             description: row.description,
             depositAmount: parseFloat(row.deposit_amount) || 0,
-            stepTarget: parseInt(row.step_target) || 0,
+            stepTarget: parseFloat(row.step_target) || 0,
             rewardAmount: parseFloat(row.reward_amount) || 0,
             maxChallenges: parseInt(row.max_challenges) || 1,
             duration: parseInt(row.duration) || 30,

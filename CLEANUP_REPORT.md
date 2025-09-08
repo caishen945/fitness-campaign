@@ -189,7 +189,7 @@
 
 ### 保留的核心文件
 1. **README.md** - 项目主文档
-2. **start-server-simple.js** - 主要服务器文件
+2. **server.js** - 主要服务器文件
 3. **test-complete-system.js** - 完整系统测试
 4. **package.json** - 项目配置
 5. **env.template** - 环境变量模板
@@ -222,7 +222,7 @@ FitChallenge/
 ├── package.json              # 项目配置
 ├── .gitignore               # Git忽略文件
 ├── backend/                 # 后端代码
-│   ├── start-server-simple.js    # 主要服务器
+│   ├── server.js                  # 主要服务器
 │   ├── test-complete-system.js   # 完整系统测试
 │   ├── env.template              # 环境变量模板
 │   ├── package.json              # 后端配置
