@@ -1,21 +1,38 @@
 const { query, transaction } = require('../config/database');
 const VIPChallenge = require('../models/VIPChallenge');
+const logger = require('../utils/logger');
+const { isChallengeTimeoutEnabled, getChallengeTimeoutIntervalMs } = require('../config/featureFlags');
 
 class ChallengeTimeoutService {
     constructor() {
         this.isRunning = false;
         this.checkInterval = 5 * 60 * 1000; // 5分钟检查一次
+        this.timerId = null;
+        this.lastRunAt = null;
+        this.lastSuccessAt = null;
+        this.lastErrorAt = null;
+        this.lastRunError = null;
     }
 
     // 启动超时检查服务
     start() {
         if (this.isRunning) {
-            console.log('挑战超时检查服务已在运行中');
+            logger.info('挑战超时检查服务已在运行中');
             return;
         }
 
+        if (!isChallengeTimeoutEnabled()) {
+            logger.info('挑战超时检查服务未启用（CHALLENGE_TIMEOUT_ENABLED=false），跳过启动');
+            return;
+        }
+
+        const intervalFromEnv = getChallengeTimeoutIntervalMs();
+        if (Number.isFinite(intervalFromEnv) && intervalFromEnv > 0) {
+            this.checkInterval = intervalFromEnv;
+        }
+
         this.isRunning = true;
-        console.log('🚀 启动挑战超时检查服务');
+        logger.info('🚀 启动挑战超时检查服务');
         
         this.runTimeoutCheck();
         this.scheduleNextCheck();
@@ -24,14 +41,23 @@ class ChallengeTimeoutService {
     // 停止超时检查服务
     stop() {
         this.isRunning = false;
-        console.log('🛑 停止挑战超时检查服务');
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
+        logger.info('🛑 停止挑战超时检查服务');
     }
 
     // 安排下次检查
     scheduleNextCheck() {
         if (!this.isRunning) return;
 
-        setTimeout(() => {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
+
+        this.timerId = setTimeout(() => {
             this.runTimeoutCheck();
             this.scheduleNextCheck();
         }, this.checkInterval);
@@ -40,18 +66,23 @@ class ChallengeTimeoutService {
     // 运行超时检查
     async runTimeoutCheck() {
         try {
-            console.log('⏰ 开始检查超时挑战...');
+            this.lastRunAt = new Date().toISOString();
+            logger.info('⏰ 开始检查超时挑战...');
             
             const expiredChallenges = await this.findExpiredChallenges();
-            console.log(`发现 ${expiredChallenges.length} 个超时挑战`);
+            logger.info(`发现 ${expiredChallenges.length} 个超时挑战`);
             
             for (const challenge of expiredChallenges) {
                 await this.processExpiredChallenge(challenge);
             }
             
-            console.log('✅ 超时挑战检查完成');
+            this.lastSuccessAt = new Date().toISOString();
+            this.lastRunError = null;
+            logger.info('✅ 超时挑战检查完成');
         } catch (error) {
-            console.error('❌ 超时挑战检查失败:', error);
+            this.lastErrorAt = new Date().toISOString();
+            this.lastRunError = error?.message || String(error);
+            logger.error('❌ 超时挑战检查失败:', error);
         }
     }
 
@@ -76,7 +107,7 @@ class ChallengeTimeoutService {
     async processExpiredChallenge(challenge) {
         try {
             await transaction(async (connection) => {
-                console.log(`处理超时挑战 ID: ${challenge.id}, 用户: ${challenge.userId}`);
+                logger.info(`处理超时挑战 ID: ${challenge.id}, 用户: ${challenge.userId}`);
 
                 // 检查挑战状态
                 if (challenge.currentConsecutiveDays >= challenge.requiredConsecutiveDays) {
@@ -91,15 +122,15 @@ class ChallengeTimeoutService {
                 }
             });
             
-            console.log(`✅ 超时挑战 ${challenge.id} 处理完成`);
+            logger.info(`✅ 超时挑战 ${challenge.id} 处理完成`);
         } catch (error) {
-            console.error(`❌ 处理超时挑战 ${challenge.id} 失败:`, error);
+            logger.error(`❌ 处理超时挑战 ${challenge.id} 失败:`, error);
         }
     }
 
     // 完成挑战
     async completeChallenge(connection, challenge) {
-        console.log(`🎉 挑战 ${challenge.id} 完成，发放最终奖励`);
+        logger.info(`🎉 挑战 ${challenge.id} 完成，发放最终奖励`);
         
         // 更新挑战状态
         await connection.execute(`
@@ -134,7 +165,7 @@ class ChallengeTimeoutService {
 
     // 处理部分失败
     async handlePartialFailure(connection, challenge) {
-        console.log(`⚠️ 挑战 ${challenge.id} 部分失败，退还部分押金`);
+        logger.info(`⚠️ 挑战 ${challenge.id} 部分失败，退还部分押金`);
         
         const refundAmount = parseFloat((challenge.depositAmount * challenge.partialRefundRatio).toFixed(2));
         const deductAmount = challenge.depositAmount - refundAmount;
@@ -174,7 +205,7 @@ class ChallengeTimeoutService {
 
     // 处理完全失败
     async handleCompleteFailure(connection, challenge) {
-        console.log(`❌ 挑战 ${challenge.id} 完全失败，扣除全部押金`);
+        logger.info(`❌ 挑战 ${challenge.id} 完全失败，扣除全部押金`);
         
         // 更新挑战状态
         await connection.query(`
@@ -201,8 +232,20 @@ class ChallengeTimeoutService {
 
     // 手动触发超时检查
     async manualCheck() {
-        console.log('🔍 手动触发超时检查');
+        logger.info('🔍 手动触发超时检查');
         await this.runTimeoutCheck();
+    }
+
+    // 设置检查间隔（毫秒）并重新调度
+    setCheckInterval(ms) {
+        const parsed = Number(ms);
+        if (!Number.isFinite(parsed) || parsed <= 0) {
+            throw new Error('intervalMs 必须为正数');
+        }
+        this.checkInterval = parsed;
+        if (this.isRunning) {
+            this.scheduleNextCheck();
+        }
     }
 
     // 获取服务状态
@@ -210,7 +253,10 @@ class ChallengeTimeoutService {
         return {
             isRunning: this.isRunning,
             checkInterval: this.checkInterval,
-            lastCheck: new Date().toISOString()
+            lastRunAt: this.lastRunAt,
+            lastSuccessAt: this.lastSuccessAt,
+            lastErrorAt: this.lastErrorAt,
+            lastRunError: this.lastRunError
         };
     }
 }

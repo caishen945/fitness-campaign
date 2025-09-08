@@ -147,20 +147,31 @@ class AdminLogger {
 
     async sendToBackend(logEntry) {
         try {
-            // 使用统一的API配置
             const config = window.API_CONFIG || { baseUrl: 'http://localhost:3000' };
-            fetch(`${config.baseUrl}/api/logs/admin`, {
+            const url = `${config.baseUrl}/api/logs/admin`;
+
+            // 优先使用 sendBeacon，避免预检并在页面卸载时可靠发送
+            const payload = JSON.stringify(logEntry);
+            const beaconSupported = typeof navigator.sendBeacon === 'function';
+            if (beaconSupported) {
+                const blob = new Blob([payload], { type: 'application/json' });
+                navigator.sendBeacon(url, blob);
+                return;
+            }
+
+            // 回退到 fetch，避免使用 Authorization 头以减少预检
+            fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(logEntry)
+                body: payload,
+                keepalive: true
             }).catch(() => {
-                // 静默处理错误，不影响主应�?
+                // 静默处理错误
             });
         } catch (error) {
-            // 静默处理错误，不影响主应�?
+            // 静默处理错误
         }
     }
 
@@ -194,7 +205,7 @@ class AdminLogger {
             
             logDisplay.insertBefore(logElement, logDisplay.firstChild);
             
-            // 只显示最�?0�?
+            // 只显示最�?0�?
             const logEntries = logDisplay.querySelectorAll('.log-entry');
             if (logEntries.length > 50) {
                 logEntries[logEntries.length - 1].remove();
@@ -223,7 +234,7 @@ class AdminLogger {
         this.log('DEBUG', category, message, data);
     }
 
-    // 管理员专用日志方�?
+    // 管理员专用日志方�?
     adminAction(action, target, data) {
         this.info('ADMIN-ACTION', `${action} - ${target}`, {
             action,

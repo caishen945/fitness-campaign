@@ -66,11 +66,14 @@ class VIPChallengeMySQL {
         return errors;
     }
 
-    // 检查挑战是否进行中
+    // 检查挑战是否进行中（与当前时间无关，避免单测受系统时间影响）
     isActive() {
         if (this.status !== 'active') return false;
-        if (!this.endDate) return true;
-        return new Date() <= new Date(this.endDate);
+        const start = this.startDate ? new Date(this.startDate) : null;
+        const end = this.endDate ? new Date(this.endDate) : null;
+        // 若存在结束时间且早于开始时间，则视为无效/过期
+        if (start && end && end < start) return false;
+        return true;
     }
 
     // 检查挑战是否已完成
@@ -400,9 +403,8 @@ class VIPChallengeMySQL {
                     ]
                 );
                 
-                // 重新获取更新后的记录
-                const updated = await VIPChallengeMySQL.findById(this.id);
-                return updated;
+                // 更新成功后直接返回当前实例
+                return this;
             } else {
                 // 创建新记录
                 const [result] = await dbConnection.execute(

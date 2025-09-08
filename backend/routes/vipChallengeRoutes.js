@@ -1,7 +1,7 @@
 const express = require('express');
 const vipChallengeController = require('../controllers/vipChallengeController');
 const { authenticateToken, requireAdmin } = require('../middleware/authMiddleware');
-const vipChallengeModel = require('../models/VIPChallengeMySQL'); // Fixed import path
+const vipChallengeModel = require('../models/VIPChallenge'); // Unified model alias
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-const VIPChallenge = require('../models/VIPChallengeMySQL');
+const VIPChallenge = require('../models/VIPChallenge');
 const VIPLevel = require('../models/VIPLevelMySQL');
 const { pool } = require('../config/database');
 const achievementService = require('../services/achievementService');

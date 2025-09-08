@@ -1,6 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
+// 限制日志请求体大小，避免滥用
+router.use(express.json({ limit: '64kb' }));
+
+// 允许预检快速通过
+router.options('/admin', (req, res) => {
+    res.status(204).end();
+});
+
 // 管理员日志记录端点
 router.post('/admin', async (req, res) => {
     try {

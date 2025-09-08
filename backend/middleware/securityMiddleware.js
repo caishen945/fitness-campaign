@@ -17,6 +17,8 @@ const generalLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // 跳过预检与低价值上报端点，避免放大效应
+    skip: (req) => req.method === 'OPTIONS' || req.path === '/api/logs/admin',
     handler: (req, res) => {
         logger.warn(`速率限制触发 - IP: ${req.ip}, URL: ${req.url}`);
         res.status(429).json({
@@ -55,7 +57,9 @@ const apiLimiter = rateLimit({
         retryAfter: '15分钟'
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    // 跳过预检与低价值上报端点
+    skip: (req) => req.method === 'OPTIONS' || req.path === '/api/logs/admin'
 });
 
 // 安全头配置

@@ -109,6 +109,9 @@
 const express = require('express');
 const { verifyAdminToken } = require('../middleware/adminAuthMiddleware');
 const { pool } = require('../config/database');
+const { isRedisEnabled } = require('../config/featureFlags');
+const { getQueue } = require('../services/notificationQueueService');
+const pushService = require('../services/pushService');
 
 const router = express.Router();
 
@@ -429,12 +432,37 @@ router.get('/status', verifyAdminToken, async (req, res) => {
             uptime: process.uptime()
         };
 
+        // 只读依赖可用性
+        let queues = { enabled: isRedisEnabled(), redisConnected: null };
+        try {
+            if (isRedisEnabled()) {
+                const q = getQueue();
+                // bullmq 没有直接暴露连接状态，这里用启用与否表示
+                queues.redisConnected = true;
+            } else {
+                queues.redisConnected = false;
+            }
+        } catch (e) {
+            queues.redisConnected = false;
+        }
+
+        // 渠道可用性（只读推断）
+        const smtpOk = !!process.env.SMTP_HOST && !!process.env.SMTP_USER;
+        const telegramOk = !!process.env.TELEGRAM_BOT_TOKEN;
+        const pushEnabled = pushService.isEnabled();
+
         res.json({
             success: true,
             data: {
                 database: { status: dbStatus },
                 system: systemInfo,
                 process: processInfo,
+                queues,
+                channels: {
+                    smtp: { ok: smtpOk },
+                    telegram: { ok: telegramOk },
+                    push: { enabled: pushEnabled }
+                },
                 timestamp: new Date().toISOString()
             },
             message: '获取系统状态成功'
@@ -669,7 +697,7 @@ router.post('/maintenance', verifyAdminToken, async (req, res) => {
  *             properties:
  *               newVersion:
  *                 type: string
- *                 description: 新版本号 (例如: 3.2.1)
+ *                 description: "新版本号 (例如: 3.2.1)"
  *                 example: "3.2.1"
  *     responses:
  *       200:

@@ -5,6 +5,7 @@
 
 const redis = require('redis');
 const logger = require('../utils/logger');
+const { isRedisEnabled } = require('../config/featureFlags');
 
 class CacheService {
     constructor() {
@@ -33,6 +34,13 @@ class CacheService {
     
     async initialize() {
         try {
+            if (!isRedisEnabled()) {
+                logger.info('🧰 Redis缓存已禁用（REDIS_ENABLED=false），使用 No-Op 模式');
+                this.client = null;
+                this.isConnected = false;
+                return;
+            }
+
             logger.info('🔧 初始化Redis缓存服务...');
             
             // 创建Redis客户端

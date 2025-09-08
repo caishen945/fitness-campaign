@@ -35,7 +35,7 @@ if not exist "node_modules" (
     npm install
 )
 echo 启动后端服务器 (端口: 3000)...
-start "FitChallenge Backend" cmd /k "node start-server-simple.js"
+start "FitChallenge Backend" cmd /k "node server.js"
 cd ..
 echo ✅ 后端服务器已启动
 echo 访问地址: http://localhost:3000

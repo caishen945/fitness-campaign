@@ -110,47 +110,7 @@ class WalletManagement {
                     <div id="depositsContent" class="tab-content" style="display: none;">
                         <h3 style="margin-bottom: 1rem; color: #2c3e50;">充值管理</h3>
                         
-                        <!-- 充值操作表单 -->
-                        <div class="deposit-form" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-                            <h4 style="margin-bottom: 1rem;">管理员充值</h4>
-                            <form id="depositForm">
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                                    <div>
-                                        <label for="depositUserId" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">选择用户：</label>
-                                        <select id="depositUserId" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                            <option value="">请选择用户</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="depositAmount" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">充值金额：</label>
-                                        <input type="number" id="depositAmount" step="0.01" min="0.01" required 
-                                               style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="请输入金额">
-                                    </div>
-                                    <div>
-                                        <label for="paymentMethod" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">支付方式：</label>
-                                        <select id="paymentMethod" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                            <option value="admin">管理员充值</option>
-                                            <option value="bank">银行转账</option>
-                                            <option value="usdt">USDT转账</option>
-                                            <option value="manual">手动调整</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="trxHash" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">交易哈希：</label>
-                                        <input type="text" id="trxHash" 
-                                               style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="可选">
-                                    </div>
-                                </div>
-                                <div style="margin-bottom: 1rem;">
-                                    <label for="depositDescription" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">充值说明：</label>
-                                    <textarea id="depositDescription" rows="3" 
-                                              style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="请输入充值说明"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-success" style="padding: 0.8rem 2rem;">
-                                    <i class="fas fa-plus-circle"></i> 确认充值
-                                </button>
-                            </form>
-                        </div>
+                        
                         
                         <!-- 搜索框 -->
                         <div class="search-section" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 2rem;">

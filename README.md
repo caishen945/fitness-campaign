@@ -91,11 +91,11 @@ cp env.template .env
 # 编辑 .env 文件，配置数据库连接等信息
 ```
 
-6. **启动服务**
+6. **启动服务（跨平台手动）**
 ```bash
 # 启动后端服务
 cd backend
-node start-server-simple.js
+node server.js
 
 # 启动前端服务
 cd frontend
@@ -111,6 +111,21 @@ npm run dev
 - 前端应用: http://localhost:8080
 - 管理后台: http://localhost:8081
 - API文档: http://localhost:3000/api/docs
+
+### 运维：挑战超时检查服务
+
+后端提供定时处理超时挑战的服务，默认关闭。
+
+- 通过环境变量控制：
+  - `CHALLENGE_TIMEOUT_ENABLED=false`
+  - `CHALLENGE_TIMEOUT_INTERVAL_MS=300000`
+- 健康检查查看状态：`GET /api/health` 的 `services.challengeTimeout`
+- 管理端点（需管理员权限）：
+  - `GET  /api/admin/challenge-timeout/status`
+  - `POST /api/admin/challenge-timeout/start`
+  - `POST /api/admin/challenge-timeout/stop`
+  - `POST /api/admin/challenge-timeout/run-once`
+  - `POST /api/admin/challenge-timeout/config` body: `{ "intervalMs": 60000 }`
 
 ## 🏗️ 系统架构
 
@@ -395,10 +410,15 @@ docker run -d -p 3000:3000 fitchallenge
 
 ## 🧪 测试
 
-### 运行完整系统测试
+### 运行完整系统测试（根目录）
 ```bash
-cd backend
-node test-complete-system.js
+node ./complete-system-test.js          # 宽松模式（Redis 未连仅警告）
+node ./complete-system-test.js --strict # 严格模式（Redis 必须连接）
+```
+
+或使用 npm 脚本：
+```bash
+npm run test:system
 ```
 
 ### 测试覆盖范围

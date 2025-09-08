@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitChallenge - 健康挑战平台</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- 使用图标字体 -->
+    <style>
+        /* 基础图标样式 */
+        .fas {
+            font-family: Arial, sans-serif;
+            font-style: normal;
+            font-weight: normal;
+        }
+        /* 钱包图标 */
+        .fa-wallet:before {
+            content: '💰';
+        }
+        /* 用户图标 */
+        .fa-user:before {
+            content: '👤';
+        }
+        /* 加号图标 */
+        .fa-plus:before {
+            content: '➕';
+        }
+        /* 减号图标 */
+        .fa-minus:before {
+            content: '➖';
+        }
+        /* 主页图标 */
+        .fa-home:before {
+            content: '🏠';
+        }
+        /* 挑战图标 */
+        .fa-trophy:before {
+            content: '🏆';
+        }
+        /* 排行榜图标 */
+        .fa-list:before {
+            content: '📊';
+        }
+    </style>
+    <link rel="stylesheet" href="style.css?v=3.0.2&t=1736490000000">
+    <link rel="stylesheet" href="src/assets/styles/main.css?v=3.0.2&t=1736490000000">
+    <link rel="stylesheet" href="css/achievements.css?v=3.0.2&t=1736490000000">
+    <!-- Telegram WebApp 脚本 -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- API 配置脚本 -->
+    <script type="module" src="config/api-config.js?v=3.0.2&t=1736490000000"></script>
+    <!-- 版本配置脚本 -->
+    <script type="module" src="src/config/version.js?v=3.0.2&t=1736490000000"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- 模态框容器 -->
+    <div id="modal-container" class="modal-container" style="display: none;">
+        <div class="modal">
+            <div class="modal-title"></div>
+            <div class="modal-message"></div>
+            <div class="modal-buttons">
+                <button class="modal-cancel">取消</button>
+                <button class="modal-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="src/index.js?v=3.0.2&t=1736490000000"></script>
+</body>
+</html>

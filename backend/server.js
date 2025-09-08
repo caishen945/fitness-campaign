@@ -49,8 +49,8 @@ const adminTeamRoutes = require('./routes/adminTeamRoutes');
 const exampleRoutes = require('./routes/example-route');
 const app = express();
 const PORT = process.env.PORT || 3000;
-// 固定使用相同的JWT密钥，确保前后端一致
-const JWT_SECRET = 'fitchallenge_secret_key_2025';
+// 使用环境变量中的JWT密钥，确保安全性
+const JWT_SECRET = process.env.JWT_SECRET || 'fitchallenge_secret_key_2025';
 
 // 中间件
 // 安全头设置 - 必须在其他中间件之前
@@ -59,22 +59,27 @@ app.use(securityHeaders);
 // 请求日志记录
 app.use(requestLogger);
 
-// 通用速率限制
-app.use(generalLimiter);
-
-// 配置CORS
-app.use(cors({
-    origin: [
-        'http://localhost:8080', 'http://127.0.0.1:8080',  // 前端
-        'http://localhost:8081', 'http://127.0.0.1:8081',  // 管理后台原端口
-        'http://localhost:8082', 'http://127.0.0.1:8082',  // 管理后台备用端口
-        'http://localhost:8000', 'http://127.0.0.1:8000',  // 兼容旧配置
-        'http://localhost:8001', 'http://127.0.0.1:8001'   // 兼容旧配置
-    ],
+// 配置CORS（需在限流之前，避免预检被限流拦截）
+const corsAllowedOrigins = [
+    'http://localhost:8080', 'http://127.0.0.1:8080',
+    'http://localhost:8081', 'http://127.0.0.1:8081',
+    'http://localhost:8082', 'http://127.0.0.1:8082',
+    'http://localhost:8000', 'http://127.0.0.1:8000',
+    'http://localhost:8001', 'http://127.0.0.1:8001'
+];
+const corsConfig = {
+    origin: corsAllowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
-}));
+};
+app.use(cors(corsConfig));
+
+// 显式处理所有预检请求，快速返回204并带上CORS头
+app.options('*', cors(corsConfig));
+
+// 通用速率限制（置于CORS之后）
+app.use(generalLimiter);
 
 app.use(express.json({ limit: '10mb' })); // 添加请求体大小限制
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -685,6 +690,11 @@ app.use('/api/achievements', achievementRoutes);
 app.use('/api/logs', logRoutes);
 app.use('/api/admin/wallet', adminWalletRoutes);
 app.use('/api/admin/team-statistics', adminTeamRoutes);
+// 新增模板与批次管理路由
+const adminTemplateRoutes = require('./routes/adminTemplateRoutes');
+const adminBatchRoutes = require('./routes/adminBatchRoutes');
+app.use('/api/admin/notification-templates', adminTemplateRoutes);
+app.use('/api/admin/notification-batches', adminBatchRoutes);
 
 // 团队路由
 const teamRoutes = require('./routes/teamRoutes');
@@ -699,6 +709,10 @@ app.use('/api/auth', authRoutes);
 const userProfileRoutes = require('./routes/userProfileRoutes');
 app.use('/api/user', userProfileRoutes);
 
+// 用户通知偏好路由
+const userPreferenceRoutes = require('./routes/userPreferenceRoutes');
+app.use('/api/user/notification-preferences', userPreferenceRoutes);
+
 // 通知系统路由
 const notificationRoutes = require('./routes/notificationRoutes');
 app.use('/api/notifications', notificationRoutes);
@@ -707,21 +721,55 @@ app.use('/api/notifications', notificationRoutes);
 const systemRoutes = require('./routes/systemRoutes');
 app.use('/api/system', systemRoutes);
 
+// 管理员通知管理路由
+const adminNotificationRoutes = require('./routes/adminNotificationRoutes');
+app.use('/api/admin/notifications', adminNotificationRoutes);
+const adminDeliveryRoutes = require('./routes/adminDeliveryRoutes');
+app.use('/api/admin/notification-monitor', adminDeliveryRoutes);
+
+// 管理员挑战超时服务控制路由
+const adminChallengeTimeoutRoutes = require('./routes/adminChallengeTimeoutRoutes');
+app.use('/api/admin/challenge-timeout', adminChallengeTimeoutRoutes);
+
 // 搜索和过滤路由
 const searchRoutes = require('./routes/searchRoutes');
 app.use('/api/search', searchRoutes);
 
 // 健康检查接口（放在所有路由之后，错误处理之前）
 app.get('/api/health', (req, res) => {
+    const { isRedisEnabled } = require('./config/featureFlags');
+    const redisStatus = isRedisEnabled() ? 'connected' : 'disabled';
+    let challengeTimeout = undefined;
+    try {
+        const challengeTimeoutService = require('./services/challengeTimeoutService');
+        challengeTimeout = challengeTimeoutService.getStatus();
+    } catch (e) {
+        challengeTimeout = { error: 'unavailable' };
+    }
     res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         services: {
             database: 'connected',
-            redis: 'connected'
+            redis: redisStatus,
+            challengeTimeout
         }
     });
+});
+
+// CORS头保底中间件（在错误处理之前），确保4xx/5xx也包含CORS响应头
+app.use((req, res, next) => {
+    if (res.headersSent) return next();
+    const origin = req.headers.origin;
+    if (origin && corsAllowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Vary', 'Origin');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
+        res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+    }
+    next();
 });
 
 // 全局错误处理中间件（放在所有路由之后）
@@ -794,6 +842,15 @@ server.listen(SERVER_PORT, () => {
         logger.info('⏰ 挑战超时检查服务已启动');
     } catch (error) {
         logger.error('❌ 启动挑战超时检查服务失败:', error);
+    }
+
+    // 启动通知Worker（BullMQ）
+    try {
+        const { start: startNotificationWorker } = require('./services/notificationWorker');
+        startNotificationWorker();
+        logger.info('📬 通知Worker已启动');
+    } catch (error) {
+        logger.error('❌ 启动通知Worker失败:', error);
     }
 
     // Telegram轮询服务默认禁用，需要手动启动

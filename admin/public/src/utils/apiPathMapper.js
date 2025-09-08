@@ -31,7 +31,7 @@ const apiPathMap = {
     '/admin/users/balance/freeze': '/api/admin/wallet/adjust',
     '/admin/users/balance/unfreeze': '/api/admin/wallet/adjust',
     
-    // 用户交易记录 - 需要特殊处理，因为路径包含动态参�?
+    // 用户交易记录 - 需要特殊处理，因为路径包含动态参�?
     
     // 签到管理
     '/admin/checkin/overview': '/api/admin/checkin/overview',
@@ -48,6 +48,15 @@ const apiPathMap = {
     '/achievements/admin/types': '/api/achievements/admin/types',
     '/achievements/admin/achievements': '/api/achievements/admin/achievements',
     '/achievements/admin/stats': '/api/achievements/admin/stats',
+    
+    // 通知管理（管理员）
+    '/admin/notifications': '/api/admin/notifications',
+    '/admin/notifications/send': '/api/admin/notifications/send',
+    '/admin/notifications/export': '/api/admin/notifications/export',
+    
+    // 模板管理（管理员）
+    '/admin/templates': '/api/admin/templates',
+    '/admin/notification-templates': '/api/admin/notification-templates',
     
     // 团队管理
     '/team/admin/statistics': '/api/team/admin/statistics',
@@ -80,12 +89,12 @@ export function mapApiPath(frontendPath) {
         }
     }
     
-    // 如果没有匹配，返回原路径并添�?api前缀
+    // 如果没有匹配，返回原路径并添加 api 前缀
     if (!frontendPath.startsWith('/api/')) {
         return '/api' + frontendPath;
     }
     
-    // 默认返回原路�?
+    // 默认返回原路径
     return frontendPath;
 }
 

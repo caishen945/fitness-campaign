@@ -515,6 +515,141 @@ class AdminApi {
         const url = queryString ? `/admin/team-statistics/invitation-rewards?${queryString}` : '/admin/team-statistics/invitation-rewards';
         return this.request(url);
     }
+
+    // ==========================================
+    // 通知管理（管理员）
+    // ==========================================
+
+    async adminGetNotifications(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const url = queryString ? `/admin/notifications?${queryString}` : '/admin/notifications';
+        return this.request(url);
+    }
+
+    async adminCreateNotification(payload) {
+        return this.request('/admin/notifications', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async adminMarkNotificationRead(id) {
+        return this.request(`/admin/notifications/${id}/read`, {
+            method: 'PUT'
+        });
+    }
+
+    async adminDeleteNotification(id) {
+        return this.request(`/admin/notifications/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // ==========================================
+    // 模板管理（管理员）
+    // ==========================================
+
+    async adminGetTemplates(params = {}) {
+        const query = new URLSearchParams();
+        if (params.template_key) query.set('template_key', params.template_key);
+        if (params.locale) query.set('locale', params.locale);
+        if (params.channel) query.set('channel', params.channel);
+        if (typeof params.active !== 'undefined' && params.active !== '') query.set('active', params.active);
+        if (params.page) query.set('page', String(params.page));
+        if (params.page_size) query.set('page_size', String(params.page_size));
+        const qs = query.toString();
+        const url = qs ? `/admin/notification-templates?${qs}` : '/admin/notification-templates';
+        return this.request(url);
+    }
+
+    async adminCreateTemplate(payload) {
+        return this.request('/admin/notification-templates', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async adminToggleTemplate(id, active) {
+        return this.request(`/admin/notification-templates/${id}/activate`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_active: !!active })
+        });
+    }
+
+    async adminGetLatestTemplate(params = {}) {
+        const query = new URLSearchParams();
+        if (params.template_key) query.set('template_key', params.template_key);
+        if (params.locale) query.set('locale', params.locale);
+        if (params.channel) query.set('channel', params.channel);
+        const url = `/admin/notification-templates/latest?${query.toString()}`;
+        return this.request(url);
+    }
+
+    async adminPreviewTemplate(params = {}) {
+        const query = new URLSearchParams();
+        if (params.template_key) query.set('template_key', params.template_key);
+        if (params.locale) query.set('locale', params.locale);
+        if (params.channel) query.set('channel', params.channel);
+        if (params.variables) query.set('variables', JSON.stringify(params.variables));
+        const url = `/admin/notification-templates/preview?${query.toString()}`;
+        return this.request(url);
+    }
+
+    async adminUpdateTemplate(id, payload) {
+        return this.request(`/admin/notification-templates/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async adminDeleteTemplate(id) {
+        return this.request(`/admin/notification-templates/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    // ==========================================
+    // 通知 - 扩展能力（批量发送 / 导出）
+    // ==========================================
+
+    async adminBatchSendNotifications(payload) {
+        return this.request('/admin/notifications/send', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async adminExportNotifications(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/admin/notifications/export?${queryString}` : '/admin/notifications/export';
+
+        // 单独用 fetch 处理文件下载
+        const mappedEndpoint = mapApiPath(endpoint);
+        const url = `${this.baseUrl}${mappedEndpoint}`;
+
+        const token = this.getToken();
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            credentials: 'include'
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || '导出失败');
+        }
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        const href = URL.createObjectURL(blob);
+        a.href = href;
+        a.download = 'notifications.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(href);
+        return { success: true };
+    }
 }
 
 // 创建单例实例
